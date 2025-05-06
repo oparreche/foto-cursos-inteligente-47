@@ -9,6 +9,7 @@ import { generateAbrasfXml } from "./xmlGenerator";
 import { NFSeDetailsTab } from "./components/NFSeDetailsTab";
 import { NFSeXmlTab } from "./components/NFSeXmlTab";
 import { NFSeDialogHeader } from "./components/NFSeDialogHeader";
+import { toast } from "sonner";
 
 interface NFSeViewerProps {
   nfseData: NFSeData;
@@ -24,12 +25,30 @@ export const NFSeViewer: React.FC<NFSeViewerProps> = ({
   onDownload
 }) => {
   const [activeTab, setActiveTab] = useState<string>("details");
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   
   // Gera o XML a partir dos dados
   const xmlContent = generateAbrasfXml(nfseData);
   
+  const handlePrintFallback = () => {
+    if (onPrint) {
+      onPrint();
+    } else {
+      window.print();
+    }
+  };
+  
+  const handleDownloadFallback = () => {
+    if (onDownload) {
+      onDownload();
+    } else {
+      toast.info("Gerando PDF da NFS-e...");
+      // O download será tratado diretamente pelo componente NFSeDetailsTab
+    }
+  };
+  
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="flex items-center gap-2">
           <FileText className="h-4 w-4" />
@@ -49,8 +68,8 @@ export const NFSeViewer: React.FC<NFSeViewerProps> = ({
           <TabsContent value="details" className="mt-4">
             <NFSeDetailsTab 
               nfseData={nfseData} 
-              onPrint={onPrint} 
-              onDownload={onDownload} 
+              onPrint={handlePrintFallback} 
+              onDownload={handleDownloadFallback} 
             />
           </TabsContent>
           

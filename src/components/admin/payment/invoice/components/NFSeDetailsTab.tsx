@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Printer, Download, CheckCircle } from "lucide-react";
 import { NFSeData } from "../types";
 import { toast } from "sonner";
-// Corrigindo a importação do jsPDF
+// Importação correta do jsPDF
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
@@ -41,7 +41,7 @@ export const NFSeDetailsTab: React.FC<NFSeDetailsTabProps> = ({
       return;
     }
 
-    toast.loading("Gerando PDF...");
+    const toastId = toast.loading("Gerando PDF...");
 
     try {
       const content = invoiceContentRef.current;
@@ -53,7 +53,8 @@ export const NFSeDetailsTab: React.FC<NFSeDetailsTabProps> = ({
       });
       
       const imgData = canvas.toDataURL('image/png');
-      // Corrigindo a instanciação do jsPDF
+      
+      // Instanciação correta do jsPDF
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
@@ -65,13 +66,18 @@ export const NFSeDetailsTab: React.FC<NFSeDetailsTabProps> = ({
       const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
       
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`NFS-e_${nfseData.numeroLote}.pdf`);
       
-      toast.dismiss();
+      // Salvar o PDF usando o método save e garantindo a extensão .pdf
+      const filename = `NFS-e_${nfseData.numeroLote}.pdf`;
+      pdf.save(filename);
+      
+      toast.dismiss(toastId);
       toast.success("PDF gerado com sucesso!");
+      
+      console.log("PDF gerado e download iniciado:", filename);
     } catch (error) {
       console.error("Erro ao gerar PDF:", error);
-      toast.dismiss();
+      toast.dismiss(toastId);
       toast.error("Erro ao gerar o PDF. Tente novamente.");
     }
   };

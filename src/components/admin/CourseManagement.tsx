@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -91,15 +92,27 @@ const CourseManagement = () => {
     if (isEditing && currentCourse) {
       // Update existing course
       setCourses(
-        courses.map((c) => (c.id === currentCourse.id ? { ...c, ...values } : c))
+        courses.map((c) => (c.id === currentCourse.id ? { 
+          ...c, 
+          title: values.title,
+          slug: values.slug,
+          category: values.category,
+          duration: values.duration,
+          level: values.level,
+          description: values.description || "" 
+        } : c))
       );
       toast.success("Curso atualizado com sucesso!");
     } else {
-      // Add new course - make sure all required fields are present
+      // Add new course - explicitly include all required fields
       const newCourse: Course = {
-        ...values,
         id: courses.length > 0 ? Math.max(...courses.map((c) => c.id)) + 1 : 1,
-        description: values.description || "",  // Ensure description is always defined
+        title: values.title,
+        slug: values.slug,
+        category: values.category,
+        duration: values.duration,
+        level: values.level,
+        description: values.description || ""
       };
       setCourses([...courses, newCourse]);
       toast.success("Novo curso criado com sucesso!");

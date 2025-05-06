@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Printer, Download, CheckCircle } from "lucide-react";
 import { NFSeData } from "../types";
 import { toast } from "sonner";
-// Importação correta do jsPDF
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
@@ -42,41 +41,57 @@ export const NFSeDetailsTab: React.FC<NFSeDetailsTabProps> = ({
     }
 
     const toastId = toast.loading("Gerando PDF...");
-
+    
     try {
+      // Adicionando uma pequena pausa para garantir que o toast seja exibido
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       const content = invoiceContentRef.current;
+      console.log("Elemento capturado para PDF:", content);
+      
       const canvas = await html2canvas(content, {
         scale: 2,
-        logging: false,
+        logging: true, // Habilitar logs para debug
         useCORS: true,
-        allowTaint: true
+        allowTaint: true,
+        backgroundColor: "#ffffff"
       });
       
-      const imgData = canvas.toDataURL('image/png');
+      console.log("Canvas gerado com sucesso, dimensões:", canvas.width, "x", canvas.height);
       
-      // Instanciação correta do jsPDF
+      const imgData = canvas.toDataURL('image/png');
+      console.log("Imagem base64 gerada");
+      
+      // Criando o PDF
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
-        format: 'a4'
+        format: 'a4',
+        compress: true
       });
       
-      const imgProps = pdf.getImageProperties(imgData);
       const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
       
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
       
-      // Salvar o PDF usando o método save e garantindo a extensão .pdf
-      const filename = `NFS-e_${nfseData.numeroLote}.pdf`;
-      pdf.save(filename);
+      // Forçando o download com um nome específico
+      const filename = `NFSe_${nfseData.numeroLote || "documento"}_${Date.now()}.pdf`;
+      console.log("Iniciando download do PDF:", filename);
+      
+      // Método alternativo para garantir o download
+      const blob = pdf.output('blob');
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
       
       toast.dismiss(toastId);
       toast.success("PDF gerado com sucesso!");
-      
-      console.log("PDF gerado e download iniciado:", filename);
     } catch (error) {
-      console.error("Erro ao gerar PDF:", error);
+      console.error("Erro detalhado ao gerar PDF:", error);
       toast.dismiss(toastId);
       toast.error("Erro ao gerar o PDF. Tente novamente.");
     }

@@ -31,6 +31,7 @@ export const NFSeViewer: React.FC<NFSeViewerProps> = ({
   const xmlContent = generateAbrasfXml(nfseData);
   
   const handlePrintFallback = () => {
+    console.log("Tentando imprimir NFSe");
     if (onPrint) {
       onPrint();
     } else {
@@ -39,6 +40,7 @@ export const NFSeViewer: React.FC<NFSeViewerProps> = ({
   };
   
   const handleDownloadFallback = () => {
+    console.log("Tentando baixar NFSe PDF");
     if (onDownload) {
       onDownload();
     } else {

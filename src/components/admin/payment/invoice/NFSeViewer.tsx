@@ -44,8 +44,8 @@ export const NFSeViewer: React.FC<NFSeViewerProps> = ({
     if (onDownload) {
       onDownload();
     } else {
+      // Deixar o componente NFSeDetailsTab lidar com o download, conforme implementado
       toast.info("Gerando PDF da NFS-e...");
-      // O download será tratado diretamente pelo componente NFSeDetailsTab
     }
   };
   

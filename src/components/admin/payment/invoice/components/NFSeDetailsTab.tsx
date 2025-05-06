@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Printer, Download, CheckCircle } from "lucide-react";
 import { NFSeData } from "../types";
 import { toast } from "sonner";
-// Fix the imports for jspdf and html2canvas
+// Corrigindo a importação do jsPDF
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
@@ -53,7 +53,7 @@ export const NFSeDetailsTab: React.FC<NFSeDetailsTabProps> = ({
       });
       
       const imgData = canvas.toDataURL('image/png');
-      // Corrected jsPDF instantiation
+      // Corrigindo a instanciação do jsPDF
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',

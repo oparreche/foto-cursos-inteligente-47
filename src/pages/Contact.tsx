@@ -7,52 +7,60 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Mail, Phone, MapPin, Clock, Send } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+// Form validation schema
+const contactFormSchema = z.object({
+  name: z.string().min(3, { message: "Nome deve ter pelo menos 3 caracteres" }),
+  email: z.string().email({ message: "E-mail inválido" }),
+  phone: z.string().optional(),
+  subject: z.string().optional(),
+  message: z.string().min(10, { message: "Mensagem deve ter pelo menos 10 caracteres" })
+});
+
+type ContactFormData = z.infer<typeof contactFormSchema>;
 
 const Contact = () => {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    subject: "",
-    message: ""
-  });
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Check if all required fields are filled
-    if (!formData.name || !formData.email || !formData.message) {
-      toast({
-        title: "Erro ao enviar mensagem",
-        description: "Por favor, preencha todos os campos obrigatórios.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    // In a real application, this would send the data to a server
-    console.log("Form data submitted:", formData);
-    
-    toast({
-      title: "Mensagem enviada com sucesso!",
-      description: "Entraremos em contato em breve.",
-    });
-    
-    // Reset form
-    setFormData({
+  const { 
+    register, 
+    handleSubmit, 
+    reset, 
+    formState: { errors, isSubmitting } 
+  } = useForm<ContactFormData>({
+    resolver: zodResolver(contactFormSchema),
+    defaultValues: {
       name: "",
       email: "",
       phone: "",
       subject: "",
       message: ""
-    });
+    }
+  });
+
+  const onSubmit = async (data: ContactFormData) => {
+    try {
+      // Simulate API call with a delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Log form data (would be sent to an API in a real application)
+      console.log("Form data submitted:", data);
+      
+      toast({
+        title: "Mensagem enviada com sucesso!",
+        description: "Entraremos em contato em breve.",
+      });
+      
+      // Reset form
+      reset();
+    } catch (error) {
+      toast({
+        title: "Erro ao enviar mensagem",
+        description: "Ocorreu um erro ao enviar sua mensagem. Tente novamente mais tarde.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -83,29 +91,33 @@ const Contact = () => {
             <div>
               <h2 className="text-2xl font-bold mb-6">Envie sua mensagem</h2>
               
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="name">Nome completo *</Label>
                     <Input 
                       id="name" 
-                      name="name" 
+                      {...register("name")}
                       placeholder="Seu nome completo"
-                      value={formData.name}
-                      onChange={handleChange}
+                      className={errors.name ? "border-red-500" : ""}
                     />
+                    {errors.name && (
+                      <p className="text-sm text-red-500">{errors.name.message}</p>
+                    )}
                   </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="email">E-mail *</Label>
                     <Input 
                       id="email" 
-                      name="email" 
+                      {...register("email")}
                       type="email"
                       placeholder="seu@email.com"
-                      value={formData.email}
-                      onChange={handleChange}
+                      className={errors.email ? "border-red-500" : ""}
                     />
+                    {errors.email && (
+                      <p className="text-sm text-red-500">{errors.email.message}</p>
+                    )}
                   </div>
                 </div>
                 
@@ -114,10 +126,8 @@ const Contact = () => {
                     <Label htmlFor="phone">Telefone</Label>
                     <Input 
                       id="phone" 
-                      name="phone" 
+                      {...register("phone")}
                       placeholder="(00) 00000-0000"
-                      value={formData.phone}
-                      onChange={handleChange}
                     />
                   </div>
                   
@@ -125,10 +135,8 @@ const Contact = () => {
                     <Label htmlFor="subject">Assunto</Label>
                     <Input 
                       id="subject" 
-                      name="subject" 
+                      {...register("subject")}
                       placeholder="Assunto da mensagem"
-                      value={formData.subject}
-                      onChange={handleChange}
                     />
                   </div>
                 </div>
@@ -137,18 +145,29 @@ const Contact = () => {
                   <Label htmlFor="message">Mensagem *</Label>
                   <Textarea 
                     id="message" 
-                    name="message" 
+                    {...register("message")}
                     placeholder="Digite sua mensagem aqui"
                     rows={6}
-                    value={formData.message}
-                    onChange={handleChange}
+                    className={errors.message ? "border-red-500" : ""}
                   />
+                  {errors.message && (
+                    <p className="text-sm text-red-500">{errors.message.message}</p>
+                  )}
                 </div>
                 
                 <div>
-                  <Button type="submit" className="w-full md:w-auto">
-                    <Send className="h-4 w-4 mr-2" />
-                    Enviar mensagem
+                  <Button type="submit" className="w-full md:w-auto" disabled={isSubmitting}>
+                    {isSubmitting ? (
+                      <>
+                        <span className="animate-spin mr-2">⏳</span>
+                        Enviando...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="h-4 w-4 mr-2" />
+                        Enviar mensagem
+                      </>
+                    )}
                   </Button>
                 </div>
               </form>

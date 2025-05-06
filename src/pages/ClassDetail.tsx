@@ -3,9 +3,11 @@ import { useEffect, useState } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Calendar, Clock, MapPin, Users, CheckCircle } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+import EnrollmentForm from "@/components/class/EnrollmentForm";
+import ClassDetails from "@/components/class/ClassDetails";
+import RelatedClasses from "@/components/class/RelatedClasses";
 
 // Mock class data - in a real application this would be fetched from a database or API
 const classesData = [
@@ -146,6 +148,34 @@ const classesData = [
   },
 ];
 
+// Sample related classes data
+const relatedClassesData = [
+  {
+    slug: "fotografia-basica-outubro-2023-final-de-semana",
+    title: "Fotografia Básica",
+    image: "https://images.unsplash.com/photo-1452378174528-3090a4bba7b2?ixlib=rb-4.0.3",
+    period: "Final de Semana",
+    schedule: "Sábados, 09:00 - 16:00",
+    date: "Outubro/2023"
+  },
+  {
+    slug: "fotografia-retrato-setembro-2023-noturno",
+    title: "Fotografia de Retrato",
+    image: "https://images.unsplash.com/photo-1441057206919-63d19fac2369?ixlib=rb-4.0.3",
+    period: "Noturno",
+    schedule: "Segundas e Quartas, 19:00 - 22:00",
+    date: "Setembro/2023"
+  },
+  {
+    slug: "pos-producao-edicao-setembro-2023-noturno",
+    title: "Pós-produção e Edição",
+    image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?ixlib=rb-4.0.3",
+    period: "Noturno",
+    schedule: "Terças e Quintas, 19:00 - 22:00",
+    date: "Setembro/2023"
+  }
+];
+
 const ClassDetail = () => {
   const { classSlug } = useParams();
   const [classData, setClassData] = useState<any>(null);
@@ -263,236 +293,23 @@ const ClassDetail = () => {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             {/* Class Details */}
-            <div className="lg:col-span-2">
-              <h2 className="text-2xl font-bold mb-6">Detalhes da turma</h2>
-              
-              <div className="bg-white rounded-xl shadow-sm border mb-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="w-5 h-5 text-purple" />
-                      <div>
-                        <p className="text-sm text-gray-500">Data de início</p>
-                        <p className="font-medium">{classData.startDate}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Calendar className="w-5 h-5 text-purple" />
-                      <div>
-                        <p className="text-sm text-gray-500">Data de término</p>
-                        <p className="font-medium">{classData.endDate}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-5 h-5 text-purple" />
-                      <div>
-                        <p className="text-sm text-gray-500">Horário</p>
-                        <p className="font-medium">{classData.days}, {classData.time}</p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-5 h-5 text-purple" />
-                      <div>
-                        <p className="text-sm text-gray-500">Local</p>
-                        <p className="font-medium">{classData.location}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Users className="w-5 h-5 text-purple" />
-                      <div>
-                        <p className="text-sm text-gray-500">Vagas</p>
-                        <p className="font-medium">
-                          {classData.spotsAvailable} disponíveis de {classData.totalSpots}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="mt-1">
-                      <Progress value={(classData.totalSpots - classData.spotsAvailable) / classData.totalSpots * 100} className="h-2" />
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="border-t p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-500">Professor(a)</p>
-                      <p className="font-medium">{classData.instructor}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm text-gray-500">Investimento</p>
-                      <p className="text-xl font-bold text-purple">{classData.price}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Benefits */}
-              <div className="mb-8">
-                <h3 className="text-xl font-bold mb-4">O curso inclui</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {classData.benefits.map((benefit: string, index: number) => (
-                    <div key={index} className="flex items-start gap-2">
-                      <CheckCircle className="h-5 w-5 text-purple mt-0.5" />
-                      <span>{benefit}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              
-              {/* Payment Methods */}
-              <div>
-                <h3 className="text-xl font-bold mb-4">Formas de pagamento</h3>
-                <ul className="space-y-2">
-                  {classData.paymentMethods.map((method: string, index: number) => (
-                    <li key={index} className="flex items-start gap-2">
-                      <CheckCircle className="h-5 w-5 text-purple mt-0.5" />
-                      <span>{method}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
+            <ClassDetails classData={classData} />
             
             {/* Enrollment Form */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-xl shadow-lg border overflow-hidden sticky top-24">
-                <div className="p-6 border-b">
-                  <h3 className="text-xl font-bold mb-4">Inscreva-se nesta turma</h3>
-                  <p className="text-gray-600 mb-6">
-                    Preencha o formulário abaixo para garantir sua vaga nesta turma.
-                  </p>
-                  
-                  {classData.spotsAvailable > 0 ? (
-                    <form className="space-y-4">
-                      <div>
-                        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                          Nome completo
-                        </label>
-                        <input
-                          type="text"
-                          id="name"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                          placeholder="Seu nome completo"
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                          E-mail
-                        </label>
-                        <input
-                          type="email"
-                          id="email"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                          placeholder="seu@email.com"
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                          Telefone
-                        </label>
-                        <input
-                          type="tel"
-                          id="phone"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                          placeholder="(00) 00000-0000"
-                        />
-                      </div>
-                      <Button className="w-full">Reservar minha vaga</Button>
-                    </form>
-                  ) : (
-                    <div className="text-center py-4">
-                      <Badge variant="destructive" className="mb-4">Turma lotada</Badge>
-                      <p className="text-gray-600 mb-4">
-                        Esta turma já está com todas as vagas preenchidas, mas você pode entrar em nossa lista de espera.
-                      </p>
-                      <Button variant="outline" className="w-full">Entrar na lista de espera</Button>
-                    </div>
-                  )}
-                </div>
-                
-                <div className="bg-gray-50 p-6">
-                  <p className="text-sm text-gray-600">
-                    Ao se inscrever, você concorda com nossos termos de serviço e política de privacidade.
-                    Para mais informações, entre em contato conosco pelo telefone ou WhatsApp.
-                  </p>
-                </div>
-              </div>
+              <EnrollmentForm 
+                spotsAvailable={classData.spotsAvailable} 
+                totalSpots={classData.totalSpots}
+                classTitle={classData.courseName}
+                classPeriod={`${classData.month}/${classData.year} - ${classData.period}`}
+              />
             </div>
           </div>
         </div>
       </section>
       
       {/* Related Classes */}
-      <section className="py-12 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <h2 className="text-2xl font-bold mb-6">Outras turmas disponíveis</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
-              <div className="h-40 overflow-hidden relative">
-                <img
-                  src="https://images.unsplash.com/photo-1452378174528-3090a4bba7b2?ixlib=rb-4.0.3"
-                  alt="Fotografia Básica"
-                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-                />
-                <div className="absolute top-0 left-0 bg-amber-600 text-white px-3 py-1 rounded-br-lg font-medium text-sm">
-                  Outubro/2023
-                </div>
-              </div>
-              <div className="p-4">
-                <h3 className="text-lg font-bold mb-2">Fotografia Básica</h3>
-                <p className="text-sm text-gray-500 mb-3">Sábados, 09:00 - 16:00</p>
-                <Button variant="outline" size="sm" asChild className="w-full">
-                  <Link to="/turmas/fotografia-basica-outubro-2023-final de semana">Ver detalhes</Link>
-                </Button>
-              </div>
-            </div>
-            
-            <div className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
-              <div className="h-40 overflow-hidden relative">
-                <img
-                  src="https://images.unsplash.com/photo-1441057206919-63d19fac2369?ixlib=rb-4.0.3"
-                  alt="Fotografia de Retrato"
-                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-                />
-                <div className="absolute top-0 left-0 bg-amber-600 text-white px-3 py-1 rounded-br-lg font-medium text-sm">
-                  Setembro/2023
-                </div>
-              </div>
-              <div className="p-4">
-                <h3 className="text-lg font-bold mb-2">Fotografia de Retrato</h3>
-                <p className="text-sm text-gray-500 mb-3">Segundas e Quartas, 19:00 - 22:00</p>
-                <Button variant="outline" size="sm" asChild className="w-full">
-                  <Link to="/turmas/fotografia-retrato-setembro-2023-noturno">Ver detalhes</Link>
-                </Button>
-              </div>
-            </div>
-            
-            <div className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
-              <div className="h-40 overflow-hidden relative">
-                <img
-                  src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?ixlib=rb-4.0.3"
-                  alt="Pós-produção e Edição"
-                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-                />
-                <div className="absolute top-0 left-0 bg-amber-600 text-white px-3 py-1 rounded-br-lg font-medium text-sm">
-                  Setembro/2023
-                </div>
-              </div>
-              <div className="p-4">
-                <h3 className="text-lg font-bold mb-2">Pós-produção e Edição</h3>
-                <p className="text-sm text-gray-500 mb-3">Terças e Quintas, 19:00 - 22:00</p>
-                <Button variant="outline" size="sm" asChild className="w-full">
-                  <Link to="/turmas/pos-producao-edicao-setembro-2023-noturno">Ver detalhes</Link>
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <RelatedClasses relatedClasses={relatedClassesData} />
     </MainLayout>
   );
 };

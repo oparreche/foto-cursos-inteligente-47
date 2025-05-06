@@ -2,7 +2,7 @@
 import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import MainLayout from "@/components/layout/MainLayout";
-import { Clock, MapPin, Users, Calendar, CheckCircle, Award, ChevronDown, ChevronUp, Check } from "lucide-react";
+import { Clock, MapPin, Users, Calendar, CheckCircle, Award, ChevronDown, ChevronUp, Check, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

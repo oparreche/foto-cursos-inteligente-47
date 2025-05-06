@@ -16,6 +16,7 @@ import ClassDetail from "./pages/ClassDetail";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import StudentArea from "./pages/StudentArea";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,7 @@ const App = () => (
           <Route path="/sobre" element={<About />} />
           <Route path="/contato" element={<Contact />} />
           <Route path="/area-do-aluno" element={<StudentArea />} />
+          <Route path="/admin" element={<Admin />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

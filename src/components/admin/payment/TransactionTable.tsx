@@ -1,8 +1,9 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { CheckCircle, Clock, XCircle } from "lucide-react";
+import { CheckCircle, Clock, XCircle, FileText } from "lucide-react";
 import { PaymentTransaction } from "../types";
+import { toast } from "sonner";
 
 interface TransactionTableProps {
   transactions: PaymentTransaction[];
@@ -10,6 +11,24 @@ interface TransactionTableProps {
 }
 
 export const TransactionTable = ({ transactions }: TransactionTableProps) => {
+  const [invoiceStatus, setInvoiceStatus] = useState<{[key: number]: string}>({});
+
+  const handleInvoiceGeneration = (transactionId: number, status: string) => {
+    if (status !== "completed") {
+      toast.error("Somente transações completadas podem ter notas fiscais emitidas");
+      return;
+    }
+    
+    // Em um sistema real, aqui teríamos a chamada para API de emissão de nota fiscal
+    toast.success(`Nota fiscal emitida com sucesso para transação #${transactionId}`);
+    
+    // Atualiza o status da nota fiscal para esta transação
+    setInvoiceStatus(prev => ({
+      ...prev,
+      [transactionId]: "emitida"
+    }));
+  };
+
   return (
     <Table>
       <TableHeader>
@@ -20,6 +39,7 @@ export const TransactionTable = ({ transactions }: TransactionTableProps) => {
           <TableHead>Valor</TableHead>
           <TableHead>Data</TableHead>
           <TableHead>Status</TableHead>
+          <TableHead>Nota Fiscal</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -53,11 +73,32 @@ export const TransactionTable = ({ transactions }: TransactionTableProps) => {
                   )}
                 </div>
               </TableCell>
+              <TableCell>
+                {invoiceStatus[transaction.id] ? (
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-green-600" />
+                    <span className="text-green-600">Emitida</span>
+                  </div>
+                ) : (
+                  <button 
+                    onClick={() => handleInvoiceGeneration(transaction.id, transaction.status)}
+                    disabled={transaction.status !== "completed"}
+                    className={`flex items-center gap-1 px-2 py-1 text-xs rounded-md ${
+                      transaction.status === "completed" 
+                        ? "bg-primary text-white hover:bg-primary/90" 
+                        : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                    }`}
+                  >
+                    <FileText className="h-3 w-3" />
+                    Emitir NFS
+                  </button>
+                )}
+              </TableCell>
             </TableRow>
           ))
         ) : (
           <TableRow>
-            <TableCell colSpan={6} className="text-center py-6">
+            <TableCell colSpan={7} className="text-center py-6">
               Nenhuma transação encontrada.
             </TableCell>
           </TableRow>

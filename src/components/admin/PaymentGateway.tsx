@@ -235,6 +235,45 @@ const PaymentGateway = () => {
                       </div>
                     </div>
                   </div>
+                  
+                  {/* Pagarme Integration */}
+                  <div className="space-y-2 pt-2 border-t">
+                    <h3 className="text-lg font-medium">Pagar.me</h3>
+                    <div className="grid gap-2">
+                      <div className="grid gap-2">
+                        <label className="text-sm font-medium">API Key</label>
+                        <Input type="password" placeholder="ak_•••••••••••••••••••••••••" />
+                      </div>
+                      <div className="grid gap-2">
+                        <label className="text-sm font-medium">Chave de Criptografia</label>
+                        <Input type="password" placeholder="ek_•••••••••••••••••••••••••" />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Asaas Integration */}
+                  <div className="space-y-2 pt-2 border-t">
+                    <h3 className="text-lg font-medium">Asaas</h3>
+                    <div className="grid gap-2">
+                      <div className="grid gap-2">
+                        <label className="text-sm font-medium">API Key</label>
+                        <Input type="password" placeholder="$aas_•••••••••••••••••••••••••" />
+                      </div>
+                      <div className="grid gap-2">
+                        <label className="text-sm font-medium">Ambiente</label>
+                        <div className="flex gap-4">
+                          <label className="flex items-center gap-2">
+                            <input type="radio" name="asaas_environment" value="sandbox" defaultChecked />
+                            <span className="text-sm">Sandbox</span>
+                          </label>
+                          <label className="flex items-center gap-2">
+                            <input type="radio" name="asaas_environment" value="production" />
+                            <span className="text-sm">Produção</span>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 
                 <div className="border-t pt-4">

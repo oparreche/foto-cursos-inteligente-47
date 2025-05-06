@@ -153,7 +153,7 @@ const Courses = () => {
                     <SelectValue placeholder="Categoria" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todas categorias</SelectItem>
+                    <SelectItem value="all">Todas categorias</SelectItem>
                     <SelectItem value="fundamentos">Fundamentos</SelectItem>
                     <SelectItem value="especializacao">Especialização</SelectItem>
                     <SelectItem value="pos-producao">Pós-produção</SelectItem>
@@ -169,7 +169,7 @@ const Courses = () => {
                     <SelectValue placeholder="Nível" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todos níveis</SelectItem>
+                    <SelectItem value="all">Todos níveis</SelectItem>
                     <SelectItem value="iniciante">Iniciante</SelectItem>
                     <SelectItem value="intermediário">Intermediário</SelectItem>
                     <SelectItem value="avançado">Avançado</SelectItem>

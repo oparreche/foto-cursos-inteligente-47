@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { FileText, Send, Download, Printer, Server } from "lucide-react";
 import { PaymentTransaction } from "../../types";
 import { toast } from "sonner";
-import { StoredInvoice } from "../../PaymentGateway";
+import { StoredInvoice } from "../types";
 import {
   AlertDialog,
   AlertDialogAction,

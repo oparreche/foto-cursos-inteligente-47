@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PaymentTransaction } from "../types";
 import { toast } from "sonner";
-import { StoredInvoice } from "../PaymentGateway";
+import { StoredInvoice } from "./types";
 import { TransactionTableRow } from "./TransactionTableRow";
 import { generateInvoiceNumber } from "./invoice/InvoiceUtils";
 import { printInvoice, generateInvoiceText } from "./invoice/InvoicePrinter";

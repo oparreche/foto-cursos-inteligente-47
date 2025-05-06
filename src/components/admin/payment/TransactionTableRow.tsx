@@ -2,7 +2,7 @@
 import React from "react";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { PaymentTransaction } from "../types";
-import { StoredInvoice } from "../PaymentGateway";
+import { StoredInvoice } from "./types";
 import { InvoiceActions } from "./invoice/InvoiceActions";
 import { TransactionStatusIndicator } from "./TransactionStatusIndicator";
 

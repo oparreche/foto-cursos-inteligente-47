@@ -14,23 +14,23 @@ const Footer = () => {
           {/* Brand */}
           <div>
             <Link to="/" className="flex items-center space-x-2 mb-4">
-              <Camera className="h-8 w-8 text-amber-400" />
+              <Camera className="h-8 w-8 text-purple" />
               <span className="logo-text text-xl font-bold">FotoCursos</span>
             </Link>
             <p className="text-gray-300 mb-6">
               Transforme sua paixão pela fotografia em habilidades profissionais com nossos cursos presenciais ministrados por especialistas do mercado.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-gray-300 hover:text-amber-400 transition-colors">
+              <a href="#" className="text-gray-300 hover:text-purple transition-colors">
                 <Facebook size={20} />
               </a>
-              <a href="#" className="text-gray-300 hover:text-amber-400 transition-colors">
+              <a href="#" className="text-gray-300 hover:text-purple transition-colors">
                 <Instagram size={20} />
               </a>
-              <a href="#" className="text-gray-300 hover:text-amber-400 transition-colors">
+              <a href="#" className="text-gray-300 hover:text-purple transition-colors">
                 <Twitter size={20} />
               </a>
-              <a href="#" className="text-gray-300 hover:text-amber-400 transition-colors">
+              <a href="#" className="text-gray-300 hover:text-purple transition-colors">
                 <Youtube size={20} />
               </a>
             </div>
@@ -41,32 +41,32 @@ const Footer = () => {
             <h3 className="text-lg font-bold mb-4">Links Úteis</h3>
             <ul className="space-y-3">
               <li>
-                <Link to="/cursos" className="text-gray-300 hover:text-amber-400 transition-colors">
+                <Link to="/cursos" className="text-gray-300 hover:text-purple transition-colors">
                   Cursos
                 </Link>
               </li>
               <li>
-                <Link to="/turmas" className="text-gray-300 hover:text-amber-400 transition-colors">
+                <Link to="/turmas" className="text-gray-300 hover:text-purple transition-colors">
                   Turmas
                 </Link>
               </li>
               <li>
-                <Link to="/blog" className="text-gray-300 hover:text-amber-400 transition-colors">
+                <Link to="/blog" className="text-gray-300 hover:text-purple transition-colors">
                   Blog
                 </Link>
               </li>
               <li>
-                <Link to="/area-do-aluno" className="text-gray-300 hover:text-amber-400 transition-colors">
+                <Link to="/area-do-aluno" className="text-gray-300 hover:text-purple transition-colors">
                   Área do Aluno
                 </Link>
               </li>
               <li>
-                <Link to="/sobre" className="text-gray-300 hover:text-amber-400 transition-colors">
+                <Link to="/sobre" className="text-gray-300 hover:text-purple transition-colors">
                   Sobre
                 </Link>
               </li>
               <li>
-                <Link to="/contato" className="text-gray-300 hover:text-amber-400 transition-colors">
+                <Link to="/contato" className="text-gray-300 hover:text-purple transition-colors">
                   Contato
                 </Link>
               </li>
@@ -78,17 +78,17 @@ const Footer = () => {
             <h3 className="text-lg font-bold mb-4">Contato</h3>
             <ul className="space-y-3">
               <li className="flex items-start space-x-3">
-                <MapPin className="h-5 w-5 mt-0.5 text-amber-400" />
+                <MapPin className="h-5 w-5 mt-0.5 text-purple" />
                 <span className="text-gray-300">
                   Av. Paulista, 1000, São Paulo - SP
                 </span>
               </li>
               <li className="flex items-center space-x-3">
-                <Phone className="h-5 w-5 text-amber-400" />
+                <Phone className="h-5 w-5 text-purple" />
                 <span className="text-gray-300">(11) 99999-9999</span>
               </li>
               <li className="flex items-center space-x-3">
-                <Mail className="h-5 w-5 text-amber-400" />
+                <Mail className="h-5 w-5 text-purple" />
                 <span className="text-gray-300">contato@fotocursos.com</span>
               </li>
             </ul>

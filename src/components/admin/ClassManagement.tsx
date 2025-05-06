@@ -19,8 +19,29 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
+// Define proper interface for ClassItem
+interface ClassItem {
+  id: number;
+  courseName: string;
+  courseSlug: string;
+  image: string;
+  month: string;
+  year: string;
+  period: string;
+  startDate: Date;
+  endDate: Date;
+  days: string;
+  time: string;
+  location: string;
+  spotsAvailable: number;
+  totalSpots: number;
+  price: string;
+  instructor: string;
+  description: string;
+}
+
 // Mock class data - in a real application this would be fetched from a database or API
-const initialClasses = [
+const initialClasses: ClassItem[] = [
   {
     id: 1,
     courseName: "Fotografia Básica",
@@ -84,9 +105,9 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 const ClassManagement = () => {
-  const [classes, setClasses] = useState(initialClasses);
+  const [classes, setClasses] = useState<ClassItem[]>(initialClasses);
   const [isEditing, setIsEditing] = useState(false);
-  const [currentClass, setCurrentClass] = useState<any>(null);
+  const [currentClass, setCurrentClass] = useState<ClassItem | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const form = useForm<FormValues>({
@@ -114,14 +135,14 @@ const ClassManagement = () => {
   // Handler for adding/editing a class
   const handleSubmit = (values: FormValues) => {
     if (isEditing && currentClass) {
-      // Update existing class
+      // Update existing class - ensure all required fields are present
       setClasses(
-        classes.map((c) => (c.id === currentClass.id ? { ...values, id: c.id } : c))
+        classes.map((c) => (c.id === currentClass.id ? { ...c, ...values } : c))
       );
       toast.success("Turma atualizada com sucesso!");
     } else {
-      // Add new class
-      const newClass = {
+      // Add new class - ensure all required fields are present
+      const newClass: ClassItem = {
         ...values,
         id: classes.length > 0 ? Math.max(...classes.map((c) => c.id)) + 1 : 1,
       };
@@ -141,7 +162,7 @@ const ClassManagement = () => {
   };
 
   // Handler for editing a class
-  const handleEdit = (classItem: any) => {
+  const handleEdit = (classItem: ClassItem) => {
     setCurrentClass(classItem);
     setIsEditing(true);
     

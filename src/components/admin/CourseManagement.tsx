@@ -14,7 +14,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 
-// Define course type to match the initialCourses structure
+// Define course interface
 interface Course {
   id: number;
   title: string;
@@ -34,6 +34,7 @@ const initialCourses: Course[] = [
     category: "Fotografia",
     duration: "20 horas",
     level: "Iniciante",
+    description: "",
   },
   {
     id: 2,
@@ -42,6 +43,7 @@ const initialCourses: Course[] = [
     category: "Fotografia",
     duration: "25 horas",
     level: "Intermediário",
+    description: "",
   },
   {
     id: 3,
@@ -50,6 +52,7 @@ const initialCourses: Course[] = [
     category: "Edição",
     duration: "30 horas",
     level: "Avançado",
+    description: "",
   },
 ];
 
@@ -93,10 +96,11 @@ const CourseManagement = () => {
       );
       toast.success("Curso atualizado com sucesso!");
     } else {
-      // Add new course
+      // Add new course - make sure all required fields are present
       const newCourse: Course = {
         ...values,
         id: courses.length > 0 ? Math.max(...courses.map((c) => c.id)) + 1 : 1,
+        description: values.description || "",  // Ensure description is always defined
       };
       setCourses([...courses, newCourse]);
       toast.success("Novo curso criado com sucesso!");

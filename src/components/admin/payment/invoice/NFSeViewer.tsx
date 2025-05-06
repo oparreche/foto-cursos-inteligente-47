@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { FileText } from "lucide-react";
 import { NFSeData } from "./types";
 import { generateAbrasfXml } from "./xmlGenerator";
@@ -59,6 +59,9 @@ export const NFSeViewer: React.FC<NFSeViewerProps> = ({
       </DialogTrigger>
       
       <DialogContent className="max-w-3xl">
+        <DialogDescription>
+          Visualize e baixe a Nota Fiscal de Serviços Eletrônica
+        </DialogDescription>
         <NFSeDialogHeader nfseData={nfseData} protocol={protocol} />
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-2">

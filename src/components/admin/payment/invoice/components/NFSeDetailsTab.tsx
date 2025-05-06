@@ -43,57 +43,103 @@ export const NFSeDetailsTab: React.FC<NFSeDetailsTabProps> = ({
     const toastId = toast.loading("Gerando PDF...");
     
     try {
-      // Adicionando uma pequena pausa para garantir que o toast seja exibido
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
+      // Vamos usar um método mais direto
       const content = invoiceContentRef.current;
-      console.log("Elemento capturado para PDF:", content);
+      console.log("Elemento para gerar PDF:", content);
       
+      // Definir estilo temporário para melhorar a captura do conteúdo
+      const originalStyle = content.style.cssText;
+      content.style.cssText = `
+        ${originalStyle}
+        background-color: white;
+        padding: 20px;
+        border-radius: 0;
+        width: 800px;
+      `;
+      
+      // Gerar o canvas
       const canvas = await html2canvas(content, {
         scale: 2,
-        logging: true, // Habilitar logs para debug
         useCORS: true,
         allowTaint: true,
-        backgroundColor: "#ffffff"
+        backgroundColor: '#ffffff',
+        logging: true,
       });
       
-      console.log("Canvas gerado com sucesso, dimensões:", canvas.width, "x", canvas.height);
+      // Restaurar o estilo original
+      content.style.cssText = originalStyle;
       
-      const imgData = canvas.toDataURL('image/png');
-      console.log("Imagem base64 gerada");
+      console.log("Canvas gerado:", canvas.width, "x", canvas.height);
       
-      // Criando o PDF
+      // Converter para imagem
+      const imgData = canvas.toDataURL('image/jpeg', 1.0);
+      console.log("Imagem base64 gerada, tamanho:", imgData.length);
+      
+      // Criar o PDF (usando versão específica do jsPDF)
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
-        format: 'a4',
-        compress: true
+        format: 'a4'
       });
       
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = pageWidth - 20; // margens de 10mm em cada lado
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
       
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      // Adicionar a imagem ao PDF
+      pdf.addImage(imgData, 'JPEG', 10, 10, imgWidth, imgHeight);
       
-      // Forçando o download com um nome específico
-      const filename = `NFSe_${nfseData.numeroLote || "documento"}_${Date.now()}.pdf`;
-      console.log("Iniciando download do PDF:", filename);
+      // Forçar o download do PDF
+      const filename = `NFSe_${nfseData.numeroLote || Date.now().toString()}.pdf`;
+      console.log("Preparando download do arquivo:", filename);
       
-      // Método alternativo para garantir o download
-      const blob = pdf.output('blob');
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      toast.dismiss(toastId);
-      toast.success("PDF gerado com sucesso!");
+      // Método 1: usando output direto para blob
+      try {
+        const pdfBlob = pdf.output('blob');
+        console.log("Blob gerado, tamanho:", pdfBlob.size);
+        
+        const blobUrl = URL.createObjectURL(pdfBlob);
+        console.log("URL do blob:", blobUrl);
+        
+        // Criar um link para download e clicar nele
+        const downloadLink = document.createElement('a');
+        downloadLink.href = blobUrl;
+        downloadLink.download = filename;
+        downloadLink.style.display = 'none';
+        document.body.appendChild(downloadLink);
+        
+        console.log("Link criado, disparando clique");
+        downloadLink.click();
+        
+        // Limpar após o download
+        setTimeout(() => {
+          document.body.removeChild(downloadLink);
+          URL.revokeObjectURL(blobUrl);
+          console.log("Link de download removido e URL revogada");
+        }, 1000);
+        
+        toast.dismiss(toastId);
+        toast.success("PDF gerado com sucesso!");
+      } catch (blobError) {
+        console.error("Erro ao gerar blob:", blobError);
+        
+        // Método alternativo: usar save()
+        try {
+          console.log("Tentando método alternativo: save()");
+          pdf.save(filename);
+          toast.dismiss(toastId);
+          toast.success("PDF gerado com sucesso!");
+        } catch (saveError) {
+          console.error("Erro ao usar save():", saveError);
+          toast.dismiss(toastId);
+          toast.error("Erro ao gerar PDF. Por favor, tente novamente.");
+        }
+      }
     } catch (error) {
-      console.error("Erro detalhado ao gerar PDF:", error);
+      console.error("Erro completo ao gerar PDF:", error);
       toast.dismiss(toastId);
-      toast.error("Erro ao gerar o PDF. Tente novamente.");
+      toast.error("Falha ao gerar o PDF. Verifique o console para detalhes.");
     }
   };
   

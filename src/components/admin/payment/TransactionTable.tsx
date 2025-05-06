@@ -9,14 +9,7 @@ interface TransactionTableProps {
   searchTerm: string;
 }
 
-export const TransactionTable = ({ transactions, searchTerm }: TransactionTableProps) => {
-  const filteredTransactions = transactions.filter(
-    tx =>
-      tx.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      tx.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      tx.status.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
+export const TransactionTable = ({ transactions }: TransactionTableProps) => {
   return (
     <Table>
       <TableHeader>
@@ -30,8 +23,8 @@ export const TransactionTable = ({ transactions, searchTerm }: TransactionTableP
         </TableRow>
       </TableHeader>
       <TableBody>
-        {filteredTransactions.length > 0 ? (
-          filteredTransactions.map(transaction => (
+        {transactions.length > 0 ? (
+          transactions.map(transaction => (
             <TableRow key={transaction.id}>
               <TableCell>#{transaction.id}</TableCell>
               <TableCell>{transaction.userName}</TableCell>

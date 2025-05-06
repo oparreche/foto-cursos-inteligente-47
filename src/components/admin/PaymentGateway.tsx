@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PaymentTransaction } from "./types";
 import { CheckCircle, CreditCard } from "lucide-react";
 import { toast } from "sonner";
+import { DateRange } from "react-day-picker";
 
 // Import refactored components
 import { TransactionSearch } from "./payment/TransactionSearch";
@@ -57,6 +58,7 @@ const PaymentGateway = () => {
   ]);
 
   const [searchTerm, setSearchTerm] = useState("");
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [activeTab, setActiveTab] = useState<"transactions" | "settings">("transactions");
 
   const handleSaveSettings = () => {
@@ -66,6 +68,30 @@ const PaymentGateway = () => {
   const handleExportTransactions = () => {
     toast.success("Relatório de transações exportado com sucesso!");
   };
+
+  // Filter transactions based on both search term and date range
+  const filteredTransactions = transactions.filter((tx) => {
+    // Search term filter
+    const matchesSearch = 
+      tx.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      tx.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      tx.status.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Date range filter
+    let withinDateRange = true;
+    if (dateRange?.from) {
+      withinDateRange = tx.date >= dateRange.from;
+      
+      if (dateRange.to) {
+        // Add one day to make the range inclusive
+        const endDate = new Date(dateRange.to);
+        endDate.setDate(endDate.getDate() + 1);
+        withinDateRange = withinDateRange && tx.date < endDate;
+      }
+    }
+    
+    return matchesSearch && withinDateRange;
+  });
 
   return (
     <div className="space-y-6">
@@ -83,11 +109,13 @@ const PaymentGateway = () => {
           <TransactionSearch 
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
+            dateRange={dateRange}
+            setDateRange={setDateRange}
             onExport={handleExportTransactions}
           />
-          <TransactionStats transactions={transactions} />
+          <TransactionStats transactions={filteredTransactions} />
           <TransactionTable 
-            transactions={transactions}
+            transactions={filteredTransactions}
             searchTerm={searchTerm}
           />
         </TabsContent>

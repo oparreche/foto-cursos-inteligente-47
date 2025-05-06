@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,7 +21,7 @@ interface Course {
   category: string;
   duration: string;
   level: string;
-  description?: string;
+  description: string;
 }
 
 // Mock courses data

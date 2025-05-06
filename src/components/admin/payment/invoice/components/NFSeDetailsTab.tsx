@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Printer, Download, CheckCircle } from "lucide-react";
 import { NFSeData } from "../types";
 import { toast } from "sonner";
-import { jsPDF } from "jspdf";
+// Fix the imports for jspdf and html2canvas
+import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
 interface NFSeDetailsTabProps {
@@ -52,6 +53,7 @@ export const NFSeDetailsTab: React.FC<NFSeDetailsTabProps> = ({
       });
       
       const imgData = canvas.toDataURL('image/png');
+      // Corrected jsPDF instantiation
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
@@ -138,13 +140,23 @@ export const NFSeDetailsTab: React.FC<NFSeDetailsTabProps> = ({
           <span>Documento Fiscal Eletrônico</span>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={handlePrint}>
+          <Button 
+            size="sm" 
+            variant="outline"
+            className="flex items-center gap-1"
+            onClick={handlePrint}
+          >
             <Printer className="h-4 w-4 mr-1" />
-            Imprimir
+            <span>Imprimir</span>
           </Button>
-          <Button variant="default" size="sm" onClick={handleDownloadPDF}>
+          <Button 
+            size="sm" 
+            variant="default"
+            className="flex items-center gap-1"
+            onClick={handleDownloadPDF}
+          >
             <Download className="h-4 w-4 mr-1" />
-            Baixar PDF
+            <span>Baixar PDF</span>
           </Button>
         </div>
       </CardFooter>

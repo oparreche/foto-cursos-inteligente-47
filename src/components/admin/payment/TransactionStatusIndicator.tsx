@@ -1,6 +1,6 @@
 
 import React from "react";
-import { CheckCircle, Clock, XCircle, AlertTriangle } from "lucide-react";
+import { CheckCircle, Clock, XCircle, AlertTriangle, FileText } from "lucide-react";
 
 interface TransactionStatusIndicatorProps {
   status: 'pending' | 'completed' | 'failed' | 'processing' | 'canceled';
@@ -21,8 +21,8 @@ export const TransactionStatusIndicator: React.FC<TransactionStatusIndicatorProp
       canceled: { text: "Cancelado", icon: AlertTriangle, className: "text-gray-600" },
     },
     nfse: {
-      completed: { text: "Emitida", icon: CheckCircle, className: "text-green-600" },
-      pending: { text: "Pendente", icon: Clock, className: "text-amber-600" },
+      completed: { text: "Emitida", icon: FileText, className: "text-green-600" },
+      pending: { text: "Aguardando", icon: Clock, className: "text-amber-600" },
       failed: { text: "Rejeitada", icon: XCircle, className: "text-red-600" },
       processing: { text: "Processando", icon: Clock, className: "text-blue-600" },
       canceled: { text: "Cancelada", icon: AlertTriangle, className: "text-gray-600" },
@@ -35,7 +35,7 @@ export const TransactionStatusIndicator: React.FC<TransactionStatusIndicatorProp
   return (
     <div className="flex items-center gap-2">
       <Icon className={`h-4 w-4 ${config.className}`} />
-      <span className={config.className}>{config.text}</span>
+      <span className={`${config.className} font-medium`}>{config.text}</span>
     </div>
   );
 };

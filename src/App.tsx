@@ -17,6 +17,7 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import StudentArea from "./pages/StudentArea";
 import Admin from "./pages/Admin";
+import NFSeTest from "./pages/NFSeTest";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,7 @@ const App = () => (
           <Route path="/contato" element={<Contact />} />
           <Route path="/area-do-aluno" element={<StudentArea />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/nfse-test" element={<NFSeTest />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

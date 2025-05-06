@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import { NFSeForm } from "@/components/admin/payment/invoice/NFSeForm";
 import { NFSeViewer } from "@/components/admin/payment/invoice/NFSeViewer";
-import { NFSeData } from "@/components/admin/payment/invoice/InvoiceUtils";
+import { NFSeData } from "@/components/admin/payment/invoice/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";

@@ -15,7 +15,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { generateInvoiceNumber, NFSeData, generateNFSe } from "./InvoiceUtils";
+import { generateInvoiceNumber, generateNFSe } from "./InvoiceUtils"; 
+import { NFSeData } from "./types";
 import { toast } from "sonner";
 
 // Define the form schema using zod

@@ -5,7 +5,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { FileText, Download, Printer, Code, CheckCircle } from "lucide-react";
-import { NFSeData, generateAbrasfXml } from "./InvoiceUtils";
+import { NFSeData } from "./types";
+import { generateAbrasfXml } from "./xmlGenerator";
 import { TransactionStatusIndicator } from "../TransactionStatusIndicator";
 
 interface NFSeViewerProps {

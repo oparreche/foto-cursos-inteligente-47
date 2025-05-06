@@ -13,6 +13,9 @@ import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import Classes from "./pages/Classes";
 import ClassDetail from "./pages/ClassDetail";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import StudentArea from "./pages/StudentArea";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +33,9 @@ const App = () => (
           <Route path="/turmas/:classSlug" element={<ClassDetail />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogPost />} />
+          <Route path="/sobre" element={<About />} />
+          <Route path="/contato" element={<Contact />} />
+          <Route path="/area-do-aluno" element={<StudentArea />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

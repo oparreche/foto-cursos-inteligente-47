@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Info } from "lucide-react";
+import { toast } from "sonner";
 
 const NFSeTest = () => {
   const [generatedNFSe, setGeneratedNFSe] = useState<NFSeData | null>(null);
@@ -23,13 +24,16 @@ const NFSeTest = () => {
     setNfseResponse(response);
   };
 
+  // We'll now skip this function since the PDF is generated directly in the NFSeViewer
   const handlePrint = () => {
     window.print();
   };
 
+  // We'll now skip this function since the PDF is generated directly in the NFSeViewer
   const handleDownload = () => {
-    // Simulate downloading the NFSe as a PDF
-    alert("Em um ambiente real, isso iria gerar e baixar um PDF da NFS-e");
+    // Este método é apenas um fallback e não será usado já que o download de PDF
+    // é implementado diretamente no NFSeViewer
+    toast.info("Gerando PDF da NFS-e...");
   };
 
   return (

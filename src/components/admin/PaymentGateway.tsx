@@ -12,6 +12,20 @@ import { TransactionStats } from "./payment/TransactionStats";
 import { TransactionTable } from "./payment/TransactionTable";
 import { PaymentGatewaySettings } from "./payment/PaymentGatewaySettings";
 
+// Interface for storing invoice data
+export interface StoredInvoice {
+  id: string;
+  transactionId: number;
+  invoiceNumber: string;
+  issueDate: string;
+  amount: number;
+  clientName: string;
+  clientId: number;
+  description: string;
+  status: "processed" | "sent" | "downloaded" | "printed";
+  createdAt: Date;
+}
+
 const PaymentGateway = () => {
   // Em um app real, isso viria de uma API e o estado seria gerenciado por um state manager como Redux, etc.
   const [transactions] = useState<PaymentTransaction[]>([
@@ -57,6 +71,9 @@ const PaymentGateway = () => {
     }
   ]);
 
+  // Simulated server storage for invoices
+  const [storedInvoices, setStoredInvoices] = useState<StoredInvoice[]>([]);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [activeTab, setActiveTab] = useState<"transactions" | "settings">("transactions");
@@ -67,6 +84,82 @@ const PaymentGateway = () => {
 
   const handleExportTransactions = () => {
     toast.success("Relatório de transações exportado com sucesso!");
+  };
+
+  // Server simulation: Store invoice data
+  const storeInvoice = (invoice: Omit<StoredInvoice, 'id' | 'createdAt'>) => {
+    return new Promise<StoredInvoice>((resolve, reject) => {
+      // Simulate network delay
+      setTimeout(() => {
+        try {
+          // Generate a unique ID for the invoice
+          const newInvoice: StoredInvoice = {
+            ...invoice,
+            id: `inv_${Date.now()}`,
+            createdAt: new Date()
+          };
+          
+          // Update stored invoices
+          setStoredInvoices(prev => [...prev, newInvoice]);
+          
+          // Simulate successful server response
+          resolve(newInvoice);
+          toast.success(`Nota fiscal ${invoice.invoiceNumber} armazenada no servidor com sucesso`);
+        } catch (error) {
+          // Simulate server error
+          reject(new Error("Falha ao armazenar a nota fiscal no servidor"));
+          toast.error("Erro ao armazenar a nota fiscal no servidor");
+        }
+      }, 800); // Simulate network delay
+    });
+  };
+
+  // Server simulation: Get stored invoice
+  const getInvoice = (invoiceId: string) => {
+    return new Promise<StoredInvoice | undefined>((resolve, reject) => {
+      setTimeout(() => {
+        try {
+          const invoice = storedInvoices.find(inv => inv.id === invoiceId);
+          if (invoice) {
+            resolve(invoice);
+          } else {
+            reject(new Error("Nota fiscal não encontrada"));
+          }
+        } catch (error) {
+          reject(new Error("Erro ao buscar nota fiscal"));
+        }
+      }, 500);
+    });
+  };
+
+  // Server simulation: Update invoice status
+  const updateInvoiceStatus = (invoiceId: string, status: StoredInvoice['status']) => {
+    return new Promise<StoredInvoice>((resolve, reject) => {
+      setTimeout(() => {
+        try {
+          setStoredInvoices(prev => {
+            const updated = prev.map(inv => {
+              if (inv.id === invoiceId) {
+                return { ...inv, status };
+              }
+              return inv;
+            });
+            
+            const updatedInvoice = updated.find(inv => inv.id === invoiceId);
+            if (updatedInvoice) {
+              resolve(updatedInvoice);
+            } else {
+              reject(new Error("Nota fiscal não encontrada"));
+            }
+            
+            return updated;
+          });
+        } catch (error) {
+          reject(new Error("Erro ao atualizar status da nota fiscal"));
+          toast.error("Erro ao atualizar status da nota fiscal");
+        }
+      }, 500);
+    });
   };
 
   // Filter transactions based on both search term and date range
@@ -117,6 +210,9 @@ const PaymentGateway = () => {
           <TransactionTable 
             transactions={filteredTransactions}
             searchTerm={searchTerm}
+            storedInvoices={storedInvoices}
+            storeInvoice={storeInvoice}
+            updateInvoiceStatus={updateInvoiceStatus}
           />
         </TabsContent>
         

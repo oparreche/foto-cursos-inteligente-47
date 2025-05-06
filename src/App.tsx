@@ -11,6 +11,7 @@ import Courses from "./pages/Courses";
 import CourseDetail from "./pages/CourseDetail";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
+import Classes from "./pages/Classes";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/cursos" element={<Courses />} />
           <Route path="/cursos/:slug" element={<CourseDetail />} />
+          <Route path="/turmas" element={<Classes />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="*" element={<NotFound />} />

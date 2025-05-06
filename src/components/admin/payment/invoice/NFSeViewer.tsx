@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { FileText, Download, Printer, Code, CheckCircle } from "lucide-react";
+import { FileText, Download, Printer, Code, CheckCircle, Upload } from "lucide-react";
 import { NFSeData } from "./types";
 import { generateAbrasfXml } from "./xmlGenerator";
 import { TransactionStatusIndicator } from "../TransactionStatusIndicator";
@@ -27,6 +27,7 @@ export const NFSeViewer: React.FC<NFSeViewerProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<string>("details");
   const invoiceContentRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Gera o XML a partir dos dados
   const xmlContent = generateAbrasfXml(nfseData);
@@ -81,6 +82,32 @@ export const NFSeViewer: React.FC<NFSeViewerProps> = ({
       console.error("Erro ao gerar PDF:", error);
       toast.dismiss();
       toast.error("Erro ao gerar o PDF. Tente novamente.");
+    }
+  };
+  
+  const handleXmlFileUpload = () => {
+    fileInputRef.current?.click();
+  };
+  
+  const processXmlFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const xmlContent = event.target?.result as string;
+          // Here you would typically parse the XML and process it
+          // For demo purposes, we'll just show a success message
+          toast.success("XML importado com sucesso");
+          console.log("XML Content:", xmlContent);
+          // Reset the file input
+          if (fileInputRef.current) fileInputRef.current.value = '';
+        } catch (error) {
+          toast.error("Erro ao processar o arquivo XML");
+          console.error("Error processing XML:", error);
+        }
+      };
+      reader.readAsText(file);
     }
   };
   
@@ -208,6 +235,23 @@ export const NFSeViewer: React.FC<NFSeViewerProps> = ({
                 <div className="bg-slate-50 p-4 rounded-md border overflow-auto max-h-[300px]">
                   <pre className="text-xs whitespace-pre-wrap font-mono">{xmlContent}</pre>
                 </div>
+
+                <div className="mt-4 space-y-2">
+                  <p className="text-sm text-muted-foreground">Você também pode importar seu próprio arquivo XML:</p>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={handleXmlFileUpload}>
+                      <Upload className="h-4 w-4 mr-1" />
+                      Importar XML
+                    </Button>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={processXmlFile}
+                      accept=".xml"
+                      className="hidden"
+                    />
+                  </div>
+                </div>
               </CardContent>
               
               <CardFooter className="flex justify-end">
@@ -231,3 +275,4 @@ export const NFSeViewer: React.FC<NFSeViewerProps> = ({
     </Dialog>
   );
 };
+

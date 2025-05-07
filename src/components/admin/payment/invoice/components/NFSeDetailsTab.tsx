@@ -1,4 +1,3 @@
-
 import React, { useRef } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,6 +19,7 @@ export const NFSeDetailsTab: React.FC<NFSeDetailsTabProps> = ({
   onDownload 
 }) => {
   const invoiceContentRef = useRef<HTMLDivElement>(null);
+  const isGeneratingPDF = useRef<boolean>(false);
   
   const handlePrint = () => {
     if (onPrint) {
@@ -30,6 +30,12 @@ export const NFSeDetailsTab: React.FC<NFSeDetailsTabProps> = ({
   };
 
   const handleDownloadPDF = async () => {
+    // If already generating PDF, prevent multiple clicks
+    if (isGeneratingPDF.current) {
+      toast.info("Aguarde, o PDF está sendo gerado...");
+      return;
+    }
+
     if (onDownload) {
       onDownload();
       return;
@@ -41,58 +47,39 @@ export const NFSeDetailsTab: React.FC<NFSeDetailsTabProps> = ({
     }
 
     const toastId = toast.loading("Gerando PDF...");
+    isGeneratingPDF.current = true;
     
     try {
-      // Removendo tentativa anterior e usando abordagem simplificada
       const content = invoiceContentRef.current;
-      console.log("Iniciando geração de PDF com elemento:", content);
       
-      // Criando clone do elemento para evitar modificar o original
-      const cloneElement = content.cloneNode(true) as HTMLElement;
-      cloneElement.style.backgroundColor = 'white';
-      cloneElement.style.padding = '20px';
-      cloneElement.style.width = '800px';
-      
-      // Adicionando temporariamente à página para render
-      document.body.appendChild(cloneElement);
-      
-      console.log("Clone criado e adicionado ao corpo do documento");
-      
-      // Gerando canvas
-      const canvas = await html2canvas(cloneElement, {
+      // Optimize canvas generation with better settings
+      const canvas = await html2canvas(content, {
         scale: 1.5,
+        useCORS: true,
+        allowTaint: true,
         backgroundColor: '#ffffff',
-        logging: true,
+        logging: false, // Disable logging for better performance
       });
       
-      // Removendo clone após a captura
-      document.body.removeChild(cloneElement);
+      // Use more efficient PDF generation approach
+      const imgData = canvas.toDataURL('image/jpeg', 0.7); // Lower quality for better performance
       
-      console.log("Canvas gerado com dimensões:", canvas.width, "x", canvas.height);
-      
-      // Criando PDF com versão específica
+      // Create PDF with specific version
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
-        format: 'a4'
+        format: 'a4',
+        compress: true // Enable compression
       });
       
       const pageWidth = pdf.internal.pageSize.getWidth();
-      const imgWidth = pageWidth - 20; // 10mm margem de cada lado
+      const imgWidth = pageWidth - 20;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       
-      // Adicionando imagem ao PDF
-      const imgData = canvas.toDataURL('image/jpeg', 0.95);
-      console.log("Imagem base64 gerada, adicionando ao PDF");
       pdf.addImage(imgData, 'JPEG', 10, 10, imgWidth, imgHeight);
       
-      // Simplificando método de download
-      console.log("PDF gerado, iniciando download");
-      const filename = `NFSe_${nfseData.numeroLote || Date.now()}.pdf`;
-      
-      // Método direto de download
-      pdf.save(filename);
-      console.log("Método pdf.save chamado com nome:", filename);
+      // Use direct output for better performance
+      pdf.save(`NFSe_${nfseData.numeroLote || Date.now()}.pdf`);
       
       toast.dismiss(toastId);
       toast.success("PDF gerado com sucesso!");
@@ -100,6 +87,8 @@ export const NFSeDetailsTab: React.FC<NFSeDetailsTabProps> = ({
       console.error("Erro ao gerar PDF:", error);
       toast.dismiss(toastId);
       toast.error("Erro ao gerar PDF. Por favor, tente novamente.");
+    } finally {
+      isGeneratingPDF.current = false;
     }
   };
   
@@ -112,6 +101,7 @@ export const NFSeDetailsTab: React.FC<NFSeDetailsTabProps> = ({
       
       <CardContent className="space-y-4">
         <div ref={invoiceContentRef} className="invoice-content">
+          
           <div className="grid grid-cols-2 gap-4">
             <div>
               <h3 className="font-medium text-sm">Prestador</h3>

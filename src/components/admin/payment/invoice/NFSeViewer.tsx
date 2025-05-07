@@ -1,15 +1,26 @@
 
-import React, { useState } from "react";
+import React, { useState, lazy, Suspense } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { FileText } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { NFSeData } from "./types";
 import { generateAbrasfXml } from "./xmlGenerator";
-import { NFSeDetailsTab } from "./components/NFSeDetailsTab";
-import { NFSeXmlTab } from "./components/NFSeXmlTab";
 import { NFSeDialogHeader } from "./components/NFSeDialogHeader";
 import { toast } from "sonner";
+
+// Lazy load tabs for better performance
+const NFSeDetailsTab = lazy(() => import("./components/NFSeDetailsTab").then(module => ({ default: module.NFSeDetailsTab })));
+const NFSeXmlTab = lazy(() => import("./components/NFSeXmlTab").then(module => ({ default: module.NFSeXmlTab })));
+
+const TabLoadingFallback = () => (
+  <div className="p-4 space-y-4">
+    <Skeleton className="h-12 w-full" />
+    <Skeleton className="h-20 w-full" />
+    <Skeleton className="h-20 w-full" />
+  </div>
+);
 
 interface NFSeViewerProps {
   nfseData: NFSeData;
@@ -26,12 +37,17 @@ export const NFSeViewer: React.FC<NFSeViewerProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<string>("details");
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [xmlContent, setXmlContent] = useState<string>("");
   
-  // Gera o XML a partir dos dados
-  const xmlContent = generateAbrasfXml(nfseData);
+  // Generate XML only when needed and tab is active to save resources
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    if (value === "xml" && !xmlContent) {
+      setXmlContent(generateAbrasfXml(nfseData));
+    }
+  };
   
   const handlePrintFallback = () => {
-    console.log("Tentando imprimir NFSe");
     if (onPrint) {
       onPrint();
     } else {
@@ -40,11 +56,9 @@ export const NFSeViewer: React.FC<NFSeViewerProps> = ({
   };
   
   const handleDownloadFallback = () => {
-    console.log("Tentando baixar NFSe PDF");
     if (onDownload) {
       onDownload();
     } else {
-      // Deixar o componente NFSeDetailsTab lidar com o download, conforme implementado
       toast.info("Gerando PDF da NFS-e...");
     }
   };
@@ -64,23 +78,25 @@ export const NFSeViewer: React.FC<NFSeViewerProps> = ({
         </DialogDescription>
         <NFSeDialogHeader nfseData={nfseData} protocol={protocol} />
         
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-2">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="mt-2">
           <TabsList className="grid grid-cols-2">
             <TabsTrigger value="details">Detalhes</TabsTrigger>
             <TabsTrigger value="xml">XML (ABRASF 2.0)</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="details" className="mt-4">
-            <NFSeDetailsTab 
-              nfseData={nfseData} 
-              onPrint={handlePrintFallback} 
-              onDownload={handleDownloadFallback} 
-            />
-          </TabsContent>
-          
-          <TabsContent value="xml" className="mt-4">
-            <NFSeXmlTab xmlContent={xmlContent} />
-          </TabsContent>
+          <Suspense fallback={<TabLoadingFallback />}>
+            <TabsContent value="details" className="mt-4">
+              <NFSeDetailsTab 
+                nfseData={nfseData} 
+                onPrint={handlePrintFallback} 
+                onDownload={handleDownloadFallback} 
+              />
+            </TabsContent>
+            
+            <TabsContent value="xml" className="mt-4">
+              {activeTab === "xml" && <NFSeXmlTab xmlContent={xmlContent || generateAbrasfXml(nfseData)} />}
+            </TabsContent>
+          </Suspense>
         </Tabs>
         
         <DialogFooter>

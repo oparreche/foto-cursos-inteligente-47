@@ -20,3 +20,6 @@ export const formSchema = z.object({
   instructor: z.string().min(1, "Nome do instrutor é obrigatório"),
   description: z.string().min(10, "Descrição deve ter pelo menos 10 caracteres"),
 });
+
+// Export type from schema for TypeScript usage
+export type ClassFormValues = z.infer<typeof formSchema>;

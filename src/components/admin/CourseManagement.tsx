@@ -13,6 +13,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import ImageUpload from "./ImageUpload";
 
 // Define course interface
 interface Course {
@@ -23,6 +24,7 @@ interface Course {
   duration: string;
   level: string;
   description: string;
+  image: string;
 }
 
 // Mock courses data
@@ -34,7 +36,8 @@ const initialCourses: Course[] = [
     category: "Fotografia",
     duration: "20 horas",
     level: "Iniciante",
-    description: "",
+    description: "Curso introdutório para quem deseja aprender fotografia do zero.",
+    image: "https://images.unsplash.com/photo-1452378174528-3090a4bba7b2?ixlib=rb-4.0.3",
   },
   {
     id: 2,
@@ -43,7 +46,8 @@ const initialCourses: Course[] = [
     category: "Fotografia",
     duration: "25 horas",
     level: "Intermediário",
-    description: "",
+    description: "Técnicas avançadas para fotografar pessoas e criar retratos impactantes.",
+    image: "https://images.unsplash.com/photo-1441057206919-63d19fac2369?ixlib=rb-4.0.3",
   },
   {
     id: 3,
@@ -52,7 +56,8 @@ const initialCourses: Course[] = [
     category: "Edição",
     duration: "30 horas",
     level: "Avançado",
-    description: "",
+    description: "Aprenda a editar suas fotos com técnicas profissionais.",
+    image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?ixlib=rb-4.0.3",
   },
 ];
 
@@ -73,6 +78,15 @@ const CourseManagement = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [currentCourse, setCurrentCourse] = useState<Course | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentImage, setCurrentImage] = useState("");
+
+  // Filter courses based on search term
+  const filteredCourses = courses.filter(course => 
+    course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    course.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    course.level.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   // Form setup with react-hook-form
   const form = useForm<FormValues>({
@@ -99,7 +113,8 @@ const CourseManagement = () => {
           category: values.category,
           duration: values.duration,
           level: values.level,
-          description: values.description || "" 
+          description: values.description || "",
+          image: currentImage || c.image
         } : c))
       );
       toast.success("Curso atualizado com sucesso!");
@@ -112,7 +127,8 @@ const CourseManagement = () => {
         category: values.category,
         duration: values.duration,
         level: values.level,
-        description: values.description || ""
+        description: values.description || "",
+        image: currentImage || "https://images.unsplash.com/photo-1482938289607-e9573fc25ebb?ixlib=rb-4.0.3"
       };
       setCourses([...courses, newCourse]);
       toast.success("Novo curso criado com sucesso!");
@@ -133,6 +149,7 @@ const CourseManagement = () => {
   const handleEdit = (course: Course) => {
     setCurrentCourse(course);
     setIsEditing(true);
+    setCurrentImage(course.image);
     
     form.reset({
       title: course.title,
@@ -150,6 +167,7 @@ const CourseManagement = () => {
   const handleNewCourse = () => {
     setCurrentCourse(null);
     setIsEditing(false);
+    setCurrentImage("");
     form.reset({
       title: "",
       slug: "",
@@ -165,6 +183,7 @@ const CourseManagement = () => {
   const resetAndCloseDialog = () => {
     setIsEditing(false);
     setCurrentCourse(null);
+    setCurrentImage("");
     form.reset();
     setIsDialogOpen(false);
   };
@@ -175,6 +194,8 @@ const CourseManagement = () => {
         <Input
           placeholder="Buscar cursos..."
           className="max-w-sm"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
         />
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
@@ -293,6 +314,13 @@ const CourseManagement = () => {
                   />
                 </div>
                 
+                {/* Image Upload Component */}
+                <ImageUpload
+                  currentImage={currentImage}
+                  onImageChange={setCurrentImage}
+                  label="Imagem do Curso"
+                />
+                
                 <FormField
                   control={form.control}
                   name="description"
@@ -327,6 +355,7 @@ const CourseManagement = () => {
           <TableHeader>
             <TableRow>
               <TableHead>ID</TableHead>
+              <TableHead>Imagem</TableHead>
               <TableHead>Título</TableHead>
               <TableHead>Categoria</TableHead>
               <TableHead>Duração</TableHead>
@@ -335,10 +364,22 @@ const CourseManagement = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {courses.length > 0 ? (
-              courses.map((course) => (
+            {filteredCourses.length > 0 ? (
+              filteredCourses.map((course) => (
                 <TableRow key={course.id}>
                   <TableCell>{course.id}</TableCell>
+                  <TableCell>
+                    <div className="h-12 w-16 overflow-hidden rounded-md">
+                      <img 
+                        src={course.image} 
+                        alt={course.title}
+                        className="h-full w-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = 'https://via.placeholder.com/150';
+                        }}
+                      />
+                    </div>
+                  </TableCell>
                   <TableCell className="font-medium">{course.title}</TableCell>
                   <TableCell>
                     <Badge variant="outline">{course.category}</Badge>
@@ -367,7 +408,7 @@ const CourseManagement = () => {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-6">
+                <TableCell colSpan={7} className="text-center py-6">
                   Nenhum curso encontrado
                 </TableCell>
               </TableRow>

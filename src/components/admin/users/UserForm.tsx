@@ -66,10 +66,8 @@ const UserForm = ({ defaultValues, onSubmit, onCancel, isEditing }: UserFormProp
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="super_admin">Super Admin</SelectItem>
                   <SelectItem value="admin">Administrador</SelectItem>
-                  <SelectItem value="coordinator">Coordenador</SelectItem>
-                  <SelectItem value="professor">Professor</SelectItem>
+                  <SelectItem value="instructor">Instrutor</SelectItem>
                   <SelectItem value="student">Estudante</SelectItem>
                   <SelectItem value="viewer">Visualizador</SelectItem>
                 </SelectContent>

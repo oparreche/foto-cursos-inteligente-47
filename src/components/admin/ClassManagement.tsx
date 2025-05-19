@@ -55,9 +55,10 @@ const ClassManagement = () => {
         if (error) throw error;
         return { success: true, message: "Turma atualizada com sucesso!" };
       } else {
+        // Corrigido: tratamento do objeto para inserção
         const { error } = await supabase
           .from('classes')
-          .insert([supabaseData]); // Corrigido para passar um array
+          .insert(supabaseData); // Corrigido para passar um objeto único, não um array
         
         if (error) throw error;
         return { success: true, message: "Nova turma criada com sucesso!" };
@@ -116,7 +117,7 @@ const ClassManagement = () => {
     
     if (isEditing && currentClass) {
       // We need to find the actual UUID in Supabase
-      // Corrigido para usar async/await ou Promise.then corretamente
+      // Corrigido para uso correto de Promise
       supabase
         .from('classes')
         .select('id')

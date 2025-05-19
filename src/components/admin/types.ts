@@ -29,7 +29,7 @@ export type FormValues = z.infer<typeof formSchema>;
 // Tipo para dados enviados ao Supabase
 export type ClassForSupabase = {
   id?: string;
-  course_id?: string;
+  course_id: string; // Mudado para required conforme exigido pelo Supabase
   instructor_id?: string;
   course_name: string;
   course_slug: string;
@@ -37,8 +37,8 @@ export type ClassForSupabase = {
   month: string;
   year: string;
   period: string;
-  start_date: string; // Alterado de Date para string conforme esperado pelo Supabase
-  end_date: string;   // Alterado de Date para string conforme esperado pelo Supabase
+  start_date: string; // String no formato YYYY-MM-DD
+  end_date: string;   // String no formato YYYY-MM-DD
   days: string;
   time: string;
   location: string;
@@ -48,41 +48,41 @@ export type ClassForSupabase = {
   description: string;
 };
 
-// Adicionando o tipo PaymentTransaction que está faltando
+// Tipo para transações de pagamento
 export type PaymentTransaction = {
   id: number;
+  userId: number; // Adicionado userId em vez de customerName/Email
+  userName: string; // Campo usado no componente
   amount: number;
-  currency: string;
-  status: "pending" | "processing" | "completed" | "failed" | "refunded";
-  paymentMethod: string;
-  customerName: string;
-  customerEmail: string;
-  createdAt: Date;
-  updatedAt: Date;
+  status: "pending" | "processing" | "completed" | "failed" | "canceled"; // Corrigido para usar 'canceled' em vez de 'refunded'
+  date: Date; // Adicionado o campo date usado em vários componentes
+  method: string; // Renomeado de paymentMethod para method
   description?: string;
 };
 
-// Adicionando o tipo DashboardStats que está faltando
+// Tipo para estatísticas do dashboard
 export type DashboardStats = {
   totalStudents: number;
   activeClasses: number;
-  revenue: number;
-  completionRate: number;
+  totalRevenue: number; // Adicionado totalRevenue em vez de revenue
+  newEnrollments: number; // Adicionado newEnrollments
 };
 
-// Adicionando o tipo User que está faltando
+// Tipo para usuários
 export type User = {
   id: number;
   name: string;
   email: string;
-  role: string;
+  role: "admin" | "viewer" | "editor"; // Corrigido para enum em vez de string genérico
   status: "active" | "inactive" | "pending";
   createdAt: Date;
+  lastLogin?: Date; // Adicionado lastLogin que é usado no UserManagement
 };
 
 // Funções de conversão entre formatos
 export const convertFormToSupabase = (values: FormValues): ClassForSupabase => {
   return {
+    course_id: "00000000-0000-0000-0000-000000000000", // Valor padrão temporário
     course_name: values.courseName,
     course_slug: values.courseSlug,
     image: values.image,

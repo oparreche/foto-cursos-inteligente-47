@@ -5,6 +5,7 @@ import AdminTabs from "@/components/admin/AdminTabs";
 import AdminAccess from "@/components/admin/AdminAccess";
 import PermissionsSheet from "@/components/admin/PermissionsSheet";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const Admin = () => {
   const [authenticated, setAuthenticated] = useState(false);
@@ -13,24 +14,59 @@ const Admin = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setAuthenticated(!!session?.user);
-      
-      if (session?.user) {
-        // In a real app, you would fetch the user's role from your database
-        // For now, we'll just set it to admin
-        setUserRole('admin');
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const isAuthenticated = !!session?.user;
+        setAuthenticated(isAuthenticated);
+        
+        if (session?.user) {
+          // Fetch the user's role from the user_roles table
+          const { data: roleData, error: roleError } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', session.user.id)
+            .single();
+            
+          if (roleError && roleError.code !== 'PGRST116') {
+            console.error("Error fetching user role:", roleError);
+            toast.error("Erro ao verificar permissões de usuário");
+          }
+          
+          // Set the user role (default to viewer if not found)
+          setUserRole(roleData?.role || 'viewer');
+        }
+      } catch (error) {
+        console.error("Auth check error:", error);
+        toast.error("Erro ao verificar autenticação");
+      } finally {
+        setIsLoading(false);
       }
-      
-      setIsLoading(false);
     };
     
     checkAuth();
     
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setAuthenticated(!!session?.user);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      const isAuthenticated = !!session?.user;
+      setAuthenticated(isAuthenticated);
+      
       if (session?.user) {
-        setUserRole('admin');
+        try {
+          // Fetch the user's role from the user_roles table
+          const { data: roleData, error: roleError } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', session.user.id)
+            .single();
+            
+          if (roleError && roleError.code !== 'PGRST116') {
+            console.error("Error fetching user role:", roleError);
+          }
+          
+          // Set the user role (default to viewer if not found)
+          setUserRole(roleData?.role || 'viewer');
+        } catch (error) {
+          console.error("Error fetching role on auth change:", error);
+        }
       } else {
         setUserRole('viewer');
       }
@@ -49,7 +85,7 @@ const Admin = () => {
           
           <AdminTabs />
           
-          <PermissionsSheet userRole={userRole} />
+          {userRole === 'admin' && <PermissionsSheet userRole={userRole} />}
         </div>
       </AdminAccess>
     </MainLayout>

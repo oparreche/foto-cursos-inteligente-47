@@ -1,5 +1,4 @@
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
@@ -8,6 +7,9 @@ import UserSearchBar from "./users/UserSearchBar";
 import UserTable from "./users/UserTable";
 import UserDialog from "./users/UserDialog";
 import { useUserManagement } from "./users/useUserManagement";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const UserManagement = () => {
   // Dados iniciais de exemplo - em um app real, estes viriam de uma API
@@ -49,6 +51,8 @@ const UserManagement = () => {
     setIsAddDialogOpen,
     isEditingUser,
     currentUser,
+    isLoading,
+    isAuthenticated,
     handleUserSubmit,
     handleEditUser,
     handleDeleteUser,
@@ -57,6 +61,16 @@ const UserManagement = () => {
 
   return (
     <div className="space-y-6">
+      {!isAuthenticated && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Autenticação necessária</AlertTitle>
+          <AlertDescription>
+            Você precisa estar logado para gerenciar usuários.
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="flex justify-between items-center">
         <UserSearchBar
           searchTerm={searchTerm}
@@ -80,11 +94,19 @@ const UserManagement = () => {
         </Dialog>
       </div>
 
-      <UserTable
-        users={filteredUsers}
-        onEditUser={handleEditUser}
-        onDeleteUser={handleDeleteUser}
-      />
+      {isLoading ? (
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="w-full h-16" />
+          ))}
+        </div>
+      ) : (
+        <UserTable
+          users={filteredUsers}
+          onEditUser={handleEditUser}
+          onDeleteUser={handleDeleteUser}
+        />
+      )}
     </div>
   );
 };

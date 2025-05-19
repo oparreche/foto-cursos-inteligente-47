@@ -2,7 +2,7 @@
 import { useParams } from "react-router-dom";
 import { useEffect } from "react";
 import MainLayout from "@/components/layout/MainLayout";
-import { useBlogPost, useBlogPosts, type BlogPostType } from "@/hooks/useBlogPosts";
+import { useBlogPost, useBlogPosts, type BlogPost } from "@/hooks/useBlogPosts";
 
 // Components
 import LoadingState from "@/components/blog/LoadingState";

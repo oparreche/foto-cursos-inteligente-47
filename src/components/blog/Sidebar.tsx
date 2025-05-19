@@ -1,74 +1,69 @@
 
 import { Link } from "react-router-dom";
-import { ChevronRight } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { type BlogPostType } from "@/hooks/useBlogPosts";
+import { Input } from "@/components/ui/input";
+import { type BlogPost } from "@/hooks/useBlogPosts";
 
 interface SidebarProps {
-  post: BlogPostType;
-  relatedPosts: BlogPostType[];
+  post: BlogPost;
+  relatedPosts: BlogPost[];
 }
 
 const Sidebar = ({ post, relatedPosts }: SidebarProps) => {
   return (
     <div className="lg:col-span-1">
-      {/* Related Posts */}
-      <div className="bg-gray-50 p-6 rounded-xl mb-6">
-        <h3 className="font-bold text-lg mb-4">Posts Relacionados</h3>
-        <div className="space-y-4">
-          {relatedPosts.length > 0 ? (
-            relatedPosts.map((related) => (
-              <Link 
-                key={related.id} 
-                to={`/blog/${related.slug}`}
-                className="flex items-start gap-3 group"
-              >
-                <div className="w-20 h-20 overflow-hidden rounded flex-shrink-0">
-                  <img 
-                    src={related.image_url || "https://images.unsplash.com/photo-1507842217343-583bb7270b66?ixlib=rb-4.0.3"} 
-                    alt={related.title}
-                    className="w-full h-full object-cover transition-transform group-hover:scale-110"
-                  />
-                </div>
-                <div className="flex-grow">
-                  <h4 className="font-medium group-hover:text-amber-600 transition-colors">
-                    {related.title}
-                  </h4>
-                </div>
-              </Link>
-            ))
-          ) : (
-            <p className="text-gray-500">Nenhum post relacionado disponível</p>
-          )}
-        </div>
-      </div>
-      
       {/* Categories */}
-      <div className="bg-gray-50 p-6 rounded-xl mb-6">
-        <h3 className="font-bold text-lg mb-4">Categorias</h3>
-        <div className="space-y-2">
+      <div className="bg-gray-50 rounded-xl p-6 mb-8">
+        <h3 className="text-lg font-bold mb-4 flex items-center">
+          <Tag className="h-5 w-5 mr-2" /> Categorias
+        </h3>
+        <div className="flex flex-wrap gap-2">
           {post.categories?.map((category, idx) => (
-            <Link 
-              key={idx} 
-              to={`/blog?category=${category}`} 
-              className="flex justify-between items-center hover:text-amber-600 transition-colors py-2 border-b"
-            >
-              <span>{category}</span>
-              <ChevronRight className="h-5 w-5" />
+            <Link key={idx} to={`/blog?category=${category}`}>
+              <Button variant="outline" size="sm" className="mb-2">
+                {category}
+              </Button>
             </Link>
           ))}
         </div>
       </div>
       
+      {/* Related Posts */}
+      {relatedPosts.length > 0 && (
+        <div className="bg-gray-50 rounded-xl p-6 mb-8">
+          <h3 className="text-lg font-bold mb-4">Posts Relacionados</h3>
+          <div className="space-y-4">
+            {relatedPosts.map((relatedPost) => (
+              <Link 
+                key={relatedPost.id} 
+                to={`/blog/${relatedPost.slug}`}
+                className="block group"
+              >
+                <div className="mb-2 rounded-lg overflow-hidden">
+                  <img
+                    src={relatedPost.image_url || "https://images.unsplash.com/photo-1452378174528-3090a4bba7b2?ixlib=rb-4.0.3"}
+                    alt={relatedPost.title}
+                    className="w-full h-28 object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                </div>
+                <h4 className="font-bold text-sm group-hover:text-amber-600 transition-colors">
+                  {relatedPost.title}
+                </h4>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+      
       {/* Newsletter */}
-      <div className="bg-amber-50 p-6 rounded-xl">
-        <h3 className="font-bold text-lg mb-2">Newsletter</h3>
-        <p className="text-gray-600 mb-4">
-          Receba as melhores dicas de fotografia diretamente no seu email.
+      <div className="bg-amber-50 rounded-xl p-6">
+        <h3 className="text-lg font-bold mb-4">Receba Novidades</h3>
+        <p className="text-sm text-gray-600 mb-4">
+          Inscreva-se para receber dicas, tutoriais e novidades do mundo da fotografia.
         </p>
         <div className="space-y-3">
-          <Input placeholder="Seu email" type="email" />
+          <Input placeholder="Seu melhor e-mail" />
           <Button className="w-full">Inscrever-se</Button>
         </div>
       </div>

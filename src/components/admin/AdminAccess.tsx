@@ -100,22 +100,23 @@ const AdminAccess = ({ authenticated, children, isLoading = false }: AdminAccess
     }
   }
   
-  const assignSuperAdminRole = async (userId: string) => {
+  // Here's the fix - change the function to use 'admin' role instead of 'super_admin'
+  const assignHighestAdminRole = async (userId: string) => {
     try {
       const { error } = await supabase
         .from('user_roles')
-        .upsert({ user_id: userId, role: 'super_admin' });
+        .upsert({ user_id: userId, role: 'admin' });
       
       if (error) {
         throw error;
       }
       
-      toast.success("Função de Super Administrador atribuída com sucesso!");
-      setUserRole('super_admin');
+      toast.success("Função de Administrador Máximo atribuída com sucesso!");
+      setUserRole('admin');
       return true;
     } catch (error) {
-      console.error("Erro ao atribuir função de super administrador:", error);
-      toast.error("Erro ao atribuir função de super administrador");
+      console.error("Erro ao atribuir função de administrador máximo:", error);
+      toast.error("Erro ao atribuir função de administrador máximo");
       return false;
     }
   }
@@ -129,12 +130,12 @@ const AdminAccess = ({ authenticated, children, isLoading = false }: AdminAccess
     }
   };
   
-  const handleAssignSuperAdminRole = async () => {
+  const handleAssignHighestAdminRole = async () => {
     if (!userId) return;
     
-    const success = await assignSuperAdminRole(userId);
+    const success = await assignHighestAdminRole(userId);
     if (success) {
-      setUserRole('super_admin');
+      setUserRole('admin');
     }
   };
 
@@ -174,7 +175,7 @@ const AdminAccess = ({ authenticated, children, isLoading = false }: AdminAccess
     );
   }
 
-  if (userRole !== 'admin' && userRole !== 'super_admin' && userRole !== 'instructor') {
+  if (userRole !== 'admin' && userRole !== 'instructor') {
     return (
       <div className="container mx-auto px-4 py-8">
         <Alert variant="destructive">
@@ -182,7 +183,7 @@ const AdminAccess = ({ authenticated, children, isLoading = false }: AdminAccess
           <AlertTitle>Permissão Negada</AlertTitle>
           <AlertDescription>
             Você não tem permissão para acessar o painel de administração.
-            É necessário ter função de administrador, super administrador ou instrutor.
+            É necessário ter função de administrador ou instrutor.
           </AlertDescription>
         </Alert>
         
@@ -193,8 +194,8 @@ const AdminAccess = ({ authenticated, children, isLoading = false }: AdminAccess
           <Button onClick={handleAssignAdminRole}>
             Tornar-me Administrador
           </Button>
-          <Button onClick={handleAssignSuperAdminRole} variant="outline">
-            Tornar-me Super Admin
+          <Button onClick={handleAssignHighestAdminRole} variant="outline">
+            Tornar-me Administrador Máximo
           </Button>
           <Button asChild variant="outline" className="mt-2">
             <Link to="/">Voltar para página inicial</Link>

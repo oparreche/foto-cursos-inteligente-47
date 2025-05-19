@@ -48,6 +48,7 @@ const BlogManagement = () => {
         image_url: currentImage || currentPost.image_url,
         read_time: values.read_time,
         updated_at: now,
+        published_at: undefined as string | null | undefined, // Adding the missing property with proper type
       };
       
       // If status changed from draft to published, add published_at date

@@ -35,7 +35,7 @@ const HeroSection = ({ post, formatDate }: HeroSectionProps) => {
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center">
               <img 
-                src={post.author_image || "https://via.placeholder.com/100"} 
+                src={post.image_url || "https://via.placeholder.com/100"} 
                 alt={post.author || "Author"} 
                 className="w-full h-full object-cover"
                 onError={(e) => {

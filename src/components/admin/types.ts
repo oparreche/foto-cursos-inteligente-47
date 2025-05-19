@@ -29,7 +29,7 @@ export type FormValues = z.infer<typeof formSchema>;
 // Tipo para dados enviados ao Supabase
 export type ClassForSupabase = {
   id?: string;
-  course_id: string; // Mudado para required conforme exigido pelo Supabase
+  course_id: string; // Required para o Supabase
   instructor_id?: string;
   course_name: string;
   course_slug: string;
@@ -51,12 +51,12 @@ export type ClassForSupabase = {
 // Tipo para transações de pagamento
 export type PaymentTransaction = {
   id: number;
-  userId: number; // Adicionado userId em vez de customerName/Email
-  userName: string; // Campo usado no componente
+  userId: number; 
+  userName: string; 
   amount: number;
-  status: "pending" | "processing" | "completed" | "failed" | "canceled"; // Corrigido para usar 'canceled' em vez de 'refunded'
-  date: Date; // Adicionado o campo date usado em vários componentes
-  method: string; // Renomeado de paymentMethod para method
+  status: "pending" | "processing" | "completed" | "failed" | "canceled";
+  date: Date; 
+  method: string;
   description?: string;
 };
 
@@ -64,8 +64,8 @@ export type PaymentTransaction = {
 export type DashboardStats = {
   totalStudents: number;
   activeClasses: number;
-  totalRevenue: number; // Adicionado totalRevenue em vez de revenue
-  newEnrollments: number; // Adicionado newEnrollments
+  totalRevenue: number;
+  newEnrollments: number;
 };
 
 // Tipo para usuários
@@ -73,10 +73,10 @@ export type User = {
   id: number;
   name: string;
   email: string;
-  role: "admin" | "viewer" | "editor"; // Corrigido para enum em vez de string genérico
+  role: "admin" | "viewer" | "editor";
   status: "active" | "inactive" | "pending";
   createdAt: Date;
-  lastLogin?: Date; // Adicionado lastLogin que é usado no UserManagement
+  lastLogin?: Date;
 };
 
 // Funções de conversão entre formatos

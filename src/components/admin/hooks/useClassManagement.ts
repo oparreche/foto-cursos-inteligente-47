@@ -1,187 +1,152 @@
 
-import { useState } from "react";
-import { toast } from "sonner";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ClassItem, FormValues, convertFormToSupabase, convertSupabaseToClassItem } from "../types";
+import { toast } from "sonner";
 
-export function useClassManagement() {
+export const useClassManagement = () => {
+  const [classes, setClasses] = useState<ClassItem[]>([]);
+  const [filteredClasses, setFilteredClasses] = useState<ClassItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [currentClass, setCurrentClass] = useState<ClassItem | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  
-  const queryClient = useQueryClient();
 
   // Fetch classes from Supabase
-  const { data: classes = [], isLoading } = useQuery({
-    queryKey: ['classes'],
-    queryFn: async () => {
-      try {
-        const { data, error } = await supabase
-          .from('classes')
-          .select('*')
-          .order('created_at', { ascending: false });
-        
-        if (error) throw error;
-        
-        // Convert Supabase format to our ClassItem format
-        return data.map(convertSupabaseToClassItem);
-      } catch (error: any) {
-        toast.error(`Erro ao carregar turmas: ${error.message}`);
-        return [];
-      }
-    }
-  });
+  useEffect(() => {
+    fetchClasses();
+  }, []);
 
-  // Mutation to create/update a class
-  const mutation = useMutation({
-    mutationFn: async ({ values, isEditing, currentId }: { values: FormValues, isEditing: boolean, currentId?: string }) => {
-      const supabaseData = convertFormToSupabase(values);
-      
-      if (isEditing && currentId) {
-        const { error } = await supabase
-          .from('classes')
-          .update(supabaseData)
-          .eq('id', currentId);
-        
-        if (error) throw error;
-        return { success: true, message: "Turma atualizada com sucesso!" };
-      } else {
-        const { error } = await supabase
-          .from('classes')
-          .insert(supabaseData);
-        
-        if (error) throw error;
-        return { success: true, message: "Nova turma criada com sucesso!" };
-      }
-    },
-    onSuccess: (result) => {
-      toast.success(result.message);
-      queryClient.invalidateQueries({ queryKey: ['classes'] });
-      resetAndCloseDialog();
-    },
-    onError: (error: any) => {
-      toast.error(`Erro: ${error.message}`);
-    }
-  });
-
-  // Mutation to delete a class
-  const deleteMutation = useMutation({
-    mutationFn: async (id: number) => {
-      // Find the UUID from the numeric ID
-      const classToDelete = classes.find(c => c.id === id);
-      if (!classToDelete) throw new Error("Turma não encontrada");
-      
-      // Get the actual UUID from Supabase by searching
-      const { data, error: findError } = await supabase
-        .from('classes')
-        .select('id')
-        .eq('course_name', classToDelete.courseName)
-        .eq('month', classToDelete.month)
-        .eq('year', classToDelete.year)
-        .eq('period', classToDelete.period)
-        .single();
-      
-      if (findError || !data) throw new Error("Turma não encontrada no banco de dados");
-      
-      const { error } = await supabase
-        .from('classes')
-        .delete()
-        .eq('id', data.id);
-      
-      if (error) throw error;
-      return { success: true };
-    },
-    onSuccess: () => {
-      toast.success("Turma excluída com sucesso!");
-      queryClient.invalidateQueries({ queryKey: ['classes'] });
-    },
-    onError: (error: any) => {
-      toast.error(`Erro ao excluir turma: ${error.message}`);
-    }
-  });
-
-  // Handler for submitting form data
-  const handleSubmit = (values: FormValues) => {
-    if (isEditing && currentClass) {
-      supabase
-        .from('classes')
-        .select('id')
-        .eq('course_name', currentClass.courseName)
-        .eq('month', currentClass.month)
-        .eq('year', currentClass.year)
-        .eq('period', currentClass.period)
-        .single()
-        .then(({ data, error }) => {
-          if (error) {
-            toast.error(`Erro ao buscar turma: ${error.message}`);
-            return;
-          }
-          
-          if (data) {
-            mutation.mutate({ values, isEditing, currentId: data.id });
-          } else {
-            toast.error("Não foi possível encontrar a turma para edição");
-          }
-        })
-        .catch((error: Error) => {
-          toast.error(`Erro ao buscar turma: ${error.message}`);
-        });
+  // Filter classes when searchTerm changes
+  useEffect(() => {
+    if (searchTerm === "") {
+      setFilteredClasses(classes);
     } else {
-      mutation.mutate({ values, isEditing });
+      const filtered = classes.filter(
+        (cls) =>
+          cls.courseName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          cls.instructor.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          cls.period.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredClasses(filtered);
+    }
+  }, [searchTerm, classes]);
+
+  const fetchClasses = async () => {
+    try {
+      setIsLoading(true);
+      
+      const { data, error } = await supabase
+        .from("classes")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data) {
+        const formattedClasses = data.map(convertSupabaseToClassItem);
+        setClasses(formattedClasses);
+        setFilteredClasses(formattedClasses);
+      }
+    } catch (error: any) {
+      toast.error(`Erro ao buscar turmas: ${error.message}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Handler for deleting a class
-  const handleDelete = (id: number) => {
-    if (confirm("Tem certeza que deseja excluir esta turma?")) {
-      deleteMutation.mutate(id);
-    }
-  };
-
-  // Handler for editing a class
-  const handleEdit = (classItem: ClassItem) => {
-    setCurrentClass(classItem);
-    setIsEditing(true);
-    setIsDialogOpen(true);
-  };
-
-  // Handler for opening the dialog for a new class
   const handleNewClass = () => {
     setCurrentClass(null);
     setIsEditing(false);
     setIsDialogOpen(true);
   };
 
-  // Reset form and close dialog
-  const resetAndCloseDialog = () => {
-    setIsEditing(false);
-    setCurrentClass(null);
-    setIsDialogOpen(false);
+  const handleEdit = (classItem: ClassItem) => {
+    setCurrentClass(classItem);
+    setIsEditing(true);
+    setIsDialogOpen(true);
   };
 
-  // Filter classes based on search term
-  const filteredClasses = classes.filter((c) => 
-    c.courseName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    c.month.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    c.year.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    c.instructor.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleSubmit = async (values: FormValues) => {
+    try {
+      const classData = convertFormToSupabase(values);
+      
+      if (isEditing && currentClass) {
+        // Update existing class
+        const { error } = await supabase
+          .from("classes")
+          .update(classData)
+          .eq("id", currentClass.id.toString());
+
+        if (error) {
+          throw error;
+        }
+
+        toast.success("Turma atualizada com sucesso!");
+      } else {
+        // Create new class
+        const { error } = await supabase
+          .from("classes")
+          .insert(classData);
+
+        if (error) {
+          throw error;
+        }
+
+        toast.success("Turma criada com sucesso!");
+      }
+
+      // Refresh classes and close dialog
+      resetAndCloseDialog();
+      fetchClasses();
+    } catch (error: any) {
+      toast.error(`Erro ao ${isEditing ? "atualizar" : "criar"} turma: ${error.message}`);
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (window.confirm("Tem certeza que deseja excluir esta turma?")) {
+      try {
+        const { error } = await supabase
+          .from("classes")
+          .delete()
+          .eq("id", id.toString());
+
+        if (error) {
+          throw error;
+        }
+
+        toast.success("Turma excluída com sucesso!");
+        fetchClasses();
+      } catch (error: any) {
+        toast.error(`Erro ao excluir turma: ${error.message}`);
+      }
+    }
+  };
+
+  const resetAndCloseDialog = () => {
+    setIsDialogOpen(false);
+    setCurrentClass(null);
+    setIsEditing(false);
+  };
 
   return {
+    classes,
+    filteredClasses,
     isLoading,
-    isEditing,
-    currentClass,
-    isDialogOpen,
-    setIsDialogOpen,
     searchTerm,
     setSearchTerm,
-    filteredClasses,
+    isDialogOpen,
+    setIsDialogOpen,
+    isEditing,
+    currentClass,
+    handleNewClass,
+    handleEdit,
     handleSubmit,
     handleDelete,
-    handleEdit,
-    handleNewClass,
     resetAndCloseDialog
   };
-}
+};

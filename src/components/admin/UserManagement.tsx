@@ -25,9 +25,9 @@ const UserManagement = () => {
     },
     {
       id: 2,
-      name: "João Instrutor",
+      name: "João Professor",
       email: "joao@escola.com",
-      role: "instructor",
+      role: "professor",
       status: "active",
       createdAt: new Date("2025-02-10"),
       lastLogin: new Date("2025-05-04")
@@ -40,6 +40,24 @@ const UserManagement = () => {
       status: "active",
       createdAt: new Date("2025-03-21"),
       lastLogin: new Date("2025-05-01")
+    },
+    {
+      id: 4,
+      name: "Pedro Coordenador",
+      email: "pedro@escola.com",
+      role: "coordinator",
+      status: "active",
+      createdAt: new Date("2025-03-15"),
+      lastLogin: new Date("2025-05-02")
+    },
+    {
+      id: 5,
+      name: "Ana Estudante",
+      email: "ana@escola.com",
+      role: "student",
+      status: "active",
+      createdAt: new Date("2025-04-01"),
+      lastLogin: new Date("2025-05-03")
     }
   ];
 

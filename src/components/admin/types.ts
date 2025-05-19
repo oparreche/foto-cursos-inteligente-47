@@ -1,4 +1,3 @@
-
 import { z } from "zod";
 import { formSchema } from "./classFormSchema";
 
@@ -73,7 +72,7 @@ export type User = {
   id: number;
   name: string;
   email: string;
-  role: "admin" | "viewer" | "instructor" | "student";
+  role: "super_admin" | "admin" | "viewer" | "instructor" | "student" | "coordinator" | "professor";
   status: "active" | "inactive" | "pending";
   createdAt: Date;
   lastLogin?: Date;

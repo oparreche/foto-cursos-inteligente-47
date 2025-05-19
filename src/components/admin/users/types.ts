@@ -4,7 +4,7 @@ import { User } from "../types";
 export interface UserFormValues {
   name: string;
   email: string;
-  role: "admin" | "editor" | "viewer";
+  role: "admin" | "viewer" | "instructor" | "student";
 }
 
 export interface UserDialogProps {

@@ -73,7 +73,7 @@ export type User = {
   id: number;
   name: string;
   email: string;
-  role: "admin" | "viewer" | "editor";
+  role: "admin" | "viewer" | "instructor" | "student";
   status: "active" | "inactive" | "pending";
   createdAt: Date;
   lastLogin?: Date;

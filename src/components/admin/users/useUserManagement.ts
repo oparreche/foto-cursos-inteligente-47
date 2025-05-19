@@ -132,7 +132,7 @@ export const useUserManagement = (initialUsers: User[]) => {
           // Inserir nova função
           const { error: insertError } = await supabase
             .from('user_roles')
-            .insert([{ user_id: currentUser.email, role: values.role }]);
+            .insert({ user_id: currentUser.email, role: values.role });
             
           if (insertError) throw insertError;
         } else if (existingRole.role !== values.role) {
@@ -175,7 +175,7 @@ export const useUserManagement = (initialUsers: User[]) => {
         // Adicionar papel/função
         const { error: roleError } = await supabase
           .from('user_roles')
-          .insert([{ user_id: values.email, role: values.role }]);
+          .insert({ user_id: values.email, role: values.role });
           
         if (roleError) throw roleError;
         

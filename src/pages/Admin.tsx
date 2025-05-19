@@ -113,7 +113,7 @@ const Admin = () => {
       // Create admin role for the user
       const { error } = await supabase
         .from('user_roles')
-        .insert([{ user_id: userId, role: 'admin' }]);
+        .insert({ user_id: userId, role: 'admin' });
 
       if (error) {
         throw error;

@@ -81,7 +81,7 @@ const AdminAccess = ({ authenticated, children, isLoading = false }: AdminAccess
     try {
       const { error } = await supabase
         .from('user_roles')
-        .insert([{ user_id: userId, role: 'admin' }]);
+        .insert({ user_id: userId, role: 'admin' });
       
       if (error) {
         throw error;
@@ -139,7 +139,7 @@ const AdminAccess = ({ authenticated, children, isLoading = false }: AdminAccess
     );
   }
 
-  if (userRole !== 'admin' && userRole !== 'editor') {
+  if (userRole !== 'admin' && userRole !== 'instructor') {
     return (
       <div className="container mx-auto px-4 py-8">
         <Alert variant="destructive">
@@ -147,7 +147,7 @@ const AdminAccess = ({ authenticated, children, isLoading = false }: AdminAccess
           <AlertTitle>Permissão Negada</AlertTitle>
           <AlertDescription>
             Você não tem permissão para acessar o painel de administração.
-            É necessário ter função de administrador ou editor.
+            É necessário ter função de administrador ou instrutor.
           </AlertDescription>
         </Alert>
         

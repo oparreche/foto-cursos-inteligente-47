@@ -2,20 +2,22 @@
 import { cn } from "@/lib/utils";
 
 interface UserRoleBadgeProps {
-  role: "admin" | "editor" | "viewer";
+  role: "admin" | "viewer" | "instructor" | "student";
 }
 
 const UserRoleBadge = ({ role }: UserRoleBadgeProps) => {
   const styles = {
     admin: "bg-purple-100 text-purple-800",
-    editor: "bg-blue-100 text-blue-800",
+    instructor: "bg-blue-100 text-blue-800",
     viewer: "bg-gray-100 text-gray-800",
+    student: "bg-green-100 text-green-800"
   };
 
   const labels = {
     admin: "Administrador",
-    editor: "Editor",
+    instructor: "Instrutor",
     viewer: "Visualizador",
+    student: "Estudante"
   };
 
   return (

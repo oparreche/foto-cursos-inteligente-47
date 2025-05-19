@@ -1,6 +1,6 @@
 
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import MainLayout from "@/components/layout/MainLayout";
@@ -11,10 +11,20 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("midiaputz@gmail.com");
+  const [password, setPassword] = useState("*Putz123");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const [defaultTab, setDefaultTab] = useState("login");
+
+  useEffect(() => {
+    // Check if coming from a redirect that specifies registration
+    const params = new URLSearchParams(location.search);
+    if (params.get("register") === "true") {
+      setDefaultTab("register");
+    }
+  }, [location]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,6 +42,7 @@ const Login = () => {
       navigate("/admin");
     } catch (error: any) {
       toast.error(`Erro ao fazer login: ${error.message}`);
+      console.error("Erro completo:", error);
     } finally {
       setLoading(false);
     }
@@ -49,9 +60,11 @@ const Login = () => {
       
       if (error) throw error;
       
-      toast.success("Cadastro realizado! Por favor, verifique seu e-mail para confirmar sua conta.");
+      toast.success("Cadastro realizado! Você já pode fazer login com suas credenciais.");
+      setDefaultTab("login");
     } catch (error: any) {
       toast.error(`Erro ao criar conta: ${error.message}`);
+      console.error("Erro completo:", error);
     } finally {
       setLoading(false);
     }
@@ -67,7 +80,7 @@ const Login = () => {
               Entre com suas credenciais para acessar o painel administrativo.
             </CardDescription>
           </CardHeader>
-          <Tabs defaultValue="login" className="w-full">
+          <Tabs defaultValue={defaultTab} value={defaultTab} onValueChange={setDefaultTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="login">Login</TabsTrigger>
               <TabsTrigger value="register">Cadastro</TabsTrigger>

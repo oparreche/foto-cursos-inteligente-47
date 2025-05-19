@@ -1,36 +1,51 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import MainLayout from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 const StudentArea = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [loginForm, setLoginForm] = useState({
-    email: "",
-    password: ""
+    email: "midiaputz@gmail.com",
+    password: "*Putz123"
   });
+  const navigate = useNavigate();
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsLoggedIn(!!session);
+      setIsLoading(false);
+    };
+    
+    checkAuth();
+  }, []);
+
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // This is just a mockup. In a real application, you would validate credentials against a backend.
-    if (loginForm.email && loginForm.password) {
-      // Simulate a login
-      toast({
-        title: "Login realizado com sucesso!",
-        description: "Bem-vindo(a) à Área do Aluno",
+    setIsLoading(true);
+    
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: loginForm.email,
+        password: loginForm.password,
       });
+      
+      if (error) throw error;
+      
+      toast.success("Login realizado com sucesso!");
       setIsLoggedIn(true);
-    } else {
-      toast({
-        title: "Erro ao fazer login",
-        description: "Por favor, preencha todos os campos.",
-        variant: "destructive",
-      });
+    } catch (error: any) {
+      toast.error(`Erro ao fazer login: ${error.message}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -41,13 +56,39 @@ const StudentArea = () => {
     });
   };
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    toast({
-      title: "Logout realizado",
-      description: "Você saiu da sua conta com sucesso.",
-    });
+  const handleLogout = async () => {
+    setIsLoading(true);
+    try {
+      await supabase.auth.signOut();
+      setIsLoggedIn(false);
+      toast.success("Logout realizado com sucesso!");
+    } catch (error: any) {
+      toast.error(`Erro ao fazer logout: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  const handleAdminRedirect = () => {
+    navigate('/admin');
+  };
+
+  const handleLoginPageRedirect = () => {
+    navigate('/login?register=true');
+  };
+
+  if (isLoading) {
+    return (
+      <MainLayout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="animate-pulse space-y-4">
+            <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+            <div className="h-64 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>
@@ -104,9 +145,18 @@ const StudentArea = () => {
                         Esqueci minha senha
                       </a>
                     </div>
-                    <Button type="submit" className="w-full">
-                      Entrar
+                    <Button type="submit" className="w-full" disabled={isLoading}>
+                      {isLoading ? "Processando..." : "Entrar"}
                     </Button>
+                    
+                    <div className="flex justify-between pt-4">
+                      <Button onClick={handleLoginPageRedirect} variant="outline" size="sm">
+                        Página de Admin
+                      </Button>
+                      <Button onClick={handleAdminRedirect} variant="outline" size="sm">
+                        Ir para Admin
+                      </Button>
+                    </div>
                   </div>
                 </form>
                 <div className="mt-6 text-center">
@@ -120,7 +170,10 @@ const StudentArea = () => {
             <div>
               <div className="flex justify-between items-center mb-8">
                 <h2 className="text-2xl font-bold">Olá, Estudante!</h2>
-                <Button variant="outline" onClick={handleLogout}>Sair</Button>
+                <div className="space-x-2">
+                  <Button variant="outline" onClick={handleAdminRedirect}>Área Admin</Button>
+                  <Button variant="outline" onClick={handleLogout}>Sair</Button>
+                </div>
               </div>
 
               <Tabs defaultValue="courses">

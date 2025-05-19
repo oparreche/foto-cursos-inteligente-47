@@ -1,10 +1,11 @@
+
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 interface AdminAccessProps {
   authenticated: boolean;
@@ -16,6 +17,7 @@ const AdminAccess = ({ authenticated, children, isLoading = false }: AdminAccess
   const [userRole, setUserRole] = useState<string | null>(null);
   const [checkingRole, setCheckingRole] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const checkUserRole = async () => {
@@ -32,6 +34,7 @@ const AdminAccess = ({ authenticated, children, isLoading = false }: AdminAccess
         }
 
         setUserId(session.user.id);
+        console.log("Usuário autenticado:", session.user.email);
 
         // Check for user role in the user_roles table
         const { data: roleData, error: roleError } = await supabase
@@ -43,7 +46,7 @@ const AdminAccess = ({ authenticated, children, isLoading = false }: AdminAccess
         if (roleError) {
           // If error is "no rows matched", user has no role assigned
           if (roleError.code === 'PGRST116') {
-            console.log("No role found for user, checking if admin");
+            console.log("Nenhum papel encontrado para o usuário, verificando se é admin");
             
             // Try to assign admin role to the first user if no roles exist in the table
             const { count, error: countError } = await supabase
@@ -51,23 +54,24 @@ const AdminAccess = ({ authenticated, children, isLoading = false }: AdminAccess
               .select('*', { count: 'exact', head: true });
             
             if (!countError && count === 0) {
-              console.log("No roles exist, assigning admin role to first user");
+              console.log("Nenhum papel existe, atribuindo papel de admin ao primeiro usuário");
               await assignDefaultAdminRole(session.user.id);
               setUserRole('admin');
             } else {
-              console.log("Roles exist but user has none");
+              console.log("Papéis existem, mas usuário não tem nenhum");
               setUserRole(null);
             }
           } else {
-            console.error("Error fetching user role:", roleError);
+            console.error("Erro ao buscar papel do usuário:", roleError);
             toast.error("Erro ao verificar permissões de usuário");
             setUserRole(null);
           }
         } else {
+          console.log("Papel do usuário encontrado:", roleData?.role);
           setUserRole(roleData?.role || null);
         }
       } catch (error) {
-        console.error("Error checking user role:", error);
+        console.error("Erro ao verificar papel do usuário:", error);
         toast.error("Erro ao verificar funções de usuário");
       } finally {
         setCheckingRole(false);
@@ -90,8 +94,28 @@ const AdminAccess = ({ authenticated, children, isLoading = false }: AdminAccess
       toast.success("Função de administrador atribuída com sucesso!");
       return true;
     } catch (error) {
-      console.error("Error assigning admin role:", error);
+      console.error("Erro ao atribuir função de administrador:", error);
       toast.error("Erro ao atribuir função de administrador");
+      return false;
+    }
+  }
+  
+  const assignSuperAdminRole = async (userId: string) => {
+    try {
+      const { error } = await supabase
+        .from('user_roles')
+        .upsert({ user_id: userId, role: 'super_admin' });
+      
+      if (error) {
+        throw error;
+      }
+      
+      toast.success("Função de Super Administrador atribuída com sucesso!");
+      setUserRole('super_admin');
+      return true;
+    } catch (error) {
+      console.error("Erro ao atribuir função de super administrador:", error);
+      toast.error("Erro ao atribuir função de super administrador");
       return false;
     }
   }
@@ -103,6 +127,19 @@ const AdminAccess = ({ authenticated, children, isLoading = false }: AdminAccess
     if (success) {
       setUserRole('admin');
     }
+  };
+  
+  const handleAssignSuperAdminRole = async () => {
+    if (!userId) return;
+    
+    const success = await assignSuperAdminRole(userId);
+    if (success) {
+      setUserRole('super_admin');
+    }
+  };
+
+  const handleLoginRedirect = () => {
+    navigate('/login');
   };
 
   if (isLoading || checkingRole) {
@@ -131,9 +168,7 @@ const AdminAccess = ({ authenticated, children, isLoading = false }: AdminAccess
           <p className="mb-4 text-center text-muted-foreground">
             Faça login para acessar as funcionalidades administrativas.
           </p>
-          <Button asChild>
-            <Link to="/login">Login</Link>
-          </Button>
+          <Button onClick={handleLoginRedirect}>Login</Button>
         </div>
       </div>
     );
@@ -157,6 +192,9 @@ const AdminAccess = ({ authenticated, children, isLoading = false }: AdminAccess
           </p>
           <Button onClick={handleAssignAdminRole}>
             Tornar-me Administrador
+          </Button>
+          <Button onClick={handleAssignSuperAdminRole} variant="outline">
+            Tornar-me Super Admin
           </Button>
           <Button asChild variant="outline" className="mt-2">
             <Link to="/">Voltar para página inicial</Link>

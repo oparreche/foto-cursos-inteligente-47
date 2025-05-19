@@ -4,10 +4,11 @@ import { UserFormValues, UserDialogProps } from "./types";
 import UserForm from "./UserForm";
 
 const UserDialog = ({ currentUser, isEditing, onSubmit, onOpenChange }: UserDialogProps) => {
+  // Ensure we only use valid roles from our types definition
   const defaultValues: UserFormValues = {
     name: currentUser?.name || "",
     email: currentUser?.email || "",
-    role: currentUser?.role || "viewer",
+    role: (currentUser?.role as "admin" | "viewer" | "instructor" | "student") || "viewer",
   };
 
   const handleCancel = () => {

@@ -1,3 +1,4 @@
+
 import { z } from "zod";
 import { formSchema } from "./classFormSchema";
 
@@ -67,12 +68,12 @@ export type DashboardStats = {
   newEnrollments: number;
 };
 
-// Tipo para usuários
+// Tipo para usuários - atualizado para usar apenas as funções suportadas pelo Supabase
 export type User = {
   id: number;
   name: string;
   email: string;
-  role: "super_admin" | "admin" | "viewer" | "instructor" | "student" | "coordinator" | "professor";
+  role: "admin" | "viewer" | "instructor" | "student";
   status: "active" | "inactive" | "pending";
   createdAt: Date;
   lastLogin?: Date;

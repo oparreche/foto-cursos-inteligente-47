@@ -12,6 +12,23 @@ interface UserTableProps {
 }
 
 const UserTable = ({ users, onEditUser, onDeleteUser }: UserTableProps) => {
+  // Function to map any role value to one of the supported roles
+  const mapToSupportedRole = (role: string): "admin" | "viewer" | "instructor" | "student" => {
+    switch(role) {
+      case "admin":
+      case "super_admin": // Map super_admin to admin
+        return "admin";
+      case "instructor":
+      case "professor":  // Map professor to instructor
+      case "coordinator": // Map coordinator to instructor
+        return "instructor";
+      case "student":
+        return "student";
+      default:
+        return "viewer";
+    }
+  };
+
   return (
     <Table>
       <TableHeader>
@@ -31,7 +48,7 @@ const UserTable = ({ users, onEditUser, onDeleteUser }: UserTableProps) => {
               <TableCell className="font-medium">{user.name}</TableCell>
               <TableCell>{user.email}</TableCell>
               <TableCell>
-                <UserRoleBadge role={user.role} />
+                <UserRoleBadge role={mapToSupportedRole(user.role)} />
               </TableCell>
               <TableCell>{user.createdAt.toLocaleDateString('pt-BR')}</TableCell>
               <TableCell>{user.lastLogin?.toLocaleDateString('pt-BR')}</TableCell>
@@ -47,7 +64,7 @@ const UserTable = ({ users, onEditUser, onDeleteUser }: UserTableProps) => {
                     variant="ghost"
                     size="icon"
                     onClick={() => onDeleteUser(user.id)}
-                    disabled={user.role === "admin" && users.filter((u) => u.role === "admin").length === 1}
+                    disabled={mapToSupportedRole(user.role) === "admin" && users.filter((u) => mapToSupportedRole(u.role) === "admin").length === 1}
                   >
                     <Trash className="h-4 w-4" />
                   </Button>

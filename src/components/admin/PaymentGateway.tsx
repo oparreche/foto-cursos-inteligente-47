@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle, CreditCard } from "lucide-react";
+import { CheckCircle, CreditCard, Settings } from "lucide-react";
 import { toast } from "sonner";
 
 // Import refactored components
@@ -9,9 +9,10 @@ import { useTransactions } from "./payment/hooks/useTransactions";
 import { TransactionsTab } from "./payment/TransactionsTab";
 import { PaymentGatewaySettings } from "./payment/PaymentGatewaySettings";
 import { PaymentGatewayProps } from "./payment/types";
+import { PagarmeSettings } from "./payment/PagarmeSettings";
 
 const PaymentGateway = ({ activeTab: initialTab, onTabChange }: PaymentGatewayProps = {}) => {
-  const [activeTab, setActiveTab] = useState<"transactions" | "settings">(initialTab || "transactions");
+  const [activeTab, setActiveTab] = useState<"transactions" | "settings" | "pagarme">(initialTab || "transactions");
 
   const {
     filteredTransactions,
@@ -26,15 +27,19 @@ const PaymentGateway = ({ activeTab: initialTab, onTabChange }: PaymentGatewayPr
   } = useTransactions();
 
   const handleTabChange = (value: string) => {
-    const tab = value as "transactions" | "settings";
+    const tab = value as "transactions" | "settings" | "pagarme";
     setActiveTab(tab);
     if (onTabChange) {
-      onTabChange(tab);
+      onTabChange(tab as "transactions" | "settings");
     }
   };
 
   const handleSaveSettings = () => {
     toast.success("Configurações de pagamento salvas com sucesso!");
+  };
+
+  const handleSavePagarmeSettings = () => {
+    toast.success("Configurações do Pagarme salvas com sucesso!");
   };
 
   return (
@@ -45,7 +50,10 @@ const PaymentGateway = ({ activeTab: initialTab, onTabChange }: PaymentGatewayPr
             <CheckCircle className="h-4 w-4" /> Transações
           </TabsTrigger>
           <TabsTrigger value="settings" className="flex items-center gap-2">
-            <CreditCard className="h-4 w-4" /> Configurações
+            <CreditCard className="h-4 w-4" /> Gateway Padrão
+          </TabsTrigger>
+          <TabsTrigger value="pagarme" className="flex items-center gap-2">
+            <Settings className="h-4 w-4" /> Pagarme
           </TabsTrigger>
         </TabsList>
         
@@ -65,6 +73,10 @@ const PaymentGateway = ({ activeTab: initialTab, onTabChange }: PaymentGatewayPr
         
         <TabsContent value="settings">
           <PaymentGatewaySettings onSave={handleSaveSettings} />
+        </TabsContent>
+
+        <TabsContent value="pagarme">
+          <PagarmeSettings onSave={handleSavePagarmeSettings} />
         </TabsContent>
       </Tabs>
     </div>

@@ -239,6 +239,45 @@ export type Database = {
         }
         Relationships: []
       }
+      usuarios: {
+        Row: {
+          cpf: string | null
+          data_cadastro: string | null
+          email: string
+          endereco: Json | null
+          id: string
+          nome: string
+          status: string | null
+          telefone: string | null
+          ultima_atualizacao: string | null
+          user_id: string | null
+        }
+        Insert: {
+          cpf?: string | null
+          data_cadastro?: string | null
+          email: string
+          endereco?: Json | null
+          id?: string
+          nome: string
+          status?: string | null
+          telefone?: string | null
+          ultima_atualizacao?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          cpf?: string | null
+          data_cadastro?: string | null
+          email?: string
+          endereco?: Json | null
+          id?: string
+          nome?: string
+          status?: string | null
+          telefone?: string | null
+          ultima_atualizacao?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

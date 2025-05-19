@@ -4,6 +4,7 @@ import { AlertCircle, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface AdminAccessProps {
   authenticated: boolean;
@@ -14,6 +15,7 @@ interface AdminAccessProps {
 const AdminAccess = ({ authenticated, children, isLoading = false }: AdminAccessProps) => {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [checkingRole, setCheckingRole] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const checkUserRole = async () => {
@@ -29,6 +31,8 @@ const AdminAccess = ({ authenticated, children, isLoading = false }: AdminAccess
           return;
         }
 
+        setUserId(session.user.id);
+
         // Check for user role in the user_roles table
         const { data: roleData, error: roleError } = await supabase
           .from('user_roles')
@@ -36,13 +40,35 @@ const AdminAccess = ({ authenticated, children, isLoading = false }: AdminAccess
           .eq('user_id', session.user.id)
           .single();
 
-        if (roleError && roleError.code !== 'PGRST116') {
-          console.error("Error fetching user role:", roleError);
+        if (roleError) {
+          // If error is "no rows matched", user has no role assigned
+          if (roleError.code === 'PGRST116') {
+            console.log("No role found for user, checking if admin");
+            
+            // Try to assign admin role to the first user if no roles exist in the table
+            const { count, error: countError } = await supabase
+              .from('user_roles')
+              .select('*', { count: 'exact', head: true });
+            
+            if (!countError && count === 0) {
+              console.log("No roles exist, assigning admin role to first user");
+              await assignDefaultAdminRole(session.user.id);
+              setUserRole('admin');
+            } else {
+              console.log("Roles exist but user has none");
+              setUserRole(null);
+            }
+          } else {
+            console.error("Error fetching user role:", roleError);
+            toast.error("Erro ao verificar permissões de usuário");
+            setUserRole(null);
+          }
+        } else {
+          setUserRole(roleData?.role || null);
         }
-
-        setUserRole(roleData?.role || null);
       } catch (error) {
         console.error("Error checking user role:", error);
+        toast.error("Erro ao verificar funções de usuário");
       } finally {
         setCheckingRole(false);
       }
@@ -50,6 +76,34 @@ const AdminAccess = ({ authenticated, children, isLoading = false }: AdminAccess
 
     checkUserRole();
   }, [authenticated]);
+
+  const assignDefaultAdminRole = async (userId: string) => {
+    try {
+      const { error } = await supabase
+        .from('user_roles')
+        .insert([{ user_id: userId, role: 'admin' }]);
+      
+      if (error) {
+        throw error;
+      }
+      
+      toast.success("Função de administrador atribuída com sucesso!");
+      return true;
+    } catch (error) {
+      console.error("Error assigning admin role:", error);
+      toast.error("Erro ao atribuir função de administrador");
+      return false;
+    }
+  }
+
+  const handleAssignAdminRole = async () => {
+    if (!userId) return;
+    
+    const success = await assignDefaultAdminRole(userId);
+    if (success) {
+      setUserRole('admin');
+    }
+  };
 
   if (isLoading || checkingRole) {
     return (
@@ -97,8 +151,14 @@ const AdminAccess = ({ authenticated, children, isLoading = false }: AdminAccess
           </AlertDescription>
         </Alert>
         
-        <div className="mt-6 flex justify-center">
-          <Button asChild variant="outline">
+        <div className="mt-6 flex flex-col items-center space-y-4">
+          <p className="text-center text-muted-foreground">
+            Se você é o primeiro usuário do sistema, clique no botão abaixo para assumir o papel de administrador.
+          </p>
+          <Button onClick={handleAssignAdminRole}>
+            Tornar-me Administrador
+          </Button>
+          <Button asChild variant="outline" className="mt-2">
             <a href="/">Voltar para página inicial</a>
           </Button>
         </div>

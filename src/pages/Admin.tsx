@@ -11,6 +11,7 @@ const Admin = () => {
   const [authenticated, setAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState('viewer');
   const [isLoading, setIsLoading] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -20,6 +21,20 @@ const Admin = () => {
         setAuthenticated(isAuthenticated);
         
         if (session?.user) {
+          setUserId(session.user.id);
+          
+          // Verificar se existe algum usuário na tabela user_roles
+          const { count: roleCount, error: countError } = await supabase
+            .from('user_roles')
+            .select('*', { count: 'exact', head: true });
+            
+          if (countError) {
+            console.error("Erro ao verificar contagem de funções:", countError);
+          } else if (roleCount === 0) {
+            console.log("Nenhuma função encontrada, configurando primeiro usuário como administrador");
+            await createAdminRole(session.user.id);
+          }
+          
           // Fetch the user's role from the user_roles table
           const { data: roleData, error: roleError } = await supabase
             .from('user_roles')
@@ -28,15 +43,17 @@ const Admin = () => {
             .single();
             
           if (roleError && roleError.code !== 'PGRST116') {
-            console.error("Error fetching user role:", roleError);
+            console.error("Erro ao buscar função do usuário:", roleError);
             toast.error("Erro ao verificar permissões de usuário");
           }
           
           // Set the user role (default to viewer if not found)
-          setUserRole(roleData?.role || 'viewer');
+          const role = roleData?.role || 'viewer';
+          setUserRole(role);
+          console.log("Função do usuário definida como:", role);
         }
       } catch (error) {
-        console.error("Auth check error:", error);
+        console.error("Erro na verificação de autenticação:", error);
         toast.error("Erro ao verificar autenticação");
       } finally {
         setIsLoading(false);
@@ -50,6 +67,7 @@ const Admin = () => {
       setAuthenticated(isAuthenticated);
       
       if (session?.user) {
+        setUserId(session.user.id);
         try {
           // Fetch the user's role from the user_roles table
           const { data: roleData, error: roleError } = await supabase
@@ -59,15 +77,16 @@ const Admin = () => {
             .single();
             
           if (roleError && roleError.code !== 'PGRST116') {
-            console.error("Error fetching user role:", roleError);
+            console.error("Erro ao buscar função do usuário:", roleError);
           }
           
           // Set the user role (default to viewer if not found)
           setUserRole(roleData?.role || 'viewer');
         } catch (error) {
-          console.error("Error fetching role on auth change:", error);
+          console.error("Erro ao buscar função na alteração de autenticação:", error);
         }
       } else {
+        setUserId(null);
         setUserRole('viewer');
       }
     });
@@ -76,6 +95,37 @@ const Admin = () => {
       subscription.unsubscribe();
     };
   }, []);
+
+  const createAdminRole = async (userId: string) => {
+    try {
+      // Check if the user already has a role
+      const { data: existingRole } = await supabase
+        .from('user_roles')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+
+      if (existingRole) {
+        console.log("Usuário já tem função atribuída");
+        return;
+      }
+
+      // Create admin role for the user
+      const { error } = await supabase
+        .from('user_roles')
+        .insert([{ user_id: userId, role: 'admin' }]);
+
+      if (error) {
+        throw error;
+      }
+      
+      toast.success("Função de administrador atribuída automaticamente!");
+      setUserRole('admin');
+    } catch (error) {
+      console.error("Erro ao criar função de administrador:", error);
+      toast.error("Erro ao atribuir função de administrador");
+    }
+  };
 
   return (
     <MainLayout>

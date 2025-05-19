@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useToast } from "@/components/ui/use-toast";
-import { useBlogPost, useBlogPosts, BlogPost } from "@/hooks/useBlogPosts";
+import { useBlogPost, useBlogPosts, type BlogPost as BlogPostType } from "@/hooks/useBlogPosts";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const BlogPost = () => {

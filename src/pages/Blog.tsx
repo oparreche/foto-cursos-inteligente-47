@@ -1,4 +1,3 @@
-
 import MainLayout from "@/components/layout/MainLayout";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -29,11 +28,11 @@ const Blog = () => {
   const filteredPosts = posts.filter((post) => {
     // Filter by search term
     const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         (post.excerpt?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false);
+                         (post.excerpt?.toLowerCase().includes(searchTerm.toLowerCase()) || false);
     
     // Filter by category
     const matchesCategory = selectedCategory === "" || 
-                           post.categories?.includes(selectedCategory) ?? false;
+                           (post.categories?.includes(selectedCategory) || false);
     
     return matchesSearch && matchesCategory;
   });

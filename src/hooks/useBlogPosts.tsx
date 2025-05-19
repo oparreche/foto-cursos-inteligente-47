@@ -16,6 +16,8 @@ export type BlogPost = {
   categories: string[] | null;
   content: string | null;
   status: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
 };
 
 export const useBlogPosts = () => {

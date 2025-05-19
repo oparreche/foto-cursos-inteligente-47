@@ -14,3 +14,16 @@ export interface UserDialogProps {
   currentUser: User | null;
   isEditing: boolean;
 }
+
+export interface Permission {
+  role: string;
+  module: string;
+  can_view: boolean;
+  can_create: boolean;
+  can_edit: boolean;
+  can_delete: boolean;
+}
+
+export interface UserFilterState {
+  searchTerm: string;
+}

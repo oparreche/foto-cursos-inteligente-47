@@ -5,18 +5,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Permission } from "./users/types";
 
 interface PermissionsSheetProps {
   userRole: string;
-}
-
-interface Permission {
-  role: string;
-  module: string;
-  can_view: boolean;
-  can_create: boolean;
-  can_edit: boolean;
-  can_delete: boolean;
 }
 
 const PermissionsSheet = ({ userRole }: PermissionsSheetProps) => {
@@ -31,6 +23,7 @@ const PermissionsSheet = ({ userRole }: PermissionsSheetProps) => {
 
   const fetchPermissions = async () => {
     try {
+      // @ts-ignore - precisamos ignorar essa tipagem, pois a tabela role_permissions foi adicionada depois
       const { data, error } = await supabase
         .from('role_permissions')
         .select('*')
@@ -38,6 +31,7 @@ const PermissionsSheet = ({ userRole }: PermissionsSheetProps) => {
         .order('module', { ascending: true });
 
       if (error) throw error;
+      // @ts-ignore - precisamos ignorar essa tipagem, pois os dados retornados são do tipo Permission
       setPermissions(data || []);
     } catch (err: any) {
       console.error("Erro ao carregar permissões:", err);
@@ -49,6 +43,7 @@ const PermissionsSheet = ({ userRole }: PermissionsSheetProps) => {
 
   const updatePermission = async (permission: Permission) => {
     try {
+      // @ts-ignore - precisamos ignorar essa tipagem, pois a tabela role_permissions foi adicionada depois
       const { error } = await supabase
         .from('role_permissions')
         .update({

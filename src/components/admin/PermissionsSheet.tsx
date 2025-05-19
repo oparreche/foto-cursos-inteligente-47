@@ -23,7 +23,7 @@ const PermissionsSheet = ({ userRole }: PermissionsSheetProps) => {
 
   const fetchPermissions = async () => {
     try {
-      // Use type assertion to bypass TypeScript's type checking
+      // First convert to unknown, then to Permission[] to satisfy TypeScript
       const { data, error } = await supabase
         .from('role_permissions' as any)
         .select('*')
@@ -31,7 +31,9 @@ const PermissionsSheet = ({ userRole }: PermissionsSheetProps) => {
         .order('module', { ascending: true });
 
       if (error) throw error;
-      setPermissions(data as Permission[] || []);
+      
+      // Properly assert the type by first casting to unknown
+      setPermissions((data as unknown) as Permission[] || []);
     } catch (err: any) {
       console.error("Erro ao carregar permissões:", err);
       toast.error("Erro ao carregar permissões");

@@ -23,16 +23,15 @@ const PermissionsSheet = ({ userRole }: PermissionsSheetProps) => {
 
   const fetchPermissions = async () => {
     try {
-      // @ts-ignore - precisamos ignorar essa tipagem, pois a tabela role_permissions foi adicionada depois
+      // Use type assertion to bypass TypeScript's type checking
       const { data, error } = await supabase
-        .from('role_permissions')
+        .from('role_permissions' as any)
         .select('*')
         .order('role', { ascending: true })
         .order('module', { ascending: true });
 
       if (error) throw error;
-      // @ts-ignore - precisamos ignorar essa tipagem, pois os dados retornados são do tipo Permission
-      setPermissions(data || []);
+      setPermissions(data as Permission[] || []);
     } catch (err: any) {
       console.error("Erro ao carregar permissões:", err);
       toast.error("Erro ao carregar permissões");
@@ -43,15 +42,15 @@ const PermissionsSheet = ({ userRole }: PermissionsSheetProps) => {
 
   const updatePermission = async (permission: Permission) => {
     try {
-      // @ts-ignore - precisamos ignorar essa tipagem, pois a tabela role_permissions foi adicionada depois
+      // Use type assertion to bypass TypeScript's type checking
       const { error } = await supabase
-        .from('role_permissions')
+        .from('role_permissions' as any)
         .update({
           can_view: permission.can_view,
           can_create: permission.can_create,
           can_edit: permission.can_edit,
           can_delete: permission.can_delete
-        })
+        } as any)
         .eq('role', permission.role)
         .eq('module', permission.module);
 

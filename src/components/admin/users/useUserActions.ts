@@ -48,14 +48,14 @@ export function useUserActions(users: User[], setUsers: React.Dispatch<React.Set
             .insert({ 
               user_id: currentUser.email, 
               role: values.role 
-            });
+            } as any);
             
           if (insertError) throw insertError;
         } else if (existingRole.role !== values.role) {
           // Atualizar função existente
           const { error: updateError } = await supabase
             .from('user_roles')
-            .update({ role: values.role })
+            .update({ role: values.role } as any)
             .eq('user_id', currentUser.email);
             
           if (updateError) throw updateError;
@@ -91,7 +91,7 @@ export function useUserActions(users: User[], setUsers: React.Dispatch<React.Set
           .insert({ 
             user_id: values.email, 
             role: values.role 
-          });
+          } as any);
           
         if (roleError) throw roleError;
         

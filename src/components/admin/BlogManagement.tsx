@@ -3,6 +3,8 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 import { BlogFormValues } from "./blog/BlogForm";
 import { useBlogManagement } from "@/hooks/useBlogManagement";
 import BlogTable from "./blog/BlogTable";
@@ -27,11 +29,16 @@ const BlogManagement = () => {
     handleEdit,
     handleNewPost,
     handleDelete,
-    resetAndCloseDialog
+    resetAndCloseDialog,
+    isAuthenticated
   } = useBlogManagement();
 
   // Handle form submission (add or edit)
   const handleSubmit = (values: BlogFormValues) => {
+    if (!isAuthenticated) {
+      return; // Prevent submission if not authenticated
+    }
+    
     const categories = values.categories.split(',').map(cat => cat.trim());
     const now = new Date().toISOString();
     
@@ -80,6 +87,16 @@ const BlogManagement = () => {
 
   return (
     <div>
+      {!isAuthenticated && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Autenticação necessária</AlertTitle>
+          <AlertDescription>
+            Você precisa estar logado para gerenciar posts no blog.
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="flex justify-between items-center mb-6">
         <Input
           placeholder="Buscar artigos..."

@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -11,7 +11,26 @@ export const useBlogManagement = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentImage, setCurrentImage] = useState("");
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const queryClient = useQueryClient();
+
+  // Check authentication status
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session?.user);
+    };
+    
+    checkAuth();
+    
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAuthenticated(!!session?.user);
+    });
+    
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   // Fetch blog posts
   const { data: posts = [], isLoading, error } = useQuery({
@@ -34,7 +53,7 @@ export const useBlogManagement = () => {
   // Create post mutation
   const createPostMutation = useMutation({
     mutationFn: async (post: Omit<BlogPost, 'id'>) => {
-      // Get the current user's ID for author_id
+      // Verify authentication first
       const { data: { session } } = await supabase.auth.getSession();
       const userId = session?.user?.id;
       
@@ -71,6 +90,12 @@ export const useBlogManagement = () => {
   // Update post mutation
   const updatePostMutation = useMutation({
     mutationFn: async ({ id, post }: { id: string, post: Partial<BlogPost> }) => {
+      // Verify authentication first
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
+        throw new Error("User must be logged in to update a post");
+      }
+      
       const { data, error } = await supabase
         .from('blog_posts')
         .update(post)
@@ -96,6 +121,12 @@ export const useBlogManagement = () => {
   // Delete post mutation
   const deletePostMutation = useMutation({
     mutationFn: async (id: string) => {
+      // Verify authentication first
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
+        throw new Error("User must be logged in to delete a post");
+      }
+      
       const { error } = await supabase
         .from('blog_posts')
         .delete()
@@ -138,6 +169,12 @@ export const useBlogManagement = () => {
 
   // Handler for opening the dialog for a new post
   const handleNewPost = () => {
+    // Check authentication before allowing new post creation
+    if (!isAuthenticated) {
+      toast.error("Você precisa estar logado para criar um post");
+      return;
+    }
+    
     setCurrentPost(null);
     setIsEditing(false);
     setCurrentImage("");
@@ -146,6 +183,11 @@ export const useBlogManagement = () => {
 
   // Handler for deleting a post
   const handleDelete = (id: string) => {
+    if (!isAuthenticated) {
+      toast.error("Você precisa estar logado para excluir um post");
+      return;
+    }
+    
     if (confirm("Tem certeza que deseja excluir este artigo?")) {
       deletePostMutation.mutate(id);
     }
@@ -170,6 +212,7 @@ export const useBlogManagement = () => {
     handleEdit,
     handleNewPost,
     handleDelete,
-    resetAndCloseDialog
+    resetAndCloseDialog,
+    isAuthenticated
   };
 };

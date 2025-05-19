@@ -6,92 +6,34 @@ import { Clock, User, Search, Tag } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
-// Mock blog posts data
-const posts = [
-  {
-    id: 1,
-    title: "Como Tirar Fotos Profissionais com Celular",
-    slug: "fotos-profissionais-com-celular",
-    image: "https://images.unsplash.com/photo-1598033129183-c4f50c736f10?ixlib=rb-4.0.3",
-    excerpt: "Dicas práticas para usar o celular como uma câmera de alta performance.",
-    author: "Ana Mendes",
-    date: "12 Jun 2023",
-    readTime: "5 min",
-    categories: ["Dicas", "Mobile"],
-  },
-  {
-    id: 2,
-    title: "Os 5 Erros Mais Comuns de Iniciantes na Fotografia",
-    slug: "erros-iniciantes-fotografia",
-    image: "https://images.unsplash.com/photo-1542038784456-1ea8e935640e?ixlib=rb-4.0.3",
-    excerpt: "Evite estes erros e acelere seu aprendizado na fotografia.",
-    author: "Carlos Silva",
-    date: "5 Jun 2023",
-    readTime: "4 min",
-    categories: ["Dicas", "Iniciantes"],
-  },
-  {
-    id: 3,
-    title: "Fotografia Noturna: Técnicas e Equipamentos",
-    slug: "fotografia-noturna-tecnicas",
-    image: "https://images.unsplash.com/photo-1542332213-9b5a5a3fad35?ixlib=rb-4.0.3",
-    excerpt: "Aprenda como fotografar com pouca luz de forma nítida e criativa.",
-    author: "Fernanda Costa",
-    date: "28 Mai 2023",
-    readTime: "7 min",
-    categories: ["Técnicas", "Equipamentos"],
-  },
-  {
-    id: 4,
-    title: "Qual a Melhor Câmera para Começar?",
-    slug: "melhor-camera-para-iniciantes",
-    image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?ixlib=rb-4.0.3",
-    excerpt: "Comparativo de custo-benefício entre modelos de entrada.",
-    author: "Paulo Mendonça",
-    date: "15 Mai 2023",
-    readTime: "6 min",
-    categories: ["Equipamentos", "Iniciantes"],
-  },
-  {
-    id: 5,
-    title: "Domine a Regra dos Terços",
-    slug: "regra-dos-tercos-fotografia",
-    image: "https://images.unsplash.com/photo-1552168324-d612d77725e3?ixlib=rb-4.0.3",
-    excerpt: "Uma das bases da composição fotográfica explicada passo a passo.",
-    author: "Mariana Alves",
-    date: "2 Mai 2023",
-    readTime: "4 min",
-    categories: ["Composição", "Técnicas"],
-  },
-  {
-    id: 6,
-    title: "Como Montar Seu Portfólio de Fotografia",
-    slug: "portfolio-de-fotografia",
-    image: "https://images.unsplash.com/photo-1507842217343-583bb7270b66?ixlib=rb-4.0.3",
-    excerpt: "Guia completo para fotógrafos que querem se destacar no mercado.",
-    author: "Ricardo Moura",
-    date: "20 Abr 2023",
-    readTime: "8 min",
-    categories: ["Carreira", "Portfólio"],
-  },
-];
-
-// All unique categories from posts
-const allCategories = [...new Set(posts.flatMap(post => post.categories))];
+import { useBlogPosts, useAllBlogCategories } from "@/hooks/useBlogPosts";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Blog = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
+  
+  const { data: posts = [], isLoading: isLoadingPosts, error: postsError } = useBlogPosts();
+  const { data: allCategories = [], isLoading: isLoadingCategories } = useAllBlogCategories();
+  
+  // Format the date for display
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return "";
+    return new Date(dateString).toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    });
+  };
 
   const filteredPosts = posts.filter((post) => {
     // Filter by search term
     const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         post.excerpt.toLowerCase().includes(searchTerm.toLowerCase());
+                         (post.excerpt?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false);
     
     // Filter by category
     const matchesCategory = selectedCategory === "" || 
-                           post.categories.includes(selectedCategory);
+                           post.categories?.includes(selectedCategory) ?? false;
     
     return matchesSearch && matchesCategory;
   });
@@ -129,7 +71,37 @@ const Blog = () => {
               </div>
 
               {/* Blog Posts */}
-              {filteredPosts.length > 0 ? (
+              {isLoadingPosts ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {[1, 2, 3, 4].map(i => (
+                    <div key={i} className="bg-white rounded-xl overflow-hidden shadow-md">
+                      <Skeleton className="h-48 w-full" />
+                      <div className="p-6">
+                        <div className="flex gap-2 mb-3">
+                          <Skeleton className="h-6 w-16" />
+                          <Skeleton className="h-6 w-16" />
+                        </div>
+                        <Skeleton className="h-8 w-full mb-2" />
+                        <Skeleton className="h-20 w-full mb-4" />
+                        <div className="pt-4 border-t border-gray-100 flex justify-between">
+                          <Skeleton className="h-4 w-24" />
+                          <Skeleton className="h-4 w-16" />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : postsError ? (
+                <div className="text-center py-16 bg-gray-50 rounded-xl">
+                  <h3 className="text-xl font-medium mb-2">Erro ao carregar os posts</h3>
+                  <p className="text-gray-500 mb-6">
+                    Ocorreu um erro ao tentar buscar os posts do blog
+                  </p>
+                  <Button onClick={() => window.location.reload()}>
+                    Tentar novamente
+                  </Button>
+                </div>
+              ) : filteredPosts.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {filteredPosts.map((post) => (
                     <Link
@@ -139,14 +111,14 @@ const Blog = () => {
                     >
                       <div className="h-48 overflow-hidden">
                         <img
-                          src={post.image}
+                          src={post.image_url || "https://images.unsplash.com/photo-1507842217343-583bb7270b66?ixlib=rb-4.0.3"}
                           alt={post.title}
                           className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
                         />
                       </div>
                       <div className="p-6 flex flex-col flex-grow">
                         <div className="flex flex-wrap gap-2 mb-3">
-                          {post.categories.map((category, idx) => (
+                          {post.categories?.map((category, idx) => (
                             <Badge key={idx} variant="outline">
                               {category}
                             </Badge>
@@ -165,7 +137,7 @@ const Blog = () => {
                           </div>
                           <div className="flex items-center gap-1">
                             <Clock className="w-4 h-4" />
-                            <span>{post.readTime}</span>
+                            <span>{post.read_time}</span>
                           </div>
                         </div>
                       </div>
@@ -218,27 +190,35 @@ const Blog = () => {
                 <h3 className="text-lg font-bold mb-4 flex items-center">
                   <Tag className="h-5 w-5 mr-2" /> Categorias
                 </h3>
-                <div className="flex flex-wrap gap-2">
-                  <Button 
-                    variant={selectedCategory === "" ? "default" : "outline"}
-                    size="sm"
-                    className="mb-2"
-                    onClick={() => setSelectedCategory("")}
-                  >
-                    Todas
-                  </Button>
-                  {allCategories.map((category, idx) => (
-                    <Button
-                      key={idx}
-                      variant={selectedCategory === category ? "default" : "outline"}
+                {isLoadingCategories ? (
+                  <div className="space-y-2">
+                    {[1, 2, 3, 4].map(i => (
+                      <Skeleton key={i} className="h-8 w-full" />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    <Button 
+                      variant={selectedCategory === "" ? "default" : "outline"}
                       size="sm"
                       className="mb-2"
-                      onClick={() => setSelectedCategory(category)}
+                      onClick={() => setSelectedCategory("")}
                     >
-                      {category}
+                      Todas
                     </Button>
-                  ))}
-                </div>
+                    {allCategories.map((category, idx) => (
+                      <Button
+                        key={idx}
+                        variant={selectedCategory === category ? "default" : "outline"}
+                        size="sm"
+                        className="mb-2"
+                        onClick={() => setSelectedCategory(category)}
+                      >
+                        {category}
+                      </Button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Featured Post */}

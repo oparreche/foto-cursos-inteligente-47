@@ -19,6 +19,7 @@ const UserManagement = () => {
       name: "Admin Principal",
       email: "admin@escola.com",
       role: "admin",
+      status: "active", // Added status property
       createdAt: new Date("2025-01-15"),
       lastLogin: new Date("2025-05-05")
     },
@@ -27,6 +28,7 @@ const UserManagement = () => {
       name: "João Editor",
       email: "joao@escola.com",
       role: "editor",
+      status: "active", // Added status property
       createdAt: new Date("2025-02-10"),
       lastLogin: new Date("2025-05-04")
     },
@@ -35,6 +37,7 @@ const UserManagement = () => {
       name: "Maria Visualizadora",
       email: "maria@escola.com",
       role: "viewer",
+      status: "active", // Added status property
       createdAt: new Date("2025-03-21"),
       lastLogin: new Date("2025-05-01")
     }
@@ -81,6 +84,7 @@ const UserManagement = () => {
         name: values.name,
         email: values.email,
         role: values.role,
+        status: "active", // Added status property
         createdAt: new Date(),
         lastLogin: new Date()
       };

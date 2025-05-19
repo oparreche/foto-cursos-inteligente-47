@@ -1,10 +1,10 @@
-
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
 
 interface AdminAccessProps {
   authenticated: boolean;
@@ -132,14 +132,14 @@ const AdminAccess = ({ authenticated, children, isLoading = false }: AdminAccess
             Faça login para acessar as funcionalidades administrativas.
           </p>
           <Button asChild>
-            <a href="/login">Login</a>
+            <Link to="/login">Login</Link>
           </Button>
         </div>
       </div>
     );
   }
 
-  if (userRole !== 'admin' && userRole !== 'instructor') {
+  if (userRole !== 'admin' && userRole !== 'super_admin' && userRole !== 'instructor') {
     return (
       <div className="container mx-auto px-4 py-8">
         <Alert variant="destructive">
@@ -147,7 +147,7 @@ const AdminAccess = ({ authenticated, children, isLoading = false }: AdminAccess
           <AlertTitle>Permissão Negada</AlertTitle>
           <AlertDescription>
             Você não tem permissão para acessar o painel de administração.
-            É necessário ter função de administrador ou instrutor.
+            É necessário ter função de administrador, super administrador ou instrutor.
           </AlertDescription>
         </Alert>
         
@@ -159,7 +159,7 @@ const AdminAccess = ({ authenticated, children, isLoading = false }: AdminAccess
             Tornar-me Administrador
           </Button>
           <Button asChild variant="outline" className="mt-2">
-            <a href="/">Voltar para página inicial</a>
+            <Link to="/">Voltar para página inicial</Link>
           </Button>
         </div>
       </div>

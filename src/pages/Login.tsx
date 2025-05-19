@@ -1,0 +1,146 @@
+
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import MainLayout from "@/components/layout/MainLayout";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+const Login = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) throw error;
+      
+      toast.success("Login realizado com sucesso!");
+      navigate("/admin");
+    } catch (error: any) {
+      toast.error(`Erro ao fazer login: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+      
+      if (error) throw error;
+      
+      toast.success("Cadastro realizado! Por favor, verifique seu e-mail para confirmar sua conta.");
+    } catch (error: any) {
+      toast.error(`Erro ao criar conta: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <MainLayout>
+      <div className="container mx-auto flex items-center justify-center py-16">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-2xl text-center">Área Administrativa</CardTitle>
+            <CardDescription className="text-center">
+              Entre com suas credenciais para acessar o painel administrativo.
+            </CardDescription>
+          </CardHeader>
+          <Tabs defaultValue="login" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="login">Login</TabsTrigger>
+              <TabsTrigger value="register">Cadastro</TabsTrigger>
+            </TabsList>
+            <TabsContent value="login">
+              <form onSubmit={handleSignIn}>
+                <CardContent className="space-y-4 pt-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="seu@email.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Senha</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading ? "Entrando..." : "Entrar"}
+                  </Button>
+                </CardFooter>
+              </form>
+            </TabsContent>
+            <TabsContent value="register">
+              <form onSubmit={handleSignUp}>
+                <CardContent className="space-y-4 pt-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-email">Email</Label>
+                    <Input
+                      id="signup-email"
+                      type="email"
+                      placeholder="seu@email.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-password">Senha</Label>
+                    <Input
+                      id="signup-password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading ? "Cadastrando..." : "Cadastrar"}
+                  </Button>
+                </CardFooter>
+              </form>
+            </TabsContent>
+          </Tabs>
+        </Card>
+      </div>
+    </MainLayout>
+  );
+};
+
+export default Login;

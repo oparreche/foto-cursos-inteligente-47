@@ -25,9 +25,9 @@ const UserManagement = () => {
     },
     {
       id: 2,
-      name: "João Editor",
+      name: "João Instrutor",
       email: "joao@escola.com",
-      role: "editor",
+      role: "instructor",
       status: "active",
       createdAt: new Date("2025-02-10"),
       lastLogin: new Date("2025-05-04")

@@ -37,8 +37,8 @@ export type ClassForSupabase = {
   month: string;
   year: string;
   period: string;
-  start_date: Date;
-  end_date: Date;
+  start_date: string; // Alterado de Date para string conforme esperado pelo Supabase
+  end_date: string;   // Alterado de Date para string conforme esperado pelo Supabase
   days: string;
   time: string;
   location: string;
@@ -46,6 +46,38 @@ export type ClassForSupabase = {
   total_spots: number;
   price: string;
   description: string;
+};
+
+// Adicionando o tipo PaymentTransaction que está faltando
+export type PaymentTransaction = {
+  id: number;
+  amount: number;
+  currency: string;
+  status: "pending" | "processing" | "completed" | "failed" | "refunded";
+  paymentMethod: string;
+  customerName: string;
+  customerEmail: string;
+  createdAt: Date;
+  updatedAt: Date;
+  description?: string;
+};
+
+// Adicionando o tipo DashboardStats que está faltando
+export type DashboardStats = {
+  totalStudents: number;
+  activeClasses: number;
+  revenue: number;
+  completionRate: number;
+};
+
+// Adicionando o tipo User que está faltando
+export type User = {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  status: "active" | "inactive" | "pending";
+  createdAt: Date;
 };
 
 // Funções de conversão entre formatos
@@ -57,8 +89,8 @@ export const convertFormToSupabase = (values: FormValues): ClassForSupabase => {
     month: values.month,
     year: values.year,
     period: values.period,
-    start_date: values.startDate,
-    end_date: values.endDate,
+    start_date: values.startDate.toISOString().split('T')[0], // Convertendo Data para string no formato YYYY-MM-DD
+    end_date: values.endDate.toISOString().split('T')[0],     // Convertendo Data para string no formato YYYY-MM-DD
     days: values.days,
     time: values.time,
     location: values.location,

@@ -57,7 +57,7 @@ const ClassManagement = () => {
       } else {
         const { error } = await supabase
           .from('classes')
-          .insert([supabaseData]);
+          .insert([supabaseData]); // Corrigido para passar um array
         
         if (error) throw error;
         return { success: true, message: "Nova turma criada com sucesso!" };
@@ -116,6 +116,7 @@ const ClassManagement = () => {
     
     if (isEditing && currentClass) {
       // We need to find the actual UUID in Supabase
+      // Corrigido para usar async/await ou Promise.then corretamente
       supabase
         .from('classes')
         .select('id')
@@ -124,14 +125,19 @@ const ClassManagement = () => {
         .eq('year', currentClass.year)
         .eq('period', currentClass.period)
         .single()
-        .then(({ data }) => {
+        .then(({ data, error }) => {
+          if (error) {
+            toast.error(`Erro ao buscar turma: ${error.message}`);
+            return;
+          }
+          
           if (data) {
             mutation.mutate({ values, isEditing, currentId: data.id });
           } else {
             toast.error("Não foi possível encontrar a turma para edição");
           }
         })
-        .catch((error) => {
+        .catch((error: Error) => {
           toast.error(`Erro ao buscar turma: ${error.message}`);
         });
     } else {

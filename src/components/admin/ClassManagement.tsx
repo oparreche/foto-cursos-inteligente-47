@@ -4,7 +4,6 @@ import { useClassManagement } from "./hooks/useClassManagement";
 import ClassesTable from "./ClassesTable";
 import ClassSearchBar from "./classes/ClassSearchBar";
 import ClassFormDialog from "./classes/ClassFormDialog";
-import { DialogTrigger } from "@/components/ui/dialog";
 
 const ClassManagement = () => {
   const {
@@ -42,9 +41,6 @@ const ClassManagement = () => {
           onDelete={handleDelete}
         />
       )}
-
-      {/* The DialogTrigger is needed but we'll control it programmatically */}
-      <DialogTrigger className="hidden" />
       
       <ClassFormDialog
         isOpen={isDialogOpen}

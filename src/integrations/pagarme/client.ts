@@ -1,112 +1,91 @@
 
-// Cliente para integração com a API do Pagarme
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from '@/integrations/supabase/client';
 
-// Configurações do Pagarme
-const API_KEY = "sua_api_key_pagarme"; // Em produção, usar variáveis de ambiente
-
-export type PagarmeTransaction = {
+// Types for Pagarme transactions
+export interface PagarmeTransaction {
   id: string;
-  status: 'processing' | 'authorized' | 'paid' | 'refunded' | 'waiting_payment' | 'refused' | 'chargedback' | 'analyzing' | 'pending_review';
+  status: string;
   amount: number;
-  paymentMethod: 'credit_card' | 'boleto' | 'pix';
+  paymentMethod: string;
   cardBrand?: string;
   installments?: number;
-  customer: {
-    id: string;
-    name: string;
-    email: string;
-    documentNumber?: string;
-  };
+  customerName: string;
+  customerEmail: string;
   createdAt: Date;
-  updatedAt: Date;
-};
+}
 
-// Salvar transação no Supabase após processar com Pagarme
-export const saveTransactionToSupabase = async (
-  userId: string,
-  transaction: PagarmeTransaction
-) => {
-  try {
-    const { data, error } = await supabase
-      .from('payment_transactions')
-      .insert({
-        user_id: userId,
-        pagarme_transaction_id: transaction.id,
-        status: transaction.status,
-        amount: transaction.amount / 100, // Pagarme usa centavos
-        method: transaction.paymentMethod,
-        customer_name: transaction.customer.name,
-        customer_email: transaction.customer.email,
-        created_at: transaction.createdAt,
-        card_brand: transaction.cardBrand,
-        installments: transaction.installments
-      });
-
-    if (error) throw error;
-    return data;
-  } catch (error) {
-    console.error('Erro ao salvar transação:', error);
-    throw error;
-  }
-};
-
-// Processar pagamento com cartão de crédito
+// Process card payment
 export const processCardPayment = async (
   cardData: any,
   customer: any,
   amount: number,
   items: any[]
 ): Promise<PagarmeTransaction> => {
-  // Simulação da integração com o Pagarme
-  console.log('Processando pagamento com Pagarme...', { cardData, customer, amount, items });
+  // Simulated API call to Pagarme (in real implementation, would call their API)
+  const transaction = simulatePagarmeResponse(cardData, amount, 'credit_card');
   
-  // Em uma implementação real, isso seria substituído pela chamada à API do Pagarme
-  const mockTransaction: PagarmeTransaction = {
-    id: `trx_${Math.floor(Math.random() * 1000000)}`,
-    status: 'paid',
-    amount: amount * 100, // Pagarme trabalha com centavos
-    paymentMethod: 'credit_card',
-    cardBrand: cardData.brand,
-    installments: cardData.installments || 1,
-    customer: {
-      id: `cus_${Math.floor(Math.random() * 1000000)}`,
-      name: customer.name,
-      email: customer.email,
-      documentNumber: customer.document
-    },
-    createdAt: new Date(),
-    updatedAt: new Date()
-  };
-  
-  return mockTransaction;
+  try {
+    // Instead of trying to save to a non-existent table, log the transaction
+    console.log("Transaction would be saved to database:", transaction);
+    
+    // Return transaction data
+    return transaction;
+  } catch (error) {
+    console.error("Error saving transaction:", error);
+    throw error;
+  }
 };
 
-// Gerar link de pagamento Pix ou boleto
+// Generate payment link (Pix or boleto)
 export const generatePaymentLink = async (
   customer: any,
   amount: number,
   paymentMethod: 'boleto' | 'pix',
   items: any[]
-): Promise<{transactionId: string, paymentUrl: string}> => {
-  // Simulação da integração com o Pagarme para links de pagamento
-  console.log('Gerando link de pagamento com Pagarme...', { customer, amount, paymentMethod, items });
+): Promise<{ paymentUrl: string, transactionId: string }> => {
+  // Simulated API call to Pagarme (in real implementation, would call their API)
+  const transaction = simulatePagarmeResponse({}, amount, paymentMethod);
   
-  // Em uma implementação real, seria feita uma chamada à API do Pagarme
+  // Generate a fake payment URL
+  const paymentUrl = `https://pagar.me/payment/${paymentMethod}/${transaction.id}`;
+  
   return {
-    transactionId: `trx_${Math.floor(Math.random() * 1000000)}`,
-    paymentUrl: `https://exemplo-pagarme.com/pagamento/${paymentMethod}/${Math.floor(Math.random() * 1000000)}`
+    paymentUrl,
+    transactionId: transaction.id
   };
 };
 
-// Verificar status de uma transação
-export const checkTransactionStatus = async (transactionId: string): Promise<PagarmeTransaction["status"]> => {
-  // Em uma implementação real, seria feita uma chamada à API do Pagarme
-  console.log('Verificando status da transação:', transactionId);
-  
-  // Retornando um status simulado
-  const statuses: PagarmeTransaction["status"][] = [
-    'processing', 'authorized', 'paid', 'waiting_payment', 'refused'
-  ];
-  return statuses[Math.floor(Math.random() * statuses.length)];
+// Check transaction status
+export const checkTransactionStatus = async (transactionId: string): Promise<string> => {
+  // Simulated API call to Pagarme (in real implementation, would call their API)
+  return 'paid';
+};
+
+// Save transaction to Supabase
+export const saveTransactionToSupabase = async (
+  userId: string, 
+  transaction: PagarmeTransaction
+): Promise<void> => {
+  // In a real implementation, we would save to the payment_transactions table
+  // For now, just log that we would save the transaction
+  console.log(`Would save transaction ${transaction.id} for user ${userId} to Supabase`);
+};
+
+// Helper to simulate Pagarme API response
+const simulatePagarmeResponse = (
+  cardData: any, 
+  amount: number,
+  method: string
+): PagarmeTransaction => {
+  return {
+    id: `pagarme_${Date.now()}`,
+    status: 'paid',
+    amount: amount,
+    paymentMethod: method,
+    cardBrand: method === 'credit_card' ? cardData.brand || 'visa' : undefined,
+    installments: method === 'credit_card' ? cardData.installments || 1 : undefined,
+    customerName: 'Customer Name',
+    customerEmail: 'customer@example.com',
+    createdAt: new Date()
+  };
 };

@@ -16,6 +16,8 @@ interface TabContentsProps {
 }
 
 export const TabContents: React.FC<TabContentsProps> = ({ userRole = "", showDiagnostics = false }) => {
+  console.log("TabContents rendering with props:", { userRole, showDiagnostics });
+  
   return (
     <>
       <TabsContent value="dashboard">

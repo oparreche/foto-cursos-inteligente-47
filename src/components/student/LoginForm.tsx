@@ -26,6 +26,7 @@ const LoginForm = ({ onLoginSuccess }: LoginFormProps) => {
     setIsLoading(true);
     
     try {
+      console.log("Attempting login with:", loginForm.email);
       const { error } = await supabase.auth.signInWithPassword({
         email: loginForm.email,
         password: loginForm.password,
@@ -33,9 +34,11 @@ const LoginForm = ({ onLoginSuccess }: LoginFormProps) => {
       
       if (error) throw error;
       
+      console.log("Login successful");
       toast.success("Login realizado com sucesso!");
       onLoginSuccess();
     } catch (error: any) {
+      console.error("Login error:", error);
       toast.error(`Erro ao fazer login: ${error.message}`);
     } finally {
       setIsLoading(false);

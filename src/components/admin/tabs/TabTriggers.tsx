@@ -16,6 +16,8 @@ interface TabTriggersProps {
 }
 
 export const TabTriggers = ({ userRole }: TabTriggersProps) => {
+  console.log("TabTriggers rendering with userRole:", userRole);
+  
   return (
     <TabsList className="mb-4">
       <TabsTrigger value="dashboard" className="flex items-center gap-2">

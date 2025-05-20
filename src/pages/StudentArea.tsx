@@ -13,9 +13,16 @@ const StudentArea = () => {
   
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setIsLoggedIn(!!session);
-      setIsLoading(false);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log("Student area auth check:", !!session);
+        setIsLoggedIn(!!session);
+      } catch (error) {
+        console.error("Error checking authentication:", error);
+        toast.error("Erro ao verificar autenticação");
+      } finally {
+        setIsLoading(false);
+      }
     };
     
     checkAuth();

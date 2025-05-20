@@ -21,12 +21,20 @@ const StudentDashboard = ({ onLogout }: StudentDashboardProps) => {
   
   // Load user preferences when component mounts
   useEffect(() => {
-    const userPrefs = preferencesService.getPreferences();
-    setActiveTab(userPrefs.defaultTab);
+    try {
+      console.log("Loading user preferences");
+      const userPrefs = preferencesService.getPreferences();
+      setActiveTab(userPrefs.defaultTab || 'courses');
+    } catch (error) {
+      console.error("Error loading preferences:", error);
+      // Fallback to default tab if there's an error
+      setActiveTab('courses');
+    }
   }, []);
   
   // Handle tab change and save preference
   const handleTabChange = (value: string) => {
+    console.log("Tab changed to:", value);
     setActiveTab(value);
     preferencesService.saveDefaultTab(value);
   };

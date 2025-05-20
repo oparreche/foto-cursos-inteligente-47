@@ -60,7 +60,8 @@ export const TabContents: React.FC<TabContentsProps> = ({ userRole = "", showDia
 
       <TabsContent value="blog">
         <TabContentWrapper label="Gerenciamento do Blog">
-          <BlogManagement showDiagnostics={showDiagnostics} />
+          {/* Don't pass showDiagnostics prop as BlogManagement doesn't accept it */}
+          <BlogManagement />
         </TabContentWrapper>
       </TabsContent>
 

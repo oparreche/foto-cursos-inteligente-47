@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, ErrorInfo } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 
@@ -20,24 +20,42 @@ const TabContentWrapper: React.FC<TabContentWrapperProps> = ({ children, label }
     };
   }, [label]);
   
-  // Utilizando ErrorBoundary em forma de try/catch para conteúdo
+  // Enhanced error handling with better error information
   const renderSafeContent = () => {
     try {
       return children;
     } catch (error) {
       console.error(`Erro ao renderizar conteúdo da aba ${label}:`, error);
+      let message = "Erro desconhecido";
+      
+      if (error instanceof Error) {
+        message = error.message;
+        console.error("Stack trace:", error.stack);
+      } else {
+        message = String(error);
+      }
+      
       setHasError(true);
-      setErrorMessage(error instanceof Error ? error.message : String(error));
+      setErrorMessage(message);
       return null;
     }
   };
   
   if (hasError) {
     return (
-      <Alert variant="destructive">
+      <Alert variant="destructive" className="m-4">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          Erro ao carregar conteúdo da aba {label}: {errorMessage}
+          <div className="space-y-2">
+            <p><strong>Erro ao carregar conteúdo da aba {label}:</strong></p>
+            <p className="text-sm break-words">{errorMessage}</p>
+            <button 
+              className="bg-destructive/20 hover:bg-destructive/30 text-destructive px-2 py-1 text-xs rounded"
+              onClick={() => window.location.reload()}
+            >
+              Recarregar página
+            </button>
+          </div>
         </AlertDescription>
       </Alert>
     );

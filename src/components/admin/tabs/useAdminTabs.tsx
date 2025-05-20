@@ -21,6 +21,23 @@ export const useAdminTabs = () => {
       if (hashValue && allowedTabs.includes(hashValue)) {
         console.log(`Tab ${hashValue} selecionada por hash`);
         setActiveTab(hashValue);
+        
+        // Force check for the tab content if that's the current hash
+        setTimeout(() => {
+          const tabContent = document.querySelector(`[data-value="${hashValue}"]`);
+          console.log(`${hashValue} TabContent presente após delay:`, !!tabContent);
+          
+          const tabTrigger = document.querySelector(`[data-state="active"]`);
+          console.log("Tab trigger ativo após delay:", tabTrigger?.getAttribute('value'));
+          
+          if (!tabContent && tabTrigger) {
+            console.log("Forçando clique na tab:", hashValue);
+            const targetTrigger = document.querySelector(`[value="${hashValue}"]`);
+            if (targetTrigger instanceof HTMLElement) {
+              targetTrigger.click();
+            }
+          }
+        }, 500);
       } else {
         console.log("Definindo dashboard como tab padrão");
         // Se não tiver hash ou se o hash for inválido, use "dashboard"

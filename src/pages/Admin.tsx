@@ -73,21 +73,6 @@ const Admin = () => {
       
       setHasRendered(true);
       
-      // Simular navegação por hash - FORÇA ABERTURA DA TAB AI
-      if (!window.location.hash) {
-        window.location.hash = "ai";
-        console.log("Definindo hash para 'ai' - forçando abertura da aba de IA");
-      }
-      
-      // Verificar se precisamos forçar clique na tab AI
-      setTimeout(() => {
-        const aiTab = document.querySelector('[data-value="ai"]');
-        if (aiTab instanceof HTMLElement && window.location.hash === "#ai") {
-          console.log("Forçando abertura da aba AI por hash");
-          aiTab.click();
-        }
-      }, 500);
-      
       return () => {
         window.removeEventListener('keydown', handleKeyDown);
         window.removeEventListener('unhandledrejection', handleUnhandledRejection);

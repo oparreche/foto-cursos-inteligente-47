@@ -1,6 +1,6 @@
 
 import React from "react";
-import DiagnosticDisplay from "@/components/admin/DiagnosticDisplay";
+import DiagnosticDisplay from "@/components/admin/diagnostics";
 import MainLayout from "@/components/layout/MainLayout";
 import { AlertCircle } from "lucide-react";
 

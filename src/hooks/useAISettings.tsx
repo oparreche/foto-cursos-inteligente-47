@@ -5,26 +5,11 @@ import { AIConfig } from "@/components/admin/ai/types";
 import { getAIConfig, updateAIConfig } from "@/components/admin/ai/configService";
 import { toast } from "sonner";
 
-export const useAISettings = () => {
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const queryClient = useQueryClient();
-  const [saveError, setSaveError] = useState<string | null>(null);
-  const [attemptCount, setAttemptCount] = useState(0);
-
-  console.log("useAISettings hook inicializado");
+// Hook for fetching AI configuration
+const useFetchAIConfig = () => {
+  console.log("useFetchAIConfig initialized");
   
-  useEffect(() => {
-    // Reset error state when component mounts or is refreshed
-    setSaveError(null);
-  }, []);
-  
-  // Fetch AI settings with improved error handling
-  const { 
-    data: aiConfig,
-    isLoading,
-    error,
-    refetch
-  } = useQuery({
+  return useQuery({
     queryKey: ['aiConfig'],
     queryFn: async () => {
       console.log("Buscando configurações de IA...");
@@ -41,16 +26,17 @@ export const useAISettings = () => {
     retry: 1,
     staleTime: 1000 * 60 * 5 // 5 minutos
   });
+};
+
+// Hook for updating AI configuration
+const useUpdateAIConfig = (
+  setIsEditDialogOpen: (value: boolean) => void,
+  setSaveError: (error: string | null) => void,
+  setAttemptCount: (callback: (prev: number) => number) => void
+) => {
+  const queryClient = useQueryClient();
   
-  console.log("Estado atual do hook useAISettings:", { 
-    temConfiguracao: !!aiConfig, 
-    isLoading, 
-    temErro: !!error,
-    temErroSalvamento: !!saveError
-  });
-  
-  // Update AI settings with mutation
-  const updateConfigMutation = useMutation({
+  return useMutation({
     mutationFn: async (config: AIConfig) => {
       console.log("Iniciando mutação para salvar config:", config);
       setSaveError(null);
@@ -68,7 +54,6 @@ export const useAISettings = () => {
     onMutate: () => {
       console.log("Mutação iniciada");
       setSaveError(null);
-      // Não fechar o diálogo até que a operação seja concluída
     },
     onSuccess: () => {
       console.log("Mutação bem-sucedida");
@@ -88,8 +73,44 @@ export const useAISettings = () => {
       toast.error(`Erro ao atualizar configurações: ${errorMessage}`);
     }
   });
+};
+
+// Main hook that combines all the pieces
+export const useAISettings = () => {
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [attemptCount, setAttemptCount] = useState(0);
+
+  console.log("useAISettings hook inicializado");
   
-  // Update AI settings
+  // Reset error state when component mounts or is refreshed
+  useEffect(() => {
+    setSaveError(null);
+  }, []);
+  
+  // Use the extracted hooks
+  const { 
+    data: aiConfig,
+    isLoading,
+    error,
+    refetch
+  } = useFetchAIConfig();
+  
+  // Create update mutation with necessary dependencies
+  const updateConfigMutation = useUpdateAIConfig(
+    setIsEditDialogOpen,
+    setSaveError,
+    setAttemptCount
+  );
+  
+  console.log("Estado atual do hook useAISettings:", { 
+    temConfiguracao: !!aiConfig, 
+    isLoading, 
+    temErro: !!error,
+    temErroSalvamento: !!saveError
+  });
+  
+  // Handle save config logic
   const handleSaveConfig = useCallback((config: AIConfig) => {
     console.log("Salvando configuração:", {
       provider: config.provider,

@@ -1,29 +1,65 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 
-export function useUserAuth() {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+export const useUserAuth = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-
-  // Verificar o status de autenticação
+  const [currentUserRole, setCurrentUserRole] = useState<string>('viewer');
+  const [isLoading, setIsLoading] = useState(true);
+  
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setIsAuthenticated(!!session?.user);
-      if (session?.user) {
-        setCurrentUserId(session.user.id);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session?.user) {
+          setIsAuthenticated(true);
+          setCurrentUserId(session.user.id);
+          
+          // Fetch user role
+          const { data: roleData, error: roleError } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', session.user.id)
+            .single();
+            
+          if (!roleError && roleData) {
+            setCurrentUserRole(roleData.role);
+          }
+        } else {
+          setIsAuthenticated(false);
+          setCurrentUserId(null);
+          setCurrentUserRole('viewer');
+        }
+      } catch (error) {
+        console.error('Error checking auth:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
     
     checkAuth();
     
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       setIsAuthenticated(!!session?.user);
+      setCurrentUserId(session?.user?.id || null);
+      
       if (session?.user) {
-        setCurrentUserId(session.user.id);
+        // Fetch user role
+        const { data: roleData, error: roleError } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', session.user.id)
+          .single();
+          
+        if (!roleError && roleData) {
+          setCurrentUserRole(roleData.role);
+        } else {
+          setCurrentUserRole('viewer');
+        }
       } else {
-        setCurrentUserId(null);
+        setCurrentUserRole('viewer');
       }
     });
     
@@ -31,6 +67,6 @@ export function useUserAuth() {
       subscription.unsubscribe();
     };
   }, []);
-
-  return { isAuthenticated, currentUserId };
-}
+  
+  return { isAuthenticated, currentUserId, currentUserRole, isLoading };
+};

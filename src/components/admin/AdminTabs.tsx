@@ -8,12 +8,13 @@ import BlogManagement from "@/components/admin/BlogManagement";
 import UserManagement from "@/components/admin/UserManagement";
 import PaymentGateway from "@/components/admin/PaymentGateway";
 import Dashboard from "@/components/admin/Dashboard";
-import { Layers, BookOpen, FileText, LayoutDashboard, Users, CreditCard } from "lucide-react";
+import AIManagement from "@/components/admin/AIManagement";
+import { Layers, BookOpen, FileText, LayoutDashboard, Users, CreditCard, BrainCircuit } from "lucide-react";
 
 const AdminTabs = () => {
   return (
     <Tabs defaultValue="dashboard">
-      <TabsList className="grid grid-cols-6 mb-8">
+      <TabsList className="grid grid-cols-7 mb-8">
         <TabsTrigger value="dashboard" className="flex items-center gap-2">
           <LayoutDashboard className="h-4 w-4" />
           <span>Dashboard</span>
@@ -37,6 +38,10 @@ const AdminTabs = () => {
         <TabsTrigger value="payments" className="flex items-center gap-2">
           <CreditCard className="h-4 w-4" />
           <span>Pagamentos</span>
+        </TabsTrigger>
+        <TabsTrigger value="ai" className="flex items-center gap-2">
+          <BrainCircuit className="h-4 w-4" />
+          <span>IA</span>
         </TabsTrigger>
       </TabsList>
       
@@ -66,6 +71,10 @@ const AdminTabs = () => {
             <CardTitle>Gateway de Pagamento</CardTitle>
             <CardDescription>Configure e monitore as transações de pagamento.</CardDescription>
           </TabsContent>
+          <TabsContent value="ai">
+            <CardTitle>Inteligência Artificial</CardTitle>
+            <CardDescription>Geração de conteúdo e análises usando IA.</CardDescription>
+          </TabsContent>
         </CardHeader>
         
         <CardContent>
@@ -86,6 +95,9 @@ const AdminTabs = () => {
           </TabsContent>
           <TabsContent value="payments" className="mt-0">
             <PaymentGateway />
+          </TabsContent>
+          <TabsContent value="ai" className="mt-0">
+            <AIManagement />
           </TabsContent>
         </CardContent>
       </Card>

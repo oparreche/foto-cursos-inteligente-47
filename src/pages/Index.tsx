@@ -3,10 +3,10 @@ import { lazy, Suspense } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import HeroSection from "@/components/home/HeroSection";
 import BenefitsSection from "@/components/home/BenefitsSection";
+import GallerySection from "@/components/home/GallerySection"; // Direct import instead of lazy loading
 import { Skeleton } from "@/components/ui/skeleton";
 
 // Lazy load components that aren't immediately visible
-const GallerySection = lazy(() => import("@/components/home/GallerySection"));
 const TestimonialsSection = lazy(() => import("@/components/home/TestimonialsSection"));
 const CoursesSection = lazy(() => import("@/components/home/CoursesSection"));
 const BlogPreviewSection = lazy(() => import("@/components/home/BlogPreviewSection"));
@@ -26,8 +26,8 @@ const Index = () => {
     <MainLayout>
       <HeroSection />
       <BenefitsSection />
+      <GallerySection /> {/* Directly include without Suspense */}
       <Suspense fallback={<LoadingFallback />}>
-        <GallerySection />
         <TestimonialsSection />
         <CoursesSection />
         <BlogPreviewSection />

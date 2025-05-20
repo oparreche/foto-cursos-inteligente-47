@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AdminTabs from "@/components/admin/AdminTabs";
 import PermissionsSheet from "@/components/admin/PermissionsSheet";
 import DiagnosticDisplay from "@/components/admin/DiagnosticDisplay";
@@ -20,13 +20,21 @@ const AdminContent: React.FC<AdminContentProps> = ({ userRole, showDiagnostics }
     adminTabsLoaded: false,
   });
 
-  // Simple fallback before AdminTabs is rendered
-  const renderAdminTabs = () => {
+  // Use useEffect to modify the state safely and avoid render loops
+  useEffect(() => {
     try {
       setRenderState(prev => ({...prev, adminTabsStarted: true}));
-      const tabs = <AdminTabs />;
+      // After the tabs are started, mark them as loaded
       setRenderState(prev => ({...prev, adminTabsLoaded: true}));
-      return tabs;
+    } catch (error) {
+      console.error("Erro ao inicializar estado de AdminTabs:", error);
+    }
+  }, []);
+
+  // Moved the tabs rendering out of the function to avoid re-renders
+  const renderAdminTabs = () => {
+    try {
+      return <AdminTabs />;
     } catch (error) {
       console.error("Erro ao renderizar AdminTabs:", error);
       return (
@@ -50,9 +58,10 @@ const AdminContent: React.FC<AdminContentProps> = ({ userRole, showDiagnostics }
       {/* Show the current rendering state */}
       <RenderStateTracker renderState={renderState} />
       
-      {/* Wrap AdminTabs with try-catch to avoid blank screen */}
+      {/* Render AdminTabs */}
       {renderAdminTabs()}
       
+      {/* Conditional rendering of PermissionsSheet */}
       {(userRole === 'admin' || userRole === 'super_admin') && 
         <PermissionsSheet userRole={userRole} />}
     </>

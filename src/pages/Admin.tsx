@@ -20,6 +20,7 @@ const Admin = () => {
 
   useEffect(() => {
     console.log("Admin page rendered at", new Date().toISOString());
+    console.log("Auth state:", { authenticated, userRole, isLoading, error });
     
     // Make the diagnostic panel toggleable with a keyboard shortcut
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -33,7 +34,7 @@ const Admin = () => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, [authenticated, userRole, isLoading, error]);
 
   // Add a simple error boundary
   if (error) {

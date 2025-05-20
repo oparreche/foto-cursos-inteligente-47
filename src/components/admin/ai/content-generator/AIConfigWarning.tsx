@@ -17,7 +17,8 @@ const AIConfigWarning = memo(({ isConfigured }: AIConfigWarningProps) => {
     return null;
   }
   
-  const handleGoToSettings = () => {
+  // Use useCallback to prevent recreating this function on each render
+  const handleGoToSettings = useCallback(() => {
     console.log("Tentando encontrar e rolar até a seção de configurações");
     
     // Find and select the AI tab first if not already selected
@@ -44,7 +45,7 @@ const AIConfigWarning = memo(({ isConfigured }: AIConfigWarningProps) => {
       console.log("Tab de IA não encontrada, rolando para o topo");
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  };
+  }, []);
   
   return (
     <Alert variant="destructive">

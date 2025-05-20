@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import ClassManagement from "@/components/admin/ClassManagement";
@@ -41,10 +41,11 @@ const AdminTabs = () => {
     }
   }, []);
 
-  const handleTabChange = (value) => {
+  // Use useCallback to prevent unnecessary re-renders
+  const handleTabChange = useCallback((value) => {
     console.log("Tab changed to:", value);
     setActiveTab(value);
-  };
+  }, []);
 
   return (
     <>

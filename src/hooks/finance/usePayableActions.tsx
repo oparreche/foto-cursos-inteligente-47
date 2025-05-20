@@ -16,9 +16,17 @@ export const usePayableActions = () => {
         ? { ...values } 
         : { ...values, payment_date: null };
       
+      // Ensure amount is a number
+      const parsedValues = {
+        ...dataToInsert,
+        amount: typeof dataToInsert.amount === 'string' 
+          ? parseFloat(dataToInsert.amount) 
+          : dataToInsert.amount
+      };
+      
       const { data, error } = await supabase
         .from('payables')
-        .insert([dataToInsert])
+        .insert(parsedValues)
         .select()
         .single();
       
@@ -37,9 +45,17 @@ export const usePayableActions = () => {
   // Update payable
   const updatePayable = useMutation({
     mutationFn: async ({ id, values }: { id: string, values: Partial<Payable> }) => {
+      // Ensure amount is a number if it's present in the values
+      const parsedValues = values.amount !== undefined ? {
+        ...values,
+        amount: typeof values.amount === 'string' 
+          ? parseFloat(values.amount) 
+          : values.amount
+      } : values;
+      
       const { data, error } = await supabase
         .from('payables')
-        .update(values)
+        .update(parsedValues)
         .eq('id', id)
         .select()
         .single();
@@ -84,14 +100,14 @@ export const usePayableActions = () => {
       if (payable) {
         const { error: transactionError } = await supabase
           .from('transactions')
-          .insert([{
+          .insert({
             description: `Pagamento: ${payable.description}`,
             type: 'expense',
             amount: payable.amount,
             transaction_date: formattedDate,
             reference_id: id,
             reference_type: 'payable'
-          }]);
+          });
         
         if (transactionError) throw new Error(transactionError.message);
       }

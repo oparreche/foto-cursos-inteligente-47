@@ -16,9 +16,17 @@ export const useReceivableActions = () => {
         ? { ...values } 
         : { ...values, payment_date: null };
       
+      // Ensure amount is a number
+      const parsedValues = {
+        ...dataToInsert,
+        amount: typeof dataToInsert.amount === 'string' 
+          ? parseFloat(dataToInsert.amount) 
+          : dataToInsert.amount
+      };
+      
       const { data, error } = await supabase
         .from('receivables')
-        .insert([dataToInsert])
+        .insert(parsedValues)
         .select()
         .single();
       
@@ -37,9 +45,17 @@ export const useReceivableActions = () => {
   // Update receivable
   const updateReceivable = useMutation({
     mutationFn: async ({ id, values }: { id: string, values: Partial<Receivable> }) => {
+      // Ensure amount is a number if it's present in the values
+      const parsedValues = values.amount !== undefined ? {
+        ...values,
+        amount: typeof values.amount === 'string' 
+          ? parseFloat(values.amount) 
+          : values.amount
+      } : values;
+      
       const { data, error } = await supabase
         .from('receivables')
-        .update(values)
+        .update(parsedValues)
         .eq('id', id)
         .select()
         .single();
@@ -84,14 +100,14 @@ export const useReceivableActions = () => {
       if (receivable) {
         const { error: transactionError } = await supabase
           .from('transactions')
-          .insert([{
+          .insert({
             description: `Recebimento: ${receivable.description}`,
             type: 'income',
             amount: receivable.amount,
             transaction_date: formattedDate,
             reference_id: id,
             reference_type: 'receivable'
-          }]);
+          });
         
         if (transactionError) throw new Error(transactionError.message);
       }

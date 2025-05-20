@@ -11,9 +11,17 @@ export const useTransactionActions = () => {
   // Add transaction
   const addTransaction = useMutation({
     mutationFn: async (values: TransactionFormValues) => {
+      // Ensure amount is a number
+      const parsedValues = {
+        ...values,
+        amount: typeof values.amount === 'string' 
+          ? parseFloat(values.amount) 
+          : values.amount
+      };
+      
       const { data, error } = await supabase
         .from('transactions')
-        .insert([values])
+        .insert(parsedValues)
         .select()
         .single();
       
@@ -57,14 +65,14 @@ export const useTransactionActions = () => {
       // Create refund transaction (with opposite value)
       const { data, error } = await supabase
         .from('transactions')
-        .insert([{
+        .insert({
           description: description || `Estorno: ${transaction.description}`,
           type: 'refund',
           amount: transaction.amount,
           transaction_date: today,
           reference_id: transaction.id,
           reference_type: 'transaction'
-        }])
+        })
         .select()
         .single();
       

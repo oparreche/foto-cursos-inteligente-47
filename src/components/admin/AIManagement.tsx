@@ -1,9 +1,19 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { AIContentGenerator, AISettings } from "@/components/admin/ai";
 
 const AIManagement = () => {
+  useEffect(() => {
+    console.log("AIManagement component mounted");
+    try {
+      console.log("AISettings component imported:", typeof AISettings);
+      console.log("AIContentGenerator component imported:", typeof AIContentGenerator);
+    } catch (error) {
+      console.error("Error in AIManagement:", error);
+    }
+  }, []);
+
   return (
     <div className="space-y-8">
       <section>

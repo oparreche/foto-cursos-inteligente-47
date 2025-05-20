@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ContentPrompt, AIResponse } from "@/components/admin/ai/types";
@@ -9,6 +9,8 @@ import { getAIConfig } from "@/components/admin/ai/configService";
 import PromptForm from "./PromptForm";
 import ContentDisplay from "./ContentDisplay";
 import AIConfigWarning from "./AIConfigWarning";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 interface AIContentGeneratorProps {
   onSelectContent?: (content: string) => void;
@@ -26,12 +28,23 @@ const AIContentGenerator = ({ onSelectContent }: AIContentGeneratorProps) => {
     length: 'medium'
   });
 
-  // Fetch AI configuration to check if it's configured
-  const { data: aiConfig } = useQuery({
+  // Enhanced fetch AI configuration with proper error handling
+  const { 
+    data: aiConfig, 
+    isLoading, 
+    isError,
+    error 
+  } = useQuery({
     queryKey: ['aiConfig'],
     queryFn: getAIConfig
   });
+  
+  // Add debugging logs to track the AI config
+  useEffect(() => {
+    console.log("AIContentGenerator - Configuração de IA:", aiConfig);
+  }, [aiConfig]);
 
+  // Safe check for configuration
   const aiConfigured = !!aiConfig?.apiKey;
 
   const handleGenerateContent = async () => {
@@ -55,6 +68,33 @@ const AIContentGenerator = ({ onSelectContent }: AIContentGeneratorProps) => {
     }
   };
 
+  // Show loading state
+  if (isLoading) {
+    return (
+      <Card data-testid="ai-content-generator-loading">
+        <CardContent className="pt-6">
+          <p className="text-center py-8">Carregando configurações de IA...</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Show error state
+  if (isError) {
+    return (
+      <Card data-testid="ai-content-generator-error">
+        <CardContent className="pt-6">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Erro ao carregar configuração de IA: {(error as Error)?.message || 'Erro desconhecido'}
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card data-testid="ai-content-generator">
       <CardHeader>
@@ -65,6 +105,15 @@ const AIContentGenerator = ({ onSelectContent }: AIContentGeneratorProps) => {
       </CardHeader>
       <CardContent className="space-y-4">
         <AIConfigWarning isConfigured={aiConfigured} />
+        
+        {!aiConfigured && (
+          <Alert variant="warning" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              As configurações de IA não foram encontradas ou estão incompletas. Verifique sua chave de API na seção de Configurações.
+            </AlertDescription>
+          </Alert>
+        )}
         
         {aiConfigured && (
           <Tabs defaultValue="prompt" className="space-y-4">

@@ -15,6 +15,15 @@ interface TabContentsProps {
   showDiagnostics?: boolean;
 }
 
+// Create interfaces for the component props to ensure TypeScript compatibility
+interface UserManagementProps {
+  userRole?: string;
+}
+
+interface BlogManagementProps {
+  showDiagnostics?: boolean;
+}
+
 export const TabContents: React.FC<TabContentsProps> = ({ userRole = "", showDiagnostics = false }) => {
   return (
     <>
@@ -26,8 +35,8 @@ export const TabContents: React.FC<TabContentsProps> = ({ userRole = "", showDia
 
       <TabsContent value="users">
         <TabContentWrapper label="Gerenciamento de Usuários">
-          {/* We're explicitly casting userRole to any here to prevent TypeScript errors */}
-          <UserManagement userRole={userRole as any} />
+          {/* Use the defined UserManagementProps type to ensure compatibility */}
+          <UserManagement {...{ userRole } as UserManagementProps} />
         </TabContentWrapper>
       </TabsContent>
 
@@ -45,8 +54,8 @@ export const TabContents: React.FC<TabContentsProps> = ({ userRole = "", showDia
 
       <TabsContent value="blog">
         <TabContentWrapper label="Gerenciamento do Blog">
-          {/* We're explicitly casting showDiagnostics to any here to prevent TypeScript errors */}
-          <BlogManagement showDiagnostics={showDiagnostics as any} />
+          {/* Use the defined BlogManagementProps type to ensure compatibility */}
+          <BlogManagement {...{ showDiagnostics } as BlogManagementProps} />
         </TabContentWrapper>
       </TabsContent>
 

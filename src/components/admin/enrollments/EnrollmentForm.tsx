@@ -27,13 +27,13 @@ const enrollmentSchema = z.object({
   coupon_id: z.string().optional(),
   payment_amount: z.union([z.string(), z.number()])
     .transform(val => typeof val === 'string' ? parseFloat(val) : val)
-    .refine(val => val >= 0, 'O valor deve ser maior ou igual a zero'),
+    .refine(val => parseFloat(String(val)) >= 0, 'O valor deve ser maior ou igual a zero'),
   original_amount: z.union([z.string(), z.number()])
     .transform(val => typeof val === 'string' ? parseFloat(val) : val)
-    .refine(val => val > 0, 'O valor deve ser maior que zero'),
+    .refine(val => parseFloat(String(val)) > 0, 'O valor deve ser maior que zero'),
   discount_amount: z.union([z.string(), z.number()]).optional()
     .transform(val => typeof val === 'string' && val ? parseFloat(val) : val)
-    .refine(val => val === undefined || val === null || val >= 0, 'O valor do desconto deve ser maior ou igual a zero'),
+    .refine(val => val === undefined || val === null || parseFloat(String(val)) >= 0, 'O valor do desconto deve ser maior ou igual a zero'),
   notes: z.string().optional(),
 });
 

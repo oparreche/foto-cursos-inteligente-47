@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { DiscountCoupon } from '@/types/enrollment';
 import { 
@@ -164,16 +163,16 @@ const CouponsTable: React.FC<CouponsTableProps> = ({ coupons, isLoading }) => {
                   </TableCell>
                   <TableCell>
                     {coupon.is_active ? (
-                      <Badge variant="success" className="flex items-center gap-1">
-                        <Check size={12} />
-                        Ativo
-                      </Badge>
-                    ) : (
-                      <Badge variant="destructive" className="flex items-center gap-1">
-                        <X size={12} />
-                        Inativo
-                      </Badge>
-                    )}
+                    <Badge variant="outline" className="text-green-600 bg-green-100 flex items-center gap-1">
+                      <Check size={12} />
+                      Ativo
+                    </Badge>
+                  ) : (
+                    <Badge variant="destructive" className="flex items-center gap-1">
+                      <X size={12} />
+                      Inativo
+                    </Badge>
+                  )}
                   </TableCell>
                   <TableCell>
                     {coupon.current_uses} {coupon.max_uses ? `/ ${coupon.max_uses}` : ''}

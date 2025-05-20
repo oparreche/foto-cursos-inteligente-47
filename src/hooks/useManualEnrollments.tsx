@@ -24,10 +24,10 @@ export const useManualEnrollments = () => {
       // Formatar os dados para a interface EnrollmentWithDetails
       const formattedData = data.map((item: any) => ({
         ...item,
-        student_name: item.student?.email,
-        class_name: item.class ? `${item.class.course_name} - ${item.class.period} (${item.class.days})` : '',
-        course_name: item.class?.course_name,
-        coupon_code: item.coupon?.code
+        student_name: item.student?.email || 'Usuário não encontrado',
+        class_name: item.class ? `${item.class.course_name} - ${item.class.period} (${item.class.days})` : 'Turma não encontrada',
+        course_name: item.class?.course_name || 'Curso não encontrado',
+        coupon_code: item.coupon?.code || ''
       }));
       
       return formattedData as EnrollmentWithDetails[];
@@ -74,9 +74,14 @@ export const useManualEnrollmentActions = () => {
   // Adicionar matrícula
   const addEnrollment = useMutation({
     mutationFn: async (values: ManualEnrollmentFormValues) => {
+      // Obter o ID do usuário autenticado para usar como created_by
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) throw new Error('Usuário não autenticado');
+      
       // Garantir que valores numéricos sejam convertidos
       const parsedValues = {
         ...values,
+        created_by: user.id, // Adicionar o ID do usuário como created_by
         payment_amount: typeof values.payment_amount === 'string' 
           ? parseFloat(values.payment_amount) 
           : values.payment_amount,
@@ -90,7 +95,17 @@ export const useManualEnrollmentActions = () => {
 
       const { data, error } = await supabase
         .from('manual_enrollments')
-        .insert(parsedValues)
+        .insert({
+          student_id: parsedValues.student_id,
+          class_id: parsedValues.class_id,
+          payment_status: parsedValues.payment_status,
+          coupon_id: parsedValues.coupon_id || null,
+          payment_amount: parsedValues.payment_amount,
+          original_amount: parsedValues.original_amount,
+          discount_amount: parsedValues.discount_amount || 0,
+          notes: parsedValues.notes,
+          created_by: parsedValues.created_by
+        })
         .select()
         .single();
 

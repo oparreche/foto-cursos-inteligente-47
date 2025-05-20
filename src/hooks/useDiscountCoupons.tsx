@@ -43,7 +43,18 @@ export const useDiscountCouponActions = () => {
 
       const { data, error } = await supabase
         .from('discount_coupons')
-        .insert(parsedValues)
+        .insert({
+          code: parsedValues.code,
+          description: parsedValues.description,
+          discount_type: parsedValues.discount_type,
+          discount_value: parsedValues.discount_value,
+          max_uses: parsedValues.max_uses,
+          valid_from: parsedValues.valid_from,
+          valid_until: parsedValues.valid_until || null,
+          is_active: parsedValues.is_active ?? true,
+          course_id: parsedValues.course_id || null,
+          minimum_purchase: parsedValues.minimum_purchase || 0
+        })
         .select()
         .single();
 

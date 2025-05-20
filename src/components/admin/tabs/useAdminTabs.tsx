@@ -22,8 +22,8 @@ export const useAdminTabs = () => {
       console.log("Rota atual:", window.location.pathname);
       console.log("Hash atual:", window.location.hash);
       
-      // Verificar se AIManagement está disponível
-      console.log("AIManagement está disponível para importação:", typeof AIManagement !== 'undefined');
+      // Verificação removida para evitar referência a AIManagement
+      console.log("Verificando componentes disponíveis");
     } catch (error) {
       console.error("Erro no AdminTabs useEffect:", error);
       setHasError(true);

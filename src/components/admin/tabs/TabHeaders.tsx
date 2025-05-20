@@ -1,7 +1,7 @@
 
 import React from "react";
-import { TabsContent, CardTitle, CardDescription } from "@/components/ui/tabs";
-import { CardHeader } from "@/components/ui/card";
+import { TabsContent } from "@/components/ui/tabs";
+import { CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 const TabHeaders: React.FC = () => {
   return (

@@ -29,7 +29,7 @@ export const useUserManagement = (initialUsers: User[] = []) => {
     handleDeleteUser,
     handleDialogClose,
     handleAddUser
-  } = useUserActions(users, setUsers, isAuthenticated);
+  } = useUserActions(users as User[], setUsers, isAuthenticated);
 
   // Return all necessary functionality
   return {

@@ -116,7 +116,7 @@ export const useUserData = (isAuthenticated: boolean = true, initialUsers: User[
     searchTerm,
     setSearchTerm,
     setUsers,
-    loading: loading,
+    loading,
     isLoading: loading,
     error,
     addUser,

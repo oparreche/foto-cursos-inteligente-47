@@ -15,7 +15,7 @@ interface TabContentsProps {
   showDiagnostics?: boolean;
 }
 
-export const TabContents = ({ userRole = "", showDiagnostics = false }: TabContentsProps) => {
+export const TabContents: React.FC<TabContentsProps> = ({ userRole = "", showDiagnostics = false }) => {
   return (
     <>
       <TabsContent value="dashboard">

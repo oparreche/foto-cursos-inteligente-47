@@ -52,7 +52,12 @@ const AIConfigWarning = ({ isConfigured }: AIConfigWarningProps) => {
       <AlertCircle className="h-4 w-4" />
       <AlertDescription className="flex flex-col gap-2">
         <div>Atenção: As configurações de IA não foram definidas. Por favor, configure as credenciais de IA para usar este recurso.</div>
-        <Button variant="outline" size="sm" onClick={handleGoToSettings} className="w-fit mt-2">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => handleGoToSettings()} 
+          className="w-fit mt-2"
+        >
           Ir para Configurações
         </Button>
       </AlertDescription>

@@ -44,7 +44,7 @@ const AIContentGenerator = ({ onSelectContent }: AIContentGeneratorProps) => {
     console.log("AIContentGenerator - Configuração de IA:", aiConfig);
   }, [aiConfig]);
 
-  // Safe check for configuration
+  // Safe check for configuration - prevent infinite loops by not calling setState here
   const aiConfigured = aiConfig?.apiKey ? true : false;
 
   const handleGenerateContent = async () => {

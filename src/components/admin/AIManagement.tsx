@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-import { AIContentGenerator } from "@/components/admin/ai/AIContentGenerator";
-import { AISettings } from "@/components/admin/ai/AISettings";
+import AIContentGenerator from "@/components/admin/ai/AIContentGenerator";
+import AISettings from "@/components/admin/ai/AISettings";
 import { useAISettings } from "@/hooks/useAISettings";
 
 const AIManagement = () => {

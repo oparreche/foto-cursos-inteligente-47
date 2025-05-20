@@ -3,7 +3,7 @@ import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { usePayableActions, useCategories } from "@/hooks/useFinance";
+import { usePayableActions, useCategories } from "@/hooks/finance";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -42,8 +42,13 @@ const PayableForm: React.FC<PayableFormProps> = ({ onSuccess }) => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       await addPayable.mutateAsync({
-        ...values,
+        description: values.description,
         amount: parseFloat(values.amount),
+        supplier: values.supplier,
+        due_date: values.due_date,
+        status: values.status,
+        category_id: values.category_id,
+        payment_date: null
       });
       
       form.reset();

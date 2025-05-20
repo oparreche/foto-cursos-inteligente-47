@@ -3,7 +3,7 @@ import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useTransactionActions } from "@/hooks/useFinance";
+import { useTransactionActions } from "@/hooks/finance";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -41,8 +41,11 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onSuccess }) => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       await addTransaction.mutateAsync({
-        ...values,
+        description: values.description,
+        type: values.type,
         amount: parseFloat(values.amount),
+        transaction_date: values.transaction_date,
+        notes: values.notes,
         reference_id: null,
         reference_type: null
       });

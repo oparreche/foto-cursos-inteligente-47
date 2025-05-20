@@ -45,7 +45,7 @@ export const useAISettings = () => {
     updateConfigMutation.mutate(config);
   }, []);
   
-  // Update AI settings
+  // Update AI settings - moved before handleSaveConfig to fix reference issue
   const updateConfigMutation = useMutation({
     mutationFn: updateAIConfig,
     onSuccess: () => {

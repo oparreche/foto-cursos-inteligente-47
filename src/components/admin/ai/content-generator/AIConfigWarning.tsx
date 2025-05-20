@@ -17,9 +17,7 @@ const AIConfigWarning = memo(({ isConfigured }: AIConfigWarningProps) => {
     return null;
   }
   
-  // Define the handler with useCallback to prevent recreation on each render
   const handleGoToSettings = () => {
-    // Scrolling to the settings section
     console.log("Tentando encontrar e rolar até a seção de configurações");
     
     // Find and select the AI tab first if not already selected

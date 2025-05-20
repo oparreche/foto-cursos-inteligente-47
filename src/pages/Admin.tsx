@@ -65,7 +65,8 @@ const Admin = () => {
       const handleKeyDown = (e: KeyboardEvent) => {
         if (e.key === 'D' && e.ctrlKey) {
           setShowDiagnostics(prev => !prev);
-          toast.info(prev => prev ? "Diagnóstico desativado" : "Diagnóstico ativado");
+          // Fix: Use a ReactNode instead of a callback function for toast.info
+          toast.info(prev ? "Diagnóstico desativado" : "Diagnóstico ativado");
         }
       };
       

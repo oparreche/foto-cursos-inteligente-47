@@ -6,6 +6,7 @@ import { AlertCircle } from "lucide-react";
 
 const DiagnosticDisplay = () => {
   const [componentCounts, setComponentCounts] = useState<Record<string, number>>({});
+  const [hasAIManagement, setHasAIManagement] = useState(false);
   
   useEffect(() => {
     // Log that this component has mounted
@@ -24,13 +25,22 @@ const DiagnosticDisplay = () => {
     setComponentCounts(counts);
     console.log("Component counts:", counts);
     
-    // Check if AdminTabs is present
-    const adminTabsPresent = document.querySelectorAll('[role="tablist"]').length > 0;
-    console.log("AdminTabs present:", adminTabsPresent);
+    // Check if AIManagement is present
+    const aiSectionPresent = document.querySelector('section h2:contains("Configurações de IA")') !== null;
+    setHasAIManagement(aiSectionPresent);
+    console.log("AIManagement section present:", aiSectionPresent);
+    
+    // Try to manually check all elements to find AI Management section
+    const allH2s = document.querySelectorAll('h2');
+    console.log("All h2 titles:", Array.from(allH2s).map(el => el.textContent));
     
     // Check window location
     console.log("Current route:", window.location.pathname);
     console.log("Current hash:", window.location.hash);
+    
+    // Check if the AI tab is present
+    const aiTab = document.querySelector('[data-value="ai"]');
+    console.log("AI tab present:", !!aiTab);
   }, []);
   
   return (
@@ -52,6 +62,10 @@ const DiagnosticDisplay = () => {
                   <li key={component}>{component}: {count}</li>
                 ))}
               </ul>
+            </div>
+            <div className="mt-2">
+              <p className="font-bold">Status do AIManagement:</p>
+              <p>{hasAIManagement ? "Componente presente" : "Componente NÃO detectado"}</p>
             </div>
           </AlertDescription>
         </Alert>

@@ -16,10 +16,20 @@ const AdminTabs = () => {
   console.log("AdminTabs renderizando");
   
   useEffect(() => {
-    // Log when AI tab is rendered
+    // Check if hash is set to AI tab
     if (window.location.hash === "#ai") {
-      console.log("Tab de IA selecionada");
+      console.log("AI tab selected by hash");
+      // Try to select AI tab programmatically
+      const aiTab = document.querySelector('[data-value="ai"]');
+      if (aiTab) {
+        console.log("AI tab element found, attempting to select it");
+        (aiTab as HTMLElement).click();
+      }
     }
+    
+    // Log current route for debugging
+    console.log("Current route:", window.location.pathname);
+    console.log("Current hash:", window.location.hash);
   }, []);
 
   return (

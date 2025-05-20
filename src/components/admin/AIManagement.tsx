@@ -2,9 +2,9 @@
 import React, { useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 
-// Import the components directly from their file paths
+// Import directly from file paths to avoid any import issues
 import AISettings from "@/components/admin/ai/settings/AISettings";
-import AIContentGenerator from "@/components/admin/ai/AIContentGenerator";
+import AIContentGenerator from "@/components/admin/ai/content-generator/AIContentGenerator";
 
 const AIManagement = () => {
   useEffect(() => {

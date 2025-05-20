@@ -34,9 +34,9 @@ export interface AIResponse {
 // Defining the structure of the AI settings table data
 interface AISettingsRecord {
   id: number;
-  provider: 'openai' | 'perplexity' | null;
-  model: AIModel | null;
-  api_key: string | null;
+  provider: string;
+  model: string;
+  api_key: string;
   last_updated: string | null;
   updated_by: string | null;
 }
@@ -46,7 +46,7 @@ export const getAIConfig = async (): Promise<AIConfig | null> => {
   try {
     // Use the database function for getting AI settings
     const { data, error } = await supabase
-      .rpc<AISettingsRecord>('get_ai_settings')
+      .rpc<AISettingsRecord, {}>('get_ai_settings')
       .single();
       
     if (error) {
@@ -59,10 +59,10 @@ export const getAIConfig = async (): Promise<AIConfig | null> => {
       return null;
     }
     
-    // Convert the returned data to our AIConfig format
+    // Convert the returned data to our AIConfig format with proper type casting
     return {
-      provider: data.provider,
-      model: data.model,
+      provider: data.provider as 'openai' | 'perplexity' | null,
+      model: data.model as AIModel | null,
       apiKey: data.api_key,
       lastUpdated: data.last_updated || undefined,
       updatedBy: data.updated_by || undefined

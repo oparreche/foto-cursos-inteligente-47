@@ -40,11 +40,6 @@ const AdminTabs = () => {
     <>
       {hasError && <ErrorAlert message={errorMessage} />}
       
-      <div className="debug-info mb-4 p-2 bg-yellow-100 rounded">
-        <p>Tab ativa: {activeTab}</p>
-        <p>Cliente inicializado: {isClient ? "Sim" : "Não"}</p>
-      </div>
-    
       <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabTriggers />
         

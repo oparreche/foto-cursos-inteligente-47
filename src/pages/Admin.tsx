@@ -9,8 +9,8 @@ import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { toast } from "sonner";
 
 const Admin = () => {
-  // Sempre habilitar diagnósticos durante desenvolvimento
-  const [showDiagnostics, setShowDiagnostics] = useState(true);
+  // Changed default to false to disable diagnostics by default
+  const [showDiagnostics, setShowDiagnostics] = useState(false);
   const [errorInfo, setErrorInfo] = useState<string | null>(null);
   const [hasRendered, setHasRendered] = useState(false);
   
@@ -109,7 +109,7 @@ const Admin = () => {
   return (
     <MainLayout>
       <div data-admin-rendered="true">
-        {showDiagnostics && <AdminErrorDisplay error="Painel de diagnóstico (modo forçado)" />}
+        {showDiagnostics && <AdminErrorDisplay error="Painel de diagnóstico (modo de depuração)" />}
         
         <AdminAccess authenticated={authenticated} isLoading={isLoading}>
           <div className="container mx-auto px-4 py-8">

@@ -3,14 +3,14 @@ import { lazy, Suspense } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import HeroSection from "@/components/home/HeroSection";
 import BenefitsSection from "@/components/home/BenefitsSection";
-import GallerySection from "@/components/home/GallerySection"; // Import directly
+import GallerySection from "@/components/home/GallerySection";
+import ContactSection from "@/components/home/ContactSection"; // Direct import instead of lazy loading
 import { Skeleton } from "@/components/ui/skeleton";
 
 // Lazy load components that aren't immediately visible
 const TestimonialsSection = lazy(() => import("@/components/home/TestimonialsSection"));
 const CoursesSection = lazy(() => import("@/components/home/CoursesSection"));
 const BlogPreviewSection = lazy(() => import("@/components/home/BlogPreviewSection"));
-const ContactSection = lazy(() => import("@/components/home/ContactSection"));
 
 // Loading fallback for lazy loaded components
 const LoadingFallback = () => (
@@ -32,8 +32,9 @@ const Index = () => {
         <TestimonialsSection />
         <CoursesSection />
         <BlogPreviewSection />
-        <ContactSection />
       </Suspense>
+      {/* Render ContactSection directly without Suspense since we're not lazy-loading it anymore */}
+      <ContactSection />
     </MainLayout>
   );
 };

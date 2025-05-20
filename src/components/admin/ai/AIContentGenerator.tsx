@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,9 +12,10 @@ import { toast } from "sonner";
 
 interface AIContentGeneratorProps {
   onSelectContent?: (content: string) => void;
+  aiConfigured?: boolean;
 }
 
-const AIContentGenerator = ({ onSelectContent }: AIContentGeneratorProps) => {
+const AIContentGenerator = ({ onSelectContent, aiConfigured }: AIContentGeneratorProps) => {
   const [contentType, setContentType] = useState<'blog' | 'course' | 'seo' | 'dashboard'>('blog');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedContent, setGeneratedContent] = useState<AIResponse | null>(null);

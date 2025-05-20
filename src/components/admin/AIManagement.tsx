@@ -22,6 +22,7 @@ const AIManagement = () => {
         <h2 className="text-xl font-semibold mb-4">Configurações de IA</h2>
         <Card>
           <CardContent className="pt-6">
+            {/* Pass correct props according to the component's definition */}
             <AISettings 
               aiConfig={aiConfig} 
               isLoading={isLoading} 
@@ -38,7 +39,8 @@ const AIManagement = () => {
         <h2 className="text-xl font-semibold mb-4">Gerador de Conteúdo</h2>
         <Card>
           <CardContent className="pt-6">
-            <AIContentGenerator aiConfigured={!!aiConfig?.apiKey} />
+            {/* Pass correct props according to the component's definition */}
+            <AIContentGenerator />
           </CardContent>
         </Card>
       </section>

@@ -39,16 +39,22 @@ export const useAISettings = () => {
     temErro: !!error 
   });
   
-  // Update AI settings with useCallback to prevent function recreation
-  const handleSaveConfig = useCallback((config: AIConfig) => {
-    console.log("Salvando configuração:", config);
-    updateConfigMutation.mutate(config);
-  }, []);
-  
-  // Update AI settings - moved before handleSaveConfig to fix reference issue
+  // Update AI settings with mutation
   const updateConfigMutation = useMutation({
-    mutationFn: updateAIConfig,
+    mutationFn: async (config: AIConfig) => {
+      console.log("Iniciando mutação para salvar config:", config);
+      const result = await updateAIConfig(config);
+      if (!result) {
+        throw new Error("Falha ao atualizar configurações");
+      }
+      return result;
+    },
+    onMutate: () => {
+      console.log("Mutação iniciada");
+      // Não fechar o diálogo até que a operação seja concluída
+    },
     onSuccess: () => {
+      console.log("Mutação bem-sucedida");
       queryClient.invalidateQueries({ queryKey: ['aiConfig'] });
       setIsEditDialogOpen(false);
       toast.success("Configurações de IA atualizadas com sucesso");
@@ -58,6 +64,12 @@ export const useAISettings = () => {
       toast.error(`Erro ao atualizar configurações: ${error?.message || 'Erro desconhecido'}`);
     }
   });
+  
+  // Update AI settings
+  const handleSaveConfig = useCallback((config: AIConfig) => {
+    console.log("Salvando configuração:", config);
+    updateConfigMutation.mutate(config);
+  }, [updateConfigMutation]);
   
   // Wrap in useCallback to prevent recreation on each render
   const setIsEditDialogOpenHandler = useCallback((value: boolean) => {

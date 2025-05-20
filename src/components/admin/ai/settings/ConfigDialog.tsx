@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { AIConfig, AIModel } from "@/components/admin/ai/types";
+import { toast } from "sonner";
 
 interface ConfigDialogProps {
   isOpen: boolean;
@@ -63,9 +64,22 @@ const ConfigDialog = ({ isOpen, onOpenChange, aiConfig, onSave, isUpdating }: Co
   };
   
   const handleSubmit = () => {
-    onSave(editConfig);
+    console.log("Enviando configuração para salvar:", editConfig);
+    
+    if (!editConfig.provider || !editConfig.model || !editConfig.apiKey) {
+      toast.error("Preencha todos os campos para salvar");
+      return;
+    }
+    
+    try {
+      onSave(editConfig);
+    } catch (error) {
+      console.error("Erro ao enviar configuração:", error);
+      toast.error("Falha ao processar o pedido de salvamento");
+    }
   };
 
+  // Resto do código permanece igual
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">

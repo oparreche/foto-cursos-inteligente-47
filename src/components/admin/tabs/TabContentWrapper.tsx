@@ -20,8 +20,19 @@ const TabContentWrapper: React.FC<TabContentWrapperProps> = ({ children, label }
     };
   }, [label]);
   
+  // Adicionamos isso para resolver problemas com o React 18 Strict Mode
+  useEffect(() => {
+    // Resetar estado de erro quando o conteúdo muda
+    setHasError(false);
+    setErrorMessage("");
+  }, [children]);
+  
   // Enhanced error handling with better error information
   const renderSafeContent = () => {
+    if (hasError) {
+      return null;
+    }
+    
     try {
       return children;
     } catch (error) {
@@ -51,7 +62,12 @@ const TabContentWrapper: React.FC<TabContentWrapperProps> = ({ children, label }
             <p className="text-sm break-words">{errorMessage}</p>
             <button 
               className="bg-destructive/20 hover:bg-destructive/30 text-destructive px-2 py-1 text-xs rounded"
-              onClick={() => window.location.reload()}
+              onClick={() => {
+                setHasError(false);
+                setErrorMessage("");
+                // Dar tempo para o estado resetar antes de atualizar a página
+                setTimeout(() => window.location.reload(), 100);
+              }}
             >
               Recarregar página
             </button>

@@ -27,7 +27,7 @@ const UserManagement = () => {
       id: 2,
       name: "João Professor",
       email: "joao@escola.com",
-      role: "instructor", // Changed from "professor" to "instructor"
+      role: "instructor",
       status: "active",
       createdAt: new Date("2025-02-10"),
       lastLogin: new Date("2025-05-04")
@@ -45,7 +45,7 @@ const UserManagement = () => {
       id: 4,
       name: "Pedro Coordenador",
       email: "pedro@escola.com",
-      role: "instructor", // Changed from "coordinator" to "instructor"
+      role: "instructor",
       status: "active",
       createdAt: new Date("2025-03-15"),
       lastLogin: new Date("2025-05-02")

@@ -65,7 +65,7 @@ export function useUserActions(users: User[], setUsers: React.Dispatch<React.Set
         setUsers(
           users.map((user) =>
             user.id === currentUser.id
-              ? { ...user, name: values.name, role: values.role }
+              ? { ...user, name: values.name, role: values.role as User["role"] }
               : user
           )
         );
@@ -100,7 +100,7 @@ export function useUserActions(users: User[], setUsers: React.Dispatch<React.Set
           id: Math.max(0, ...users.map((user) => user.id)) + 1,
           name: values.name,
           email: values.email,
-          role: values.role,
+          role: values.role as User["role"],
           status: "active",
           createdAt: new Date(),
           lastLogin: new Date()

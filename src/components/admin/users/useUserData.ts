@@ -1,16 +1,6 @@
 
 import { useState, useEffect } from 'react';
-
-// User type definition
-export type User = {
-  id: number;
-  name: string;
-  email: string;
-  role: "admin" | "instructor" | "student" | "viewer" | string; // Support string to align with both types
-  status: "active" | "inactive";
-  createdAt: Date;
-  lastLogin: Date;
-};
+import { User } from "../types"; // Import User from types.ts instead of defining locally
 
 // Mock data for development purposes
 const mockUsers: User[] = [

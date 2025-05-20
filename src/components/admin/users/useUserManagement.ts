@@ -1,5 +1,5 @@
 
-import { User } from "./useUserData";
+import { User } from "../types";
 import { useUserAuth } from "./useUserAuth";
 import { useUserData } from "./useUserData";
 import { useUserActions } from "./useUserActions";

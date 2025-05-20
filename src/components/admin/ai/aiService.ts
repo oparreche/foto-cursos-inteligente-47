@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -28,16 +29,6 @@ export interface AIResponse {
     tokens?: number;
     processingTime?: number;
   };
-}
-
-// Defining the structure of the AI settings table data
-interface AISettingsRecord {
-  id: number;
-  provider: string;
-  model: string;
-  api_key: string;
-  last_updated: string | null;
-  updated_by: string | null;
 }
 
 // Get AI configuration from database

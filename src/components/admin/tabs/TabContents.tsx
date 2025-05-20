@@ -42,7 +42,7 @@ export const TabContents: React.FC<TabContentsProps> = ({ userRole = "", showDia
 
       <TabsContent value="users">
         <TabContentWrapper label="Gerenciamento de Usuários">
-          <UserManagement userRole={userRole} />
+          <UserManagement />
         </TabContentWrapper>
       </TabsContent>
 

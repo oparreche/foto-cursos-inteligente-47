@@ -18,3 +18,6 @@ export { default as ErrorState } from './settings/ErrorState';
 export { default as AIConfigWarning } from './content-generator/AIConfigWarning';
 export { default as ContentDisplay } from './content-generator/ContentDisplay';
 export { default as PromptForm } from './content-generator/PromptForm';
+
+// Export dialog components
+export { ProviderSelector, ModelSelector, ApiKeyInput, DialogError, DialogActions } from './settings/dialog';

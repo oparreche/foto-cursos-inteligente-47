@@ -13,7 +13,7 @@ const DiagnosticDisplay = () => {
   const [jsErrors, setJsErrors] = useState<string[]>([]);
   const [moduleErrors, setModuleErrors] = useState<string[]>([]);
   const [renderedComponents, setRenderedComponents] = useState<string[]>([]);
-  const [importCheck, setImportCheck] = useState<{[key: string]: boolean}>({});
+  const [importCheck, setImportCheck] = useState<{[key: string]: boolean | string}>({});
   
   useEffect(() => {
     // Log que este componente foi montado
@@ -219,3 +219,4 @@ const DiagnosticDisplay = () => {
 };
 
 export default DiagnosticDisplay;
+

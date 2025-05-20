@@ -1,3 +1,4 @@
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -55,7 +56,7 @@ export const useManualEnrollment = (id: string | undefined) => {
       if (error) throw new Error(error.message);
       
       // Verificar se data.student existe antes de acessar email
-      const student_name = data.student && 'email' in data.student ? data.student.email : 'Usuário não encontrado';
+      const student_name = data.student && data.student.email ? data.student.email : 'Usuário não encontrado';
       
       return {
         ...data,
@@ -80,7 +81,7 @@ export const useManualEnrollmentActions = () => {
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError || !user) throw new Error('Usuário não autenticado');
       
-      // Garantir que valores numéricos sejam convertidos
+      // Garantir que valores numéricos sejam convertidos corretamente
       const parsedValues = {
         student_id: values.student_id,
         class_id: values.class_id,
@@ -94,8 +95,8 @@ export const useManualEnrollmentActions = () => {
           : values.original_amount,
         discount_amount: typeof values.discount_amount === 'string' && values.discount_amount
           ? parseFloat(values.discount_amount) 
-          : (values.discount_amount || 0),
-        notes: values.notes,
+          : (typeof values.discount_amount === 'number' ? values.discount_amount : 0),
+        notes: values.notes || '',
         created_by: user.id
       };
 
@@ -137,9 +138,9 @@ export const useManualEnrollmentActions = () => {
       }
       
       if (values.discount_amount !== undefined) {
-        parsedValues.discount_amount = typeof values.discount_amount === 'string' 
+        parsedValues.discount_amount = typeof values.discount_amount === 'string' && values.discount_amount !== ''
           ? parseFloat(values.discount_amount) 
-          : values.discount_amount;
+          : (typeof values.discount_amount === 'number' ? values.discount_amount : 0);
       }
 
       const { data, error } = await supabase

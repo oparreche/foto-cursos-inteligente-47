@@ -9,11 +9,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Info } from "lucide-react";
 
 const Login = () => {
   const [email, setEmail] = useState("midiaputz@gmail.com");
   const [password, setPassword] = useState("*Putz123");
   const [loading, setLoading] = useState(false);
+  const [showConfirmationAlert, setShowConfirmationAlert] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const [defaultTab, setDefaultTab] = useState("login");
@@ -36,10 +39,17 @@ const Login = () => {
         password,
       });
       
-      if (error) throw error;
-      
-      toast.success("Login realizado com sucesso!");
-      navigate("/admin");
+      if (error) {
+        if (error.message === "Email not confirmed") {
+          setShowConfirmationAlert(true);
+          toast.error("É necessário confirmar o email antes de fazer login");
+        } else {
+          throw error;
+        }
+      } else {
+        toast.success("Login realizado com sucesso!");
+        navigate("/admin");
+      }
     } catch (error: any) {
       toast.error(`Erro ao fazer login: ${error.message}`);
       console.error("Erro completo:", error);
@@ -53,15 +63,15 @@ const Login = () => {
     setLoading(true);
     
     try {
-      const { error } = await supabase.auth.signUp({
+      const { error, data } = await supabase.auth.signUp({
         email,
         password,
       });
       
       if (error) throw error;
       
-      toast.success("Cadastro realizado! Você já pode fazer login com suas credenciais.");
-      setDefaultTab("login");
+      setShowConfirmationAlert(true);
+      toast.success("Cadastro realizado! Verifique seu email para confirmar sua conta.");
     } catch (error: any) {
       toast.error(`Erro ao criar conta: ${error.message}`);
       console.error("Erro completo:", error);
@@ -80,6 +90,17 @@ const Login = () => {
               Entre com suas credenciais para acessar o painel administrativo.
             </CardDescription>
           </CardHeader>
+          
+          {showConfirmationAlert && (
+            <Alert className="mx-6 mb-4 bg-blue-50">
+              <Info className="h-4 w-4 text-blue-500" />
+              <AlertDescription className="text-blue-700">
+                Um email de confirmação foi enviado para {email}. 
+                Por favor, verifique sua caixa de entrada e confirme seu email antes de fazer login.
+              </AlertDescription>
+            </Alert>
+          )}
+          
           <Tabs defaultValue={defaultTab} value={defaultTab} onValueChange={setDefaultTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="login">Login</TabsTrigger>

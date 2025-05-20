@@ -3,6 +3,36 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 /**
+ * Assigns the default admin role to a user
+ */
+export const assignDefaultAdminRole = async (userId: string): Promise<boolean> => {
+  try {
+    console.log("Atribuindo papel de admin ao usuário");
+    
+    // Create an entry in the roles table
+    const { error: roleError } = await supabase
+      .from('user_roles')
+      .insert({
+        user_id: userId,
+        role: 'admin' // Assign admin role
+      });
+    
+    if (roleError) {
+      console.error("Erro ao atribuir função de administrador:", roleError);
+      toast.error("Não foi possível definir papel de administrador");
+      return false;
+    }
+    
+    toast.success("Função de administrador atribuída com sucesso");
+    return true;
+  } catch (error) {
+    console.error("Erro ao atribuir função de administrador:", error);
+    toast.error("Erro ao definir papel de administrador");
+    return false;
+  }
+};
+
+/**
  * Assigns the highest admin role to the first user
  * Fixed to handle user_role as an enum type instead of text
  */

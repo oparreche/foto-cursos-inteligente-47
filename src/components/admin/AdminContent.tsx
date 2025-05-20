@@ -3,7 +3,8 @@ import React, { useState } from "react";
 import AdminTabs from "@/components/admin/AdminTabs";
 import PermissionsSheet from "@/components/admin/PermissionsSheet";
 import DiagnosticDisplay from "@/components/admin/DiagnosticDisplay";
-import { Alert, AlertCircle, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 import RenderStateTracker, { RenderState } from "@/components/admin/RenderStateTracker";
 
 interface AdminContentProps {

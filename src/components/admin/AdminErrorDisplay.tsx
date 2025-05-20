@@ -2,6 +2,7 @@
 import React from "react";
 import DiagnosticDisplay from "@/components/admin/DiagnosticDisplay";
 import MainLayout from "@/components/layout/MainLayout";
+import { AlertCircle } from "lucide-react";
 
 interface AdminErrorDisplayProps {
   error: string;

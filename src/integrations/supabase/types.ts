@@ -212,6 +212,65 @@ export type Database = {
         }
         Relationships: []
       }
+      discount_coupons: {
+        Row: {
+          code: string
+          course_id: string | null
+          created_at: string | null
+          created_by: string | null
+          current_uses: number | null
+          description: string | null
+          discount_type: string
+          discount_value: number
+          id: string
+          is_active: boolean | null
+          max_uses: number | null
+          minimum_purchase: number | null
+          valid_from: string
+          valid_until: string | null
+        }
+        Insert: {
+          code: string
+          course_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          current_uses?: number | null
+          description?: string | null
+          discount_type: string
+          discount_value: number
+          id?: string
+          is_active?: boolean | null
+          max_uses?: number | null
+          minimum_purchase?: number | null
+          valid_from?: string
+          valid_until?: string | null
+        }
+        Update: {
+          code?: string
+          course_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          current_uses?: number | null
+          description?: string | null
+          discount_type?: string
+          discount_value?: number
+          id?: string
+          is_active?: boolean | null
+          max_uses?: number | null
+          minimum_purchase?: number | null
+          valid_from?: string
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discount_coupons_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       financial_categories: {
         Row: {
           created_at: string
@@ -235,6 +294,63 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      manual_enrollments: {
+        Row: {
+          class_id: string
+          coupon_id: string | null
+          created_by: string
+          discount_amount: number | null
+          enrollment_date: string
+          id: string
+          notes: string | null
+          original_amount: number
+          payment_amount: number
+          payment_status: string
+          student_id: string
+        }
+        Insert: {
+          class_id: string
+          coupon_id?: string | null
+          created_by: string
+          discount_amount?: number | null
+          enrollment_date?: string
+          id?: string
+          notes?: string | null
+          original_amount: number
+          payment_amount: number
+          payment_status?: string
+          student_id: string
+        }
+        Update: {
+          class_id?: string
+          coupon_id?: string | null
+          created_by?: string
+          discount_amount?: number | null
+          enrollment_date?: string
+          id?: string
+          notes?: string | null
+          original_amount?: number
+          payment_amount?: number
+          payment_status?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manual_enrollments_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manual_enrollments_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "discount_coupons"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       payables: {
         Row: {

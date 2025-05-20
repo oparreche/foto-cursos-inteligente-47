@@ -1,53 +1,63 @@
 
-import React from "react";
-import { TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Home, 
-  Users, 
-  BookOpen, 
-  Calendar, 
-  Pencil, 
+import { TabsTrigger } from "@/components/ui/tabs";
+import {
+  LayoutDashboard,
+  Users,
+  BookOpen,
+  CalendarDays,
+  FileText,
   Sparkles,
-  DollarSign
+  DollarSign,
+  GraduationCap
 } from "lucide-react";
 
 interface TabTriggersProps {
-  userRole?: string;
+  userRole: string;
 }
 
-export const TabTriggers = ({ userRole }: TabTriggersProps) => {
-  console.log("TabTriggers rendering with userRole:", userRole);
-  
+export const TabTriggers: React.FC<TabTriggersProps> = ({ userRole }) => {
   return (
-    <TabsList className="mb-4">
-      <TabsTrigger value="dashboard" className="flex items-center gap-2">
-        <Home className="h-4 w-4" /> Dashboard
-      </TabsTrigger>
-
-      <TabsTrigger value="users" className="flex items-center gap-2">
-        <Users className="h-4 w-4" /> Usuários
-      </TabsTrigger>
-
-      <TabsTrigger value="courses" className="flex items-center gap-2">
-        <BookOpen className="h-4 w-4" /> Cursos
-      </TabsTrigger>
-
-      <TabsTrigger value="classes" className="flex items-center gap-2">
-        <Calendar className="h-4 w-4" /> Turmas
-      </TabsTrigger>
-
-      <TabsTrigger value="blog" className="flex items-center gap-2">
-        <Pencil className="h-4 w-4" /> Blog
-      </TabsTrigger>
-
-      <TabsTrigger value="ai" className="flex items-center gap-2">
-        <Sparkles className="h-4 w-4" /> IA
+    <>
+      <TabsTrigger value="dashboard" className="gap-2">
+        <LayoutDashboard className="h-4 w-4" />
+        <span className="hidden sm:inline-block">Dashboard</span>
       </TabsTrigger>
       
-      <TabsTrigger value="finance" className="flex items-center gap-2">
-        <DollarSign className="h-4 w-4" /> Financeiro
+      <TabsTrigger value="users" className="gap-2">
+        <Users className="h-4 w-4" />
+        <span className="hidden sm:inline-block">Usuários</span>
       </TabsTrigger>
-    </TabsList>
+      
+      <TabsTrigger value="courses" className="gap-2">
+        <BookOpen className="h-4 w-4" />
+        <span className="hidden sm:inline-block">Cursos</span>
+      </TabsTrigger>
+      
+      <TabsTrigger value="classes" className="gap-2">
+        <CalendarDays className="h-4 w-4" />
+        <span className="hidden sm:inline-block">Turmas</span>
+      </TabsTrigger>
+      
+      <TabsTrigger value="enrollments" className="gap-2">
+        <GraduationCap className="h-4 w-4" />
+        <span className="hidden sm:inline-block">Matrículas</span>
+      </TabsTrigger>
+      
+      <TabsTrigger value="blog" className="gap-2">
+        <FileText className="h-4 w-4" />
+        <span className="hidden sm:inline-block">Blog</span>
+      </TabsTrigger>
+      
+      <TabsTrigger value="finance" className="gap-2">
+        <DollarSign className="h-4 w-4" />
+        <span className="hidden sm:inline-block">Financeiro</span>
+      </TabsTrigger>
+      
+      <TabsTrigger value="ai" className="gap-2">
+        <Sparkles className="h-4 w-4" />
+        <span className="hidden sm:inline-block">AI</span>
+      </TabsTrigger>
+    </>
   );
 };
 

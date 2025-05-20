@@ -8,6 +8,7 @@ import ClassManagement from "@/components/admin/ClassManagement";
 import BlogManagement from "@/components/admin/BlogManagement";
 import AIManagement from "@/components/admin/AIManagement";
 import FinanceManagement from "@/components/admin/FinanceManagement";
+import EnrollmentManagement from "@/components/admin/EnrollmentManagement";
 import TabContentWrapper from "@/components/admin/tabs/TabContentWrapper";
 
 interface TabContentsProps {
@@ -22,7 +23,7 @@ export const TabContents: React.FC<TabContentsProps> = ({ userRole = "", showDia
     console.log("URL atual:", window.location.href);
     
     // Verificar se todos os valores de abas estão corretos
-    const tabValues = ["dashboard", "users", "courses", "classes", "blog", "ai", "finance"];
+    const tabValues = ["dashboard", "users", "courses", "classes", "enrollments", "blog", "ai", "finance"];
     console.log("Abas disponíveis para renderização:", tabValues);
     
     // Verificar se a aba finance está sendo renderizada corretamente
@@ -56,6 +57,12 @@ export const TabContents: React.FC<TabContentsProps> = ({ userRole = "", showDia
       <TabsContent value="classes" data-value="classes">
         <TabContentWrapper label="Gerenciamento de Turmas">
           <ClassManagement />
+        </TabContentWrapper>
+      </TabsContent>
+      
+      <TabsContent value="enrollments" data-value="enrollments">
+        <TabContentWrapper label="Matrículas e Descontos">
+          <EnrollmentManagement />
         </TabContentWrapper>
       </TabsContent>
 

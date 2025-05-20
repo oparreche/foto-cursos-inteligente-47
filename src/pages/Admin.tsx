@@ -1,36 +1,25 @@
 
 import { useState, useEffect } from "react";
 import MainLayout from "@/components/layout/MainLayout";
-import AdminTabs from "@/components/admin/AdminTabs";
 import AdminAccess from "@/components/admin/AdminAccess";
-import PermissionsSheet from "@/components/admin/PermissionsSheet";
-import DiagnosticDisplay from "@/components/admin/DiagnosticDisplay";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { assignHighestAdminRole } from "@/components/admin/services/roleService";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import AdminHeader from "@/components/admin/AdminHeader";
+import AdminContent from "@/components/admin/AdminContent";
+import AdminErrorDisplay from "@/components/admin/AdminErrorDisplay";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 const Admin = () => {
-  const [authenticated, setAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState('viewer');
-  const [isLoading, setIsLoading] = useState(true);
-  const [userId, setUserId] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
   // Always enable diagnostics when developing
   const [showDiagnostics, setShowDiagnostics] = useState(true);
-  // New state to track rendering progress
-  const [renderState, setRenderState] = useState({
-    mainLayoutLoaded: false,
-    adminAccessLoaded: false,
-    adminTabsStarted: false,
-    adminTabsLoaded: false,
-  });
+  
+  const {
+    authenticated,
+    userRole,
+    isLoading,
+    error
+  } = useAdminAuth();
 
   useEffect(() => {
     console.log("Admin page rendered at", new Date().toISOString());
-    setRenderState(prev => ({...prev, mainLayoutLoaded: true}));
     
     // Make the diagnostic panel toggleable with a keyboard shortcut
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -41,170 +30,22 @@ const Admin = () => {
     
     window.addEventListener('keydown', handleKeyDown);
     
-    const checkAuth = async () => {
-      try {
-        console.log("Admin page - checking authentication");
-        const { data: { session } } = await supabase.auth.getSession();
-        const isAuthenticated = !!session?.user;
-        setAuthenticated(isAuthenticated);
-        
-        if (session?.user) {
-          console.log("User authenticated:", session.user.email);
-          setUserId(session.user.id);
-          
-          // Verificar se existe algum usuário na tabela user_roles
-          const { count: roleCount, error: countError } = await supabase
-            .from('user_roles')
-            .select('*', { count: 'exact', head: true });
-            
-          if (countError) {
-            console.error("Erro ao verificar contagem de funções:", countError);
-            setError("Erro ao verificar permissões de usuário");
-          } else if (roleCount === 0) {
-            console.log("Nenhuma função encontrada, configurando primeiro usuário como administrador");
-            
-            // Se não existe nenhum usuário com função, o primeiro usuário se torna admin
-            await assignHighestAdminRole(session.user.id);
-            setUserRole('super_admin');
-          } else {
-            // Fetch the user's role from the user_roles table
-            const { data: roleData, error: roleError } = await supabase
-              .from('user_roles')
-              .select('role')
-              .eq('user_id', session.user.id)
-              .single();
-              
-            if (roleError && roleError.code !== 'PGRST116') {
-              console.error("Erro ao buscar função do usuário:", roleError);
-              setError("Erro ao verificar permissões de usuário");
-            } else {
-              // Set the user role (default to viewer if not found)
-              const role = roleData?.role || 'viewer';
-              console.log("Função do usuário definida como:", role);
-              setUserRole(role);
-            }
-          }
-        } else {
-          console.log("User not authenticated");
-        }
-      } catch (error) {
-        console.error("Erro na verificação de autenticação:", error);
-        setError("Erro ao verificar autenticação");
-        toast.error("Erro ao verificar autenticação");
-      } finally {
-        setIsLoading(false);
-        setRenderState(prev => ({...prev, adminAccessLoaded: true}));
-      }
-    };
-    
-    checkAuth();
-    
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state changed:", event);
-      const isAuthenticated = !!session?.user;
-      setAuthenticated(isAuthenticated);
-      
-      if (session?.user) {
-        setUserId(session.user.id);
-        try {
-          // Fetch the user's role from the user_roles table
-          const { data: roleData, error: roleError } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', session.user.id)
-            .single();
-            
-          if (roleError && roleError.code !== 'PGRST116') {
-            console.error("Erro ao buscar função do usuário:", roleError);
-          }
-          
-          // Set the user role (default to viewer if not found)
-          setUserRole(roleData?.role || 'viewer');
-        } catch (error) {
-          console.error("Erro ao buscar função na alteração de autenticação:", error);
-        }
-      } else {
-        setUserId(null);
-        setUserRole('viewer');
-      }
-    });
-    
     return () => {
-      subscription.unsubscribe();
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
 
   // Add a simple error boundary
   if (error) {
-    return (
-      <MainLayout>
-        <div className="container mx-auto px-4 py-8">
-          <h1 className="text-3xl font-bold mb-6">Erro no Painel de Administração</h1>
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
-            <button 
-              className="ml-4 bg-red-500 text-white px-4 py-2 rounded" 
-              onClick={() => window.location.reload()}
-            >
-              Recarregar página
-            </button>
-          </div>
-          <DiagnosticDisplay />
-        </div>
-      </MainLayout>
-    );
+    return <AdminErrorDisplay error={error} />;
   }
-
-  // Simple fallback before AdminTabs is rendered
-  const renderAdminTabs = () => {
-    try {
-      setRenderState(prev => ({...prev, adminTabsStarted: true}));
-      const tabs = <AdminTabs />;
-      setRenderState(prev => ({...prev, adminTabsLoaded: true}));
-      return tabs;
-    } catch (error) {
-      console.error("Erro ao renderizar AdminTabs:", error);
-      return (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Erro ao carregar interface</AlertTitle>
-          <AlertDescription>
-            Ocorreu um erro ao carregar a interface de administração. 
-            Detalhes: {error instanceof Error ? error.message : "Erro desconhecido"}
-          </AlertDescription>
-        </Alert>
-      );
-    }
-  };
 
   return (
     <MainLayout>
       <AdminAccess authenticated={authenticated} isLoading={isLoading}>
         <div className="container mx-auto px-4 py-8">
-          <h1 className="text-3xl font-bold mb-6">Painel de Administração</h1>
-          
-          {/* Always show the diagnostic component to help debug */}
-          {showDiagnostics && <DiagnosticDisplay />}
-          
-          {/* Show the current rendering state */}
-          <Card className="mb-4 border border-amber-500">
-            <CardContent className="pt-4">
-              <p className="text-sm text-amber-800">Estado atual do carregamento:</p>
-              <ul className="text-xs space-y-1 mt-2">
-                <li>MainLayout: {renderState.mainLayoutLoaded ? "✅" : "❌"}</li>
-                <li>AdminAccess: {renderState.adminAccessLoaded ? "✅" : "❌"}</li>
-                <li>AdminTabs iniciado: {renderState.adminTabsStarted ? "✅" : "❌"}</li>
-                <li>AdminTabs carregado: {renderState.adminTabsLoaded ? "✅" : "❌"}</li>
-              </ul>
-            </CardContent>
-          </Card>
-          
-          {/* Wrap AdminTabs with try-catch to avoid blank screen */}
-          {renderAdminTabs()}
-          
-          {(userRole === 'admin' || userRole === 'super_admin') && 
-            <PermissionsSheet userRole={userRole} />}
+          <AdminHeader />
+          <AdminContent userRole={userRole} showDiagnostics={showDiagnostics} />
         </div>
       </AdminAccess>
     </MainLayout>

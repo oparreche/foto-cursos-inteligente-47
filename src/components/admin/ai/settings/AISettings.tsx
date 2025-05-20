@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { useAISettings } from "@/hooks/useAISettings";
@@ -34,11 +35,11 @@ const AISettings: React.FC = () => {
         {isLoading ? (
           <p>Carregando configurações...</p>
         ) : error ? (
-          <DialogError message={`Erro ao carregar configurações: ${error.message}`} />
+          <DialogError error={`Erro ao carregar configurações: ${error.message}`} />
         ) : (
           <>
             <ProviderSelector
-              currentProvider={aiConfig?.provider || ''}
+              provider={aiConfig?.provider || null}
               onProviderChange={(provider) => {
                 if (aiConfig) {
                   handleConfigSave({ ...aiConfig, provider });
@@ -46,7 +47,8 @@ const AISettings: React.FC = () => {
               }}
             />
             <ModelSelector
-              currentModel={aiConfig?.model || ''}
+              provider={aiConfig?.provider || null}
+              model={aiConfig?.model || null}
               onModelChange={(model) => {
                 if (aiConfig) {
                   handleConfigSave({ ...aiConfig, model });
@@ -54,20 +56,20 @@ const AISettings: React.FC = () => {
               }}
             />
             <ApiKeyInput
-              currentApiKey={aiConfig?.apiKey || ''}
+              provider={aiConfig?.provider || null}
+              apiKey={aiConfig?.apiKey || null}
               onApiKeyChange={(apiKey) => {
                 if (aiConfig) {
                   handleConfigSave({ ...aiConfig, apiKey });
                 }
               }}
             />
-            {saveError && <DialogError message={`Erro ao salvar: ${saveError}`} />}
+            {saveError && <DialogError error={`Erro ao salvar: ${saveError}`} />}
             <DialogActions
-              isEditDialogOpen={isEditDialogOpen}
-              setIsEditDialogOpen={setIsEditDialogOpen}
+              onCancel={() => setIsEditDialogOpen(false)}
               onSave={() => refetch()}
               isUpdating={isUpdating}
-              attemptCount={attemptCount}
+              isFormValid={true}
             />
           </>
         )}

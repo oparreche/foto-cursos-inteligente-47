@@ -14,21 +14,21 @@ interface AdminTabsProps {
 }
 
 const AdminTabs: React.FC<AdminTabsProps> = ({ userRole = "", showDiagnostics = false }) => {
-  // Debug logs for troubleshooting (only in diagnostic mode)
+  // Debug logs para identificação de problemas
   useEffect(() => {
-    if (showDiagnostics) {
-      console.log("AdminTabs component mounted");
-      console.log("AdminTabs props received:", { userRole, showDiagnostics });
+    console.log("AdminTabs montado com props:", { userRole, showDiagnostics });
+    
+    // Verificar renderização do DOM
+    setTimeout(() => {
+      const tabElements = document.querySelectorAll('[role="tablist"] [role="tab"]');
+      console.log("Elementos de abas encontrados:", tabElements.length);
       
-      // Check if DOM is rendering correctly
-      setTimeout(() => {
-        const tabElements = document.querySelectorAll('[role="tablist"] [role="tab"]');
-        console.log("Tab elements found:", tabElements.length);
-        
-        const tabContentElements = document.querySelectorAll('[data-state="inactive"], [data-state="active"]');
-        console.log("Tab content elements found:", tabContentElements.length);
-      }, 500);
-    }
+      const tabContentElements = document.querySelectorAll('[data-state="inactive"], [data-state="active"]');
+      console.log("Elementos de conteúdo de abas encontrados:", tabContentElements.length);
+      
+      const financeContent = document.querySelector('[data-value="finance"]');
+      console.log("Elemento de conteúdo financeiro presente:", !!financeContent);
+    }, 300);
   }, [userRole, showDiagnostics]);
   
   const {

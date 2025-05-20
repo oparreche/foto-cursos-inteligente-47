@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { TabsContent } from "@/components/ui/tabs";
 import Dashboard from "@/components/admin/Dashboard";
 import UserManagement from "@/components/admin/UserManagement";
@@ -16,61 +16,56 @@ interface TabContentsProps {
 }
 
 export const TabContents: React.FC<TabContentsProps> = ({ userRole = "", showDiagnostics = false }) => {
-  // Debug logs only in diagnostic mode
-  if (showDiagnostics) {
-    console.log("TabContents rendering with props:", { userRole, showDiagnostics });
+  // Debug logs para ajudar na identificação de problemas
+  useEffect(() => {
+    if (showDiagnostics) {
+      console.log("TabContents renderizando com props:", { userRole, showDiagnostics });
+    }
     
-    // Additional debugging information for tab content rendering
-    React.useEffect(() => {
-      setTimeout(() => {
-        const activeContent = document.querySelector('[data-state="active"]');
-        console.log("Active content element:", activeContent?.getAttribute('value'));
-        
-        const financeContent = document.querySelector('[data-value="finance"]');
-        console.log("Finance content element present:", !!financeContent);
-      }, 300);
-    }, []);
-  }
+    // Verificar se todos os valores de abas estão corretos
+    const tabValues = ["dashboard", "users", "courses", "classes", "blog", "ai", "finance"];
+    console.log("Abas disponíveis para renderização:", tabValues);
+  }, [userRole, showDiagnostics]);
   
   return (
     <>
-      <TabsContent value="dashboard">
+      <TabsContent value="dashboard" data-value="dashboard">
         <TabContentWrapper label="Dashboard">
           <Dashboard />
         </TabContentWrapper>
       </TabsContent>
 
-      <TabsContent value="users">
+      <TabsContent value="users" data-value="users">
         <TabContentWrapper label="Gerenciamento de Usuários">
           <UserManagement />
         </TabContentWrapper>
       </TabsContent>
 
-      <TabsContent value="courses">
+      <TabsContent value="courses" data-value="courses">
         <TabContentWrapper label="Gerenciamento de Cursos">
           <CourseManagement />
         </TabContentWrapper>
       </TabsContent>
 
-      <TabsContent value="classes">
+      <TabsContent value="classes" data-value="classes">
         <TabContentWrapper label="Gerenciamento de Turmas">
           <ClassManagement />
         </TabContentWrapper>
       </TabsContent>
 
-      <TabsContent value="blog">
+      <TabsContent value="blog" data-value="blog">
         <TabContentWrapper label="Gerenciamento do Blog">
           <BlogManagement />
         </TabContentWrapper>
       </TabsContent>
 
-      <TabsContent value="ai">
+      <TabsContent value="ai" data-value="ai">
         <TabContentWrapper label="Inteligência Artificial">
           <AIManagement />
         </TabContentWrapper>
       </TabsContent>
       
-      <TabsContent value="finance">
+      <TabsContent value="finance" data-value="finance">
         <TabContentWrapper label="Sistema Financeiro">
           <FinanceManagement userRole={userRole} showDiagnostics={showDiagnostics} />
         </TabContentWrapper>

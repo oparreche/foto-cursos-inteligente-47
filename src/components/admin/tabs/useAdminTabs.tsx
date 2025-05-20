@@ -9,10 +9,10 @@ export const useAdminTabs = () => {
   
   useEffect(() => {
     try {
-      console.log("useAdminTabs hook initializing");
+      console.log("useAdminTabs hook inicializando");
       setIsClient(true);
       
-      // Define allowed tabs explicitly including finance
+      // Define as abas permitidas explicitamente incluindo finance
       const allowedTabs = [
         "dashboard", 
         "users", 
@@ -24,38 +24,51 @@ export const useAdminTabs = () => {
         "payments"
       ];
       
-      // Get hash from URL or use default
+      // Obtem o hash da URL ou usa o padrão
       const hashValue = window.location.hash.substring(1);
-      console.log("Current hash value:", hashValue || "(none)");
+      console.log("Valor atual do hash:", hashValue || "(nenhum)");
       
       if (hashValue && allowedTabs.includes(hashValue)) {
-        console.log(`Setting active tab to ${hashValue} from hash`);
+        console.log(`Definindo aba ativa para ${hashValue} do hash`);
         setActiveTab(hashValue);
         
-        // Force tab content visibility check
+        // Força verificação de visibilidade do conteúdo da aba
         setTimeout(() => {
           const activeTabContent = document.querySelector(`[data-value="${hashValue}"]`);
-          console.log(`Tab content for ${hashValue} found:`, !!activeTabContent);
+          console.log(`Conteúdo da aba ${hashValue} encontrado:`, !!activeTabContent);
+          
+          // Adicionar verificação adicional
+          const activeTabState = document.querySelector(`[data-state="active"]`);
+          console.log("Elemento ativo:", activeTabState?.getAttribute('value'));
           
           if (!activeTabContent) {
-            console.log(`Forcing hash update for tab: ${hashValue}`);
-            window.location.hash = hashValue;
+            console.log(`Forçando atualização de hash para aba: ${hashValue}`);
+            // Solução para problemas de sincronização em alguns navegadores
+            setTimeout(() => {
+              window.location.hash = hashValue;
+            }, 100);
           }
         }, 300);
       } else {
-        console.log("Using dashboard as default tab");
+        console.log("Usando dashboard como aba padrão");
         setActiveTab("dashboard");
         if (!hashValue) {
           window.location.hash = "dashboard";
         }
       }
       
-      // Add hash change listener
+      // Adiciona listener para mudança de hash
       const handleHashChange = () => {
         const newHash = window.location.hash.substring(1);
         if (newHash && allowedTabs.includes(newHash)) {
-          console.log(`Hash changed to: ${newHash}`);
+          console.log(`Hash mudou para: ${newHash}`);
           setActiveTab(newHash);
+          
+          // Verificação adicional para ativação da aba
+          setTimeout(() => {
+            const tabElement = document.querySelector(`[role="tab"][data-state="active"]`);
+            console.log(`Aba ativa após mudança de hash:`, tabElement?.textContent);
+          }, 100);
         }
       };
       
@@ -64,18 +77,18 @@ export const useAdminTabs = () => {
         window.removeEventListener('hashchange', handleHashChange);
       };
     } catch (error) {
-      console.error("Error in useAdminTabs hook:", error);
+      console.error("Erro no hook useAdminTabs:", error);
       setHasError(true);
-      setErrorMessage(error instanceof Error ? error.message : "Unknown error occurred");
+      setErrorMessage(error instanceof Error ? error.message : "Erro desconhecido ocorreu");
     }
   }, []);
 
-  // Handle tab change with useCallback
+  // Handle tab change com useCallback
   const handleTabChange = useCallback((value: string) => {
-    console.log(`Tab changed to: ${value}`);
+    console.log(`Aba mudou para: ${value}`);
     setActiveTab(value);
     
-    // Update URL hash
+    // Atualiza o hash da URL
     if (window.location.hash.substring(1) !== value) {
       window.location.hash = value;
     }

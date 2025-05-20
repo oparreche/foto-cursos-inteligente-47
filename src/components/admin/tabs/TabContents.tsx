@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { TabsContent } from "@/components/ui/tabs";
 import { CardContent } from "@/components/ui/card";
 import TabContentWrapper from "./TabContentWrapper";
@@ -14,6 +14,19 @@ import PaymentGateway from "@/components/admin/PaymentGateway";
 import AIManagement from "@/components/admin/AIManagement";
 
 const TabContents: React.FC = () => {
+  useEffect(() => {
+    console.log("TabContents componente montado");
+    
+    // Check if tab content elements are in the DOM
+    setTimeout(() => {
+      const aiTabContent = document.querySelector('[data-value="ai"]');
+      console.log("AI TabContent presente:", !!aiTabContent);
+      
+      const aiManagement = document.querySelector('[data-testid="ai-management"]');
+      console.log("AIManagement presente:", !!aiManagement);
+    }, 500);
+  }, []);
+
   return (
     <CardContent>
       <TabsContent value="dashboard" className="mt-0">

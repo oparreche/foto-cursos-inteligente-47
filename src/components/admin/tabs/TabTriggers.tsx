@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Layers, BookOpen, FileText, LayoutDashboard, 
@@ -7,6 +7,19 @@ import {
 } from "lucide-react";
 
 const TabTriggers: React.FC = () => {
+  useEffect(() => {
+    console.log("TabTriggers componente montado");
+    
+    // Check if tabs are rendered
+    setTimeout(() => {
+      const tabElements = document.querySelectorAll('[role="tab"]');
+      console.log("Número de tabs renderizadas:", tabElements.length);
+      
+      const aiTab = document.querySelector('[data-value="ai"]');
+      console.log("AI tab presente:", !!aiTab);
+    }, 200);
+  }, []);
+
   return (
     <TabsList className="grid grid-cols-7 mb-8">
       <TabsTrigger value="dashboard" className="flex items-center gap-2">

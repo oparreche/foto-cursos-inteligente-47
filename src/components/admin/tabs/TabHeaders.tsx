@@ -34,6 +34,10 @@ const TabHeaders: React.FC = () => {
         <CardTitle>Inteligência Artificial</CardTitle>
         <CardDescription>Geração de conteúdo e análises usando IA.</CardDescription>
       </TabsContent>
+      <TabsContent value="finance">
+        <CardTitle>Sistema Financeiro</CardTitle>
+        <CardDescription>Gerenciamento de finanças, transações e notas fiscais.</CardDescription>
+      </TabsContent>
     </CardHeader>
   );
 };

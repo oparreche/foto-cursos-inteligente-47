@@ -63,7 +63,7 @@ const AdminContent: React.FC<AdminContentProps> = ({ userRole, showDiagnostics }
   // Use useEffect para modificar o estado com segurança e evitar loops de renderização
   useEffect(() => {
     try {
-      console.log("AdminContent montado");
+      console.log("AdminContent montado com props:", { userRole, showDiagnostics });
       setRenderState(prev => ({...prev, adminTabsStarted: true}));
       // Após os tabs serem iniciados, marcá-los como carregados
       setRenderState(prev => ({...prev, adminTabsLoaded: true}));
@@ -71,7 +71,7 @@ const AdminContent: React.FC<AdminContentProps> = ({ userRole, showDiagnostics }
       console.error("Erro ao inicializar estado de AdminTabs:", error);
       setContentError(`Erro ao inicializar AdminTabs: ${error instanceof Error ? error.message : String(error)}`);
     }
-  }, []);
+  }, [userRole, showDiagnostics]);
 
   const handleError = (error: Error, errorInfo: ErrorInfo) => {
     console.error("Erro capturado em AdminContent:", error, errorInfo);
@@ -98,7 +98,7 @@ const AdminContent: React.FC<AdminContentProps> = ({ userRole, showDiagnostics }
       
       {/* Renderizar AdminTabs com ErrorBoundary */}
       <ErrorBoundary onError={handleError}>
-        <AdminTabs />
+        <AdminTabs userRole={userRole} showDiagnostics={showDiagnostics} />
       </ErrorBoundary>
       
       {/* Renderização condicional de PermissionsSheet */}

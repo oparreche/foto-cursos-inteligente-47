@@ -13,8 +13,15 @@ import {
 } from 'lucide-react';
 import PaymentGateway from "./PaymentGateway";
 
-const FinanceManagement = () => {
+interface FinanceManagementProps {
+  userRole?: string;
+  showDiagnostics?: boolean;
+}
+
+const FinanceManagement: React.FC<FinanceManagementProps> = ({ userRole = "", showDiagnostics = false }) => {
   const [activeTab, setActiveTab] = useState<string>("dashboard");
+  
+  console.log("FinanceManagement rendered with:", { userRole, showDiagnostics });
 
   return (
     <div className="space-y-8">

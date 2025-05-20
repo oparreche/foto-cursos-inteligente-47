@@ -8,10 +8,16 @@ import TabHeaders from "./tabs/TabHeaders";
 import { TabContents } from "./tabs/TabContents";
 import ErrorAlert from "./tabs/ErrorAlert";
 
-const AdminTabs = () => {
+interface AdminTabsProps {
+  userRole?: string;
+  showDiagnostics?: boolean;
+}
+
+const AdminTabs: React.FC<AdminTabsProps> = ({ userRole = "", showDiagnostics = false }) => {
   // Log outside of JSX for better debugging
   useEffect(() => {
     console.log("AdminTabs componente montado");
+    console.log("AdminTabs props:", { userRole, showDiagnostics });
     // Debug log to check if the component is rendering
     const tabsElement = document.querySelector('[role="tablist"]');
     console.log("Tabs element presente no DOM:", !!tabsElement);
@@ -30,7 +36,7 @@ const AdminTabs = () => {
         console.log("Tab trigger ativo:", courseTabTrigger?.getAttribute('value'));
       }, 500);
     }
-  }, []);
+  }, [userRole, showDiagnostics]);
   
   const {
     activeTab,
@@ -57,11 +63,11 @@ const AdminTabs = () => {
         defaultValue={activeTab}
         className="w-full"
       >
-        <TabTriggers />
+        <TabTriggers userRole={userRole} />
         
         <Card>
           <TabHeaders />
-          <TabContents />
+          <TabContents userRole={userRole} showDiagnostics={showDiagnostics} />
         </Card>
       </Tabs>
     </>

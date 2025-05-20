@@ -19,6 +19,9 @@ import StudentArea from "./pages/StudentArea";
 import Admin from "./pages/Admin";
 import NFSeTest from "./pages/NFSeTest";
 import Login from "./pages/Login";
+// Novas páginas
+import Finance from "./pages/Finance";
+import Quiz from "./pages/Quiz";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +45,10 @@ const App = () => (
           <Route path="/admin" element={<Admin />} />
           <Route path="/nfse-test" element={<NFSeTest />} />
           <Route path="/login" element={<Login />} />
+          {/* Novas rotas */}
+          <Route path="/financeiro" element={<Finance />} />
+          <Route path="/financeiro/:tab" element={<Finance />} />
+          <Route path="/quiz" element={<Quiz />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

@@ -212,6 +212,133 @@ export type Database = {
         }
         Relationships: []
       }
+      financial_categories: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      payables: {
+        Row: {
+          amount: number
+          category_id: string | null
+          created_at: string
+          description: string
+          due_date: string
+          id: string
+          payment_date: string | null
+          status: string
+          supplier: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          category_id?: string | null
+          created_at?: string
+          description: string
+          due_date: string
+          id?: string
+          payment_date?: string | null
+          status?: string
+          supplier: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          category_id?: string | null
+          created_at?: string
+          description?: string
+          due_date?: string
+          id?: string
+          payment_date?: string | null
+          status?: string
+          supplier?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payables_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "financial_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      photography_answers: {
+        Row: {
+          answer_text: string
+          created_at: string
+          id: string
+          is_correct: boolean
+          question_id: string | null
+        }
+        Insert: {
+          answer_text: string
+          created_at?: string
+          id?: string
+          is_correct?: boolean
+          question_id?: string | null
+        }
+        Update: {
+          answer_text?: string
+          created_at?: string
+          id?: string
+          is_correct?: boolean
+          question_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photography_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "photography_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      photography_questions: {
+        Row: {
+          category: string
+          created_at: string
+          difficulty: string
+          id: string
+          question: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          difficulty: string
+          id?: string
+          question: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          difficulty?: string
+          id?: string
+          question?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -244,6 +371,77 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      quiz_scores: {
+        Row: {
+          date_played: string
+          id: string
+          score: number
+          total_questions: number
+          user_id: string | null
+        }
+        Insert: {
+          date_played?: string
+          id?: string
+          score: number
+          total_questions: number
+          user_id?: string | null
+        }
+        Update: {
+          date_played?: string
+          id?: string
+          score?: number
+          total_questions?: number
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      receivables: {
+        Row: {
+          amount: number
+          category_id: string | null
+          created_at: string
+          customer: string
+          description: string
+          due_date: string
+          id: string
+          payment_date: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          category_id?: string | null
+          created_at?: string
+          customer: string
+          description: string
+          due_date: string
+          id?: string
+          payment_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          category_id?: string | null
+          created_at?: string
+          customer?: string
+          description?: string
+          due_date?: string
+          id?: string
+          payment_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "receivables_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "financial_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       role_permissions: {
         Row: {
@@ -299,6 +497,45 @@ export type Database = {
           id?: string
           is_system_role?: boolean | null
           name?: string
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string
+          id: string
+          notes: string | null
+          reference_id: string | null
+          reference_type: string | null
+          transaction_date: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description: string
+          id?: string
+          notes?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          transaction_date: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string
+          id?: string
+          notes?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          transaction_date?: string
+          type?: string
+          updated_at?: string
         }
         Relationships: []
       }

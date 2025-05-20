@@ -1,16 +1,16 @@
 
-// Re-export components from their direct file paths
+// Exportações explícitas para cada componente
 export { default as AIContentGenerator } from './content-generator/AIContentGenerator';
 export { default as AISettings } from './settings/AISettings';
 
-// Re-export types and services
+// Exportações de tipos e serviços
 export * from './types';
 export * from './configService';
 export * from './contentService';
 export * from './promptService';
 export * from './providerService';
 
-// Re-export utility components with their correct paths
+// Exportações explícitas de subcomponentes
 export { default as ConfigDisplay } from './settings/ConfigDisplay';
 export { default as ConfigDialog } from './settings/ConfigDialog';
 export { default as LoadingState } from './settings/LoadingState';

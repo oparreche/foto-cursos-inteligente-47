@@ -6,6 +6,7 @@ import AdminHeader from "@/components/admin/AdminHeader";
 import AdminContent from "@/components/admin/AdminContent";
 import AdminErrorDisplay from "@/components/admin/AdminErrorDisplay";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { toast } from "sonner";
 
 const Admin = () => {
   // Sempre habilitar diagnósticos durante desenvolvimento
@@ -25,6 +26,16 @@ const Admin = () => {
     console.log("Estado de autenticação:", { authenticated, userRole, isLoading, error });
     
     try {
+      // Verificar módulos críticos
+      console.log("Verificando disponibilidade de módulos críticos...");
+      import("@/components/admin/AIManagement")
+        .then(() => console.log("AIManagement importado com sucesso"))
+        .catch(err => {
+          console.error("Erro ao importar AIManagement:", err);
+          setErrorInfo("Falha ao carregar o módulo AIManagement: " + err.message);
+          toast.error("Erro ao carregar módulo IA");
+        });
+      
       // Adicionar uma verificação de montagem bem-sucedida
       setTimeout(() => {
         if (!document.querySelector("[data-admin-rendered='true']")) {
@@ -37,12 +48,14 @@ const Admin = () => {
       const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
         console.error("Rejeição não tratada:", event.reason);
         setErrorInfo(`Erro não tratado: ${event.reason?.message || String(event.reason)}`);
+        toast.error("Erro não tratado detectado");
       };
       
       // Capturar erros JavaScript
       const handleError = (event: ErrorEvent) => {
         console.error("Erro JavaScript:", event.message);
         setErrorInfo(`Erro JavaScript: ${event.message}`);
+        toast.error("Erro JavaScript detectado");
       };
       
       window.addEventListener('unhandledrejection', handleUnhandledRejection);
@@ -52,12 +65,24 @@ const Admin = () => {
       const handleKeyDown = (e: KeyboardEvent) => {
         if (e.key === 'D' && e.ctrlKey) {
           setShowDiagnostics(prev => !prev);
+          toast.info(prev => prev ? "Diagnóstico desativado" : "Diagnóstico ativado");
         }
       };
       
       window.addEventListener('keydown', handleKeyDown);
       
       setHasRendered(true);
+      
+      // Simular navegação por hash se necessário
+      if (window.location.hash === "#ai") {
+        setTimeout(() => {
+          const aiTab = document.querySelector('[data-value="ai"]');
+          if (aiTab instanceof HTMLElement) {
+            console.log("Forçando abertura da aba AI por hash");
+            aiTab.click();
+          }
+        }, 500);
+      }
       
       return () => {
         window.removeEventListener('keydown', handleKeyDown);
@@ -67,6 +92,7 @@ const Admin = () => {
     } catch (err) {
       console.error("Erro no useEffect do Admin:", err);
       setErrorInfo(`Erro no ciclo de vida do Admin: ${err instanceof Error ? err.message : String(err)}`);
+      toast.error("Erro crítico no Admin");
       return () => {};
     }
   }, [authenticated, userRole, isLoading, error]);

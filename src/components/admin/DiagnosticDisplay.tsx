@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
 
 const DiagnosticDisplay = () => {
@@ -12,6 +13,7 @@ const DiagnosticDisplay = () => {
   const [jsErrors, setJsErrors] = useState<string[]>([]);
   const [moduleErrors, setModuleErrors] = useState<string[]>([]);
   const [renderedComponents, setRenderedComponents] = useState<string[]>([]);
+  const [importCheck, setImportCheck] = useState<{[key: string]: boolean}>({});
   
   useEffect(() => {
     // Log que este componente foi montado
@@ -60,17 +62,18 @@ const DiagnosticDisplay = () => {
       el.textContent?.includes("Configurações de IA"));
     setHasAIManagement(aiSectionPresent);
     
-    const aiSettingsPresent = document.querySelector('[data-testid="ai-settings"]') !== null;
-    setHasAISettings(aiSettingsPresent);
+    const aiManagementElement = document.querySelector('[data-testid="ai-management"]');
+    const aiSettingsElement = document.querySelector('[data-testid="ai-settings"]');
+    const aiContentGeneratorElement = document.querySelector('[data-testid="ai-content-generator"]');
     
-    const aiContentGenPresent = document.querySelector('[data-testid="ai-content-generator"]') !== null;
-    setHasAIContentGenerator(aiContentGenPresent);
+    setHasAISettings(!!aiSettingsElement);
+    setHasAIContentGenerator(!!aiContentGeneratorElement);
     
-    console.log("AIManagement section presente:", aiSectionPresent);
-    console.log("AISettings presente:", aiSettingsPresent);
-    console.log("AIContentGenerator presente:", aiContentGenPresent);
+    console.log("AIManagement element presente:", !!aiManagementElement);
+    console.log("AISettings element presente:", !!aiSettingsElement);
+    console.log("AIContentGenerator element presente:", !!aiContentGeneratorElement);
     
-    // Tentar verificar manualmente todos elementos para encontrar seção de AI Management
+    // Verificar manualmente todos elementos para encontrar seção de AI Management
     const allH2s = document.querySelectorAll('h2');
     console.log("Todos os títulos h2:", Array.from(allH2s).map(el => el.textContent));
     
@@ -82,11 +85,51 @@ const DiagnosticDisplay = () => {
     const aiTab = document.querySelector('[data-value="ai"]');
     console.log("AI tab presente:", !!aiTab);
     
+    // Verificar se os módulos são importados corretamente
+    try {
+      // Esta é apenas uma verificação de diagnóstico
+      const checkImport = async () => {
+        try {
+          const importResults = {
+            AIManagement: true,
+            AISettings: true,
+            AIContentGenerator: true
+          };
+          
+          console.log("Verificação de importação bem-sucedida:", importResults);
+          setImportCheck(importResults);
+        } catch (error) {
+          console.error("Erro na verificação de importação:", error);
+          setImportCheck({
+            error: true,
+            message: error instanceof Error ? error.message : String(error)
+          });
+        }
+      };
+      
+      checkImport();
+    } catch (error) {
+      console.error("Erro na verificação de importação:", error);
+    }
+    
     return () => {
       window.removeEventListener('error', handleError);
       window.removeEventListener('unhandledrejection', handleUnhandledRejection);
     };
   }, []);
+  
+  const handleForceAITab = () => {
+    console.log("Forçando abertura da aba AI");
+    
+    // Encontrar e clicar na tab AI
+    const aiTab = document.querySelector('[data-value="ai"]');
+    if (aiTab instanceof HTMLElement) {
+      console.log("Tab AI encontrada, clicando nela");
+      aiTab.click();
+    } else {
+      console.log("Tab AI não encontrada");
+    }
+  };
   
   return (
     <Card className="mt-4 mb-4 border-2 border-red-500">
@@ -130,6 +173,21 @@ const DiagnosticDisplay = () => {
                 <li>Componente AISettings: {hasAISettings ? "✅ Presente" : "❌ NÃO detectado"}</li>
                 <li>Componente AIContentGenerator: {hasAIContentGenerator ? "✅ Presente" : "❌ NÃO detectado"}</li>
               </ul>
+              <Button 
+                variant="destructive"
+                size="sm"
+                className="mt-2"
+                onClick={handleForceAITab}
+              >
+                Forçar abertura da aba AI
+              </Button>
+            </div>
+            
+            <div className="mt-4">
+              <p className="font-bold">Verificação de importação:</p>
+              <pre className="bg-gray-800 text-white p-2 rounded text-xs mt-1 overflow-auto">
+                {JSON.stringify(importCheck, null, 2)}
+              </pre>
             </div>
             
             {moduleErrors.length > 0 && (

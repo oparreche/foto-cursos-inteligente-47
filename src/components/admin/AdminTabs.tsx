@@ -8,6 +8,7 @@ import BlogManagement from "@/components/admin/BlogManagement";
 import UserManagement from "@/components/admin/UserManagement";
 import PaymentGateway from "@/components/admin/PaymentGateway";
 import Dashboard from "@/components/admin/Dashboard";
+// Importação direta do componente AIManagement
 import AIManagement from "@/components/admin/AIManagement";
 import { Layers, BookOpen, FileText, LayoutDashboard, Users, CreditCard, BrainCircuit } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -72,6 +73,9 @@ const AdminTabs = () => {
       // Registrar rota atual para depuração
       console.log("Rota atual:", window.location.pathname);
       console.log("Hash atual:", window.location.hash);
+      
+      // Verificar se AIManagement está disponível
+      console.log("AIManagement está disponível para importação:", typeof AIManagement !== 'undefined');
     } catch (error) {
       console.error("Erro no AdminTabs useEffect:", error);
       setHasError(true);

@@ -46,13 +46,14 @@ export async function assignHighestAdminRole(userId: string) {
 // Get all available roles
 export async function getRoles(): Promise<Role[]> {
   try {
+    // Use type casting as a workaround for TypeScript limitations with Supabase client
     const { data, error } = await supabase
-      .from('roles')
+      .from('roles' as any)
       .select('*')
       .order('name');
     
     if (error) throw error;
-    return data || [];
+    return (data as unknown as Role[]) || [];
   } catch (error) {
     console.error("Erro ao buscar funções:", error);
     toast.error("Erro ao carregar funções");
@@ -80,9 +81,13 @@ export async function getUserRoles(userId: string): Promise<UserRole[]> {
 // Assign role to user
 export async function assignRoleToUser(userId: string, role: string): Promise<boolean> {
   try {
+    // Use type casting as a workaround for TypeScript limitations
     const { error } = await supabase
       .from('user_roles')
-      .upsert({ user_id: userId, role });
+      .upsert({ 
+        user_id: userId, 
+        role: role 
+      } as any);
     
     if (error) throw error;
     toast.success("Função atribuída com sucesso!");
@@ -115,14 +120,15 @@ export async function removeRoleFromUser(userRoleId: string): Promise<boolean> {
 // Get role permissions
 export async function getRolePermissions(role: string): Promise<RolePermission[]> {
   try {
+    // Use type casting as a workaround for TypeScript limitations
     const { data, error } = await supabase
-      .from('role_permissions')
+      .from('role_permissions' as any)
       .select('*')
       .eq('role', role)
       .order('module');
     
     if (error) throw error;
-    return data || [];
+    return (data as unknown as RolePermission[]) || [];
   } catch (error) {
     console.error("Erro ao buscar permissões:", error);
     toast.error("Erro ao carregar permissões");
@@ -138,8 +144,9 @@ export async function updateRolePermission(
   value: boolean
 ): Promise<boolean> {
   try {
+    // Use type casting as a workaround for TypeScript limitations
     const { error } = await supabase
-      .from('role_permissions')
+      .from('role_permissions' as any)
       .update({ [permissionType]: value })
       .eq('role', role)
       .eq('module', module);

@@ -3,7 +3,23 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { BlogPost } from "@/hooks/useBlogPosts";
+
+export interface BlogPost {
+  id: string;
+  title: string;
+  content?: string;
+  excerpt?: string;
+  slug: string;
+  image_url?: string;
+  published_at?: string;
+  created_at?: string;
+  updated_at?: string;
+  status?: string;
+  categories?: string[];
+  author?: string;
+  author_id?: string;
+  read_time?: string;
+}
 
 export const useBlogManagement = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -98,14 +114,14 @@ export const useBlogManagement = () => {
       }
       
       // Add author_id to the post if not already set
-      const postWithAuthorId = {
+      const postToCreate = {
         ...post,
         author_id: post.author_id || currentUserId
       };
       
       const { data, error } = await supabase
         .from('blog_posts')
-        .insert([postWithAuthorId])
+        .insert([postToCreate])
         .select()
         .single();
       

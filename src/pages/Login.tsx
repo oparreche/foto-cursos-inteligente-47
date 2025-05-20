@@ -28,12 +28,16 @@ const Login = () => {
     if (params.get("register") === "true") {
       setDefaultTab("register");
     }
+    
+    // Reset confirmation alert when component mounts
+    setShowConfirmationAlert(false);
   }, [location]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setErrorMessage("");
+    setShowConfirmationAlert(false);
     
     try {
       const { error } = await supabase.auth.signInWithPassword({
@@ -49,6 +53,7 @@ const Login = () => {
           setErrorMessage("O login por email está desativado no Supabase. Ative-o nas configurações de autenticação.");
           toast.error("Login por email desativado no Supabase");
         } else if (error.message === "Email not confirmed") {
+          // Only show confirmation alert if this specific error occurs
           setShowConfirmationAlert(true);
           toast.error("É necessário confirmar o email antes de fazer login");
         } else {
@@ -70,6 +75,7 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     setErrorMessage("");
+    setShowConfirmationAlert(false);
     
     try {
       const { error, data } = await supabase.auth.signUp({
@@ -88,8 +94,19 @@ const Login = () => {
           throw error;
         }
       } else {
-        setShowConfirmationAlert(true);
-        toast.success("Cadastro realizado! Verifique seu email para confirmar sua conta.");
+        // Only show confirmation alert if email verification is needed
+        if (data?.user?.identities?.[0]?.identity_data?.email_verified === false) {
+          setShowConfirmationAlert(true);
+          toast.success("Cadastro realizado! Verifique seu email para confirmar sua conta.");
+        } else {
+          toast.success("Cadastro realizado com sucesso!");
+          // Automatically log the user in after successful registration
+          await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
+          navigate("/admin");
+        }
       }
     } catch (error: any) {
       toast.error(`Erro ao criar conta: ${error.message}`);

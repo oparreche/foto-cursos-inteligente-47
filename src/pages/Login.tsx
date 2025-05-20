@@ -17,6 +17,7 @@ const Login = () => {
   const [password, setPassword] = useState("*Putz123");
   const [loading, setLoading] = useState(false);
   const [showConfirmationAlert, setShowConfirmationAlert] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
   const [defaultTab, setDefaultTab] = useState("login");
@@ -32,6 +33,7 @@ const Login = () => {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMessage("");
     
     try {
       const { error } = await supabase.auth.signInWithPassword({
@@ -40,7 +42,13 @@ const Login = () => {
       });
       
       if (error) {
-        if (error.message === "Email not confirmed") {
+        console.error("Login error:", error);
+        
+        if (error.message.includes("Email provider is not enabled") || 
+            error.message.includes("Email logins are disabled")) {
+          setErrorMessage("O login por email está desativado no Supabase. Ative-o nas configurações de autenticação.");
+          toast.error("Login por email desativado no Supabase");
+        } else if (error.message === "Email not confirmed") {
           setShowConfirmationAlert(true);
           toast.error("É necessário confirmar o email antes de fazer login");
         } else {
@@ -61,6 +69,7 @@ const Login = () => {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMessage("");
     
     try {
       const { error, data } = await supabase.auth.signUp({
@@ -68,10 +77,20 @@ const Login = () => {
         password,
       });
       
-      if (error) throw error;
-      
-      setShowConfirmationAlert(true);
-      toast.success("Cadastro realizado! Verifique seu email para confirmar sua conta.");
+      if (error) {
+        console.error("Signup error:", error);
+        
+        if (error.message.includes("Email provider is not enabled") || 
+            error.message.includes("Email logins are disabled")) {
+          setErrorMessage("O registro por email está desativado no Supabase. Ative-o nas configurações de autenticação.");
+          toast.error("Registro por email desativado no Supabase");
+        } else {
+          throw error;
+        }
+      } else {
+        setShowConfirmationAlert(true);
+        toast.success("Cadastro realizado! Verifique seu email para confirmar sua conta.");
+      }
     } catch (error: any) {
       toast.error(`Erro ao criar conta: ${error.message}`);
       console.error("Erro completo:", error);
@@ -90,6 +109,15 @@ const Login = () => {
               Entre com suas credenciais para acessar o painel administrativo.
             </CardDescription>
           </CardHeader>
+          
+          {errorMessage && (
+            <Alert className="mx-6 mb-4 bg-red-50">
+              <Info className="h-4 w-4 text-red-500" />
+              <AlertDescription className="text-red-700">
+                {errorMessage}
+              </AlertDescription>
+            </Alert>
+          )}
           
           {showConfirmationAlert && (
             <Alert className="mx-6 mb-4 bg-blue-50">

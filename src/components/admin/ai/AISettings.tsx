@@ -15,15 +15,21 @@ const AISettings = () => {
     isEditDialogOpen, 
     setIsEditDialogOpen,
     handleSaveConfig,
-    isUpdating
+    isUpdating,
+    refetch
   } = useAISettings();
+  
+  const handleRetry = () => {
+    console.log("Tentando novamente...");
+    if (refetch) refetch();
+  };
   
   if (isLoading) {
     return <LoadingState />;
   }
   
   if (error) {
-    return <ErrorState />;
+    return <ErrorState onRetry={handleRetry} />;
   }
   
   return (

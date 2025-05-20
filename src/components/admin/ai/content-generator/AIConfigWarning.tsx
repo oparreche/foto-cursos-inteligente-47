@@ -19,31 +19,28 @@ const AIConfigWarning = memo(({ isConfigured }: AIConfigWarningProps) => {
   
   // Use useCallback to prevent recreating this function on each render
   const handleGoToSettings = useCallback(() => {
-    console.log("Tentando encontrar e rolar até a seção de configurações");
+    console.log("Navegando para seção de configurações");
     
-    // Find and select the AI tab first if not already selected
-    const aiTab = document.querySelector('[data-value="ai"]');
-    if (aiTab instanceof HTMLElement) {
-      console.log("Tab de IA encontrada, clicando nela");
-      aiTab.click();
-      
-      // After a small delay to ensure the tab content is rendered
-      setTimeout(() => {
-        // Find the settings section heading
-        const settingsHeading = Array.from(document.querySelectorAll('h2'))
-          .find(el => el.textContent?.includes("Configurações de IA"));
-        
-        if (settingsHeading) {
-          console.log("Seção de configurações encontrada, rolando até ela");
-          settingsHeading.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        } else {
-          console.log("Seção de configurações não encontrada, rolando para o topo");
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-      }, 300);
+    // Find the AISettings element directly
+    const settingsElement = document.querySelector('[data-testid="ai-settings"]');
+    
+    if (settingsElement) {
+      console.log("Elemento de configurações encontrado, rolando até ele");
+      settingsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } else {
-      console.log("Tab de IA não encontrada, rolando para o topo");
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      console.log("Elemento de configurações não encontrado, verificando cabeçalho");
+      
+      // Try finding by heading text as fallback
+      const settingsHeading = Array.from(document.querySelectorAll('h2'))
+        .find(el => el.textContent?.includes("Configurações de IA"));
+      
+      if (settingsHeading) {
+        console.log("Cabeçalho de configurações encontrado, rolando até ele");
+        settingsHeading.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        console.log("Nada encontrado, rolando para o topo");
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     }
   }, []);
   

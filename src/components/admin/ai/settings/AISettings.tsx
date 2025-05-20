@@ -24,12 +24,13 @@ const AISettings = memo(() => {
   
   // Add a memoized retry handler to avoid recreating on every render
   const handleRetry = useCallback(() => {
-    console.log("Tentando novamente...");
+    console.log("Tentando novamente carregar configurações...");
     if (refetch) refetch();
   }, [refetch]);
   
   // Use a handler function for opening the dialog to avoid inline functions
   const openEditDialog = useCallback(() => {
+    console.log("Abrindo diálogo de edição");
     setIsEditDialogOpen(true);
   }, [setIsEditDialogOpen]);
   

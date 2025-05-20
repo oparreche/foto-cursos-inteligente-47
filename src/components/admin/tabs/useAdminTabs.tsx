@@ -13,7 +13,7 @@ export const useAdminTabs = () => {
       setIsClient(true);
       
       // Define allowed tabs and validate hash
-      const allowedTabs = ["ai", "dashboard", "classes", "courses", "blog", "users", "payments"];
+      const allowedTabs = ["ai", "dashboard", "classes", "courses", "blog", "users", "finance", "payments"];
       const hashValue = window.location.hash.substring(1);
       console.log("Hash detectado:", hashValue || "(nenhum)");
       

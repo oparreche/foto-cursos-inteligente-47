@@ -26,7 +26,7 @@ export const TabContents: React.FC<TabContentsProps> = ({ userRole = "", showDia
 
       <TabsContent value="users">
         <TabContentWrapper label="Gerenciamento de Usuários">
-          {/* Cast to any to bypass TypeScript's type checking */}
+          {/* Use React.createElement to bypass TypeScript's type checking */}
           {React.createElement(UserManagement, { userRole } as any)}
         </TabContentWrapper>
       </TabsContent>
@@ -45,7 +45,7 @@ export const TabContents: React.FC<TabContentsProps> = ({ userRole = "", showDia
 
       <TabsContent value="blog">
         <TabContentWrapper label="Gerenciamento do Blog">
-          {/* Cast to any to bypass TypeScript's type checking */}
+          {/* Use React.createElement to bypass TypeScript's type checking */}
           {React.createElement(BlogManagement, { showDiagnostics } as any)}
         </TabContentWrapper>
       </TabsContent>

@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, Camera } from "lucide-react";
+import { Menu, X, Camera, User, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Header = () => {
@@ -80,9 +80,22 @@ const Header = () => {
             >
               Sobre
             </Link>
-            <Link to="/area-do-aluno">
-              <Button variant="default" size="sm">
+            <Link
+              to="/area-do-aluno"
+              className="text-foreground/90 hover:text-foreground font-medium transition-colors"
+            >
+              <Button variant="outline" size="sm" className="flex items-center gap-1">
+                <User size={16} />
                 Área do Aluno
+              </Button>
+            </Link>
+            <Link
+              to="/admin"
+              className="text-foreground/90 hover:text-foreground font-medium transition-colors"
+            >
+              <Button variant="default" size="sm" className="flex items-center gap-1">
+                <Settings size={16} />
+                Admin
               </Button>
             </Link>
           </nav>
@@ -140,9 +153,18 @@ const Header = () => {
             <Link
               to="/area-do-aluno"
               onClick={closeMenu}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-center"
+              className="px-4 py-2 flex items-center space-x-2 bg-muted text-foreground rounded-md"
             >
-              Área do Aluno
+              <User size={16} />
+              <span>Área do Aluno</span>
+            </Link>
+            <Link
+              to="/admin"
+              onClick={closeMenu}
+              className="px-4 py-2 flex items-center space-x-2 bg-primary text-primary-foreground rounded-md"
+            >
+              <Settings size={16} />
+              <span>Admin</span>
             </Link>
           </nav>
         </div>

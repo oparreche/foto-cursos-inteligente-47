@@ -45,7 +45,7 @@ const AIContentGenerator = ({ onSelectContent }: AIContentGeneratorProps) => {
   }, [aiConfig]);
 
   // Safe check for configuration
-  const aiConfigured = !!aiConfig?.apiKey;
+  const aiConfigured = aiConfig?.apiKey ? true : false;
 
   const handleGenerateContent = async () => {
     setIsGenerating(true);

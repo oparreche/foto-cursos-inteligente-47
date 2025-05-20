@@ -53,7 +53,7 @@ const AISettings = () => {
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
               Não foi possível carregar as configurações de IA. Verifique sua conexão com o banco de dados.
-              <Button variant="outline" size="sm" onClick={handleRetry} className="mt-2">
+              <Button variant="outline" size="sm" className="mt-2" onClick={handleRetry}>
                 Tentar novamente
               </Button>
             </AlertDescription>

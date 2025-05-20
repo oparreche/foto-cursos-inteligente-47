@@ -18,13 +18,19 @@ interface TabContentsProps {
 export const TabContents: React.FC<TabContentsProps> = ({ userRole = "", showDiagnostics = false }) => {
   // Debug logs para ajudar na identificação de problemas
   useEffect(() => {
-    if (showDiagnostics) {
-      console.log("TabContents renderizando com props:", { userRole, showDiagnostics });
-    }
+    console.log("TabContents renderizando com props:", { userRole, showDiagnostics });
+    console.log("URL atual:", window.location.href);
     
     // Verificar se todos os valores de abas estão corretos
     const tabValues = ["dashboard", "users", "courses", "classes", "blog", "ai", "finance"];
     console.log("Abas disponíveis para renderização:", tabValues);
+    
+    // Verificar se a aba finance está sendo renderizada corretamente
+    setTimeout(() => {
+      const financeTab = document.querySelector('[data-value="finance"]');
+      console.log("Aba finance encontrada:", !!financeTab);
+      console.log("Estado da aba finance:", financeTab?.getAttribute('data-state'));
+    }, 200);
   }, [userRole, showDiagnostics]);
   
   return (

@@ -43,16 +43,17 @@ export const useAdminTabs = () => {
           
           if (!activeTabContent) {
             console.log(`Forçando atualização de hash para aba: ${hashValue}`);
-            // Solução para problemas de sincronização em alguns navegadores
-            setTimeout(() => {
-              window.location.hash = hashValue;
-            }, 100);
+            // Forçar redefinição da aba ativa
+            setActiveTab(hashValue);
           }
         }, 300);
       } else {
         console.log("Usando dashboard como aba padrão");
-        setActiveTab("dashboard");
-        if (!hashValue) {
+        // Se estamos na rota /admin#finance mas o hashValue não está na lista, forçar para finance
+        if (window.location.pathname === "/admin" && window.location.hash === "#finance") {
+          setActiveTab("finance");
+          window.location.hash = "finance";
+        } else if (!hashValue) {
           window.location.hash = "dashboard";
         }
       }

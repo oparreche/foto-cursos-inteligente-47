@@ -9,9 +9,17 @@ import {
   TrendingUp, 
   RefreshCcw, 
   Tag, 
-  Settings 
+  Settings,
+  Plus
 } from 'lucide-react';
 import PaymentGateway from "./PaymentGateway";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import ReceivableForm from "./finance/ReceivableForm";
+import PayableForm from "./finance/PayableForm";
+import RefundForm from "./finance/RefundForm";
+import TransactionForm from "./finance/TransactionForm";
+import { toast } from "sonner";
 
 interface FinanceManagementProps {
   userRole?: string;
@@ -20,6 +28,10 @@ interface FinanceManagementProps {
 
 const FinanceManagement: React.FC<FinanceManagementProps> = ({ userRole = "", showDiagnostics = false }) => {
   const [activeTab, setActiveTab] = useState<string>("dashboard");
+  const [openReceivable, setOpenReceivable] = useState(false);
+  const [openPayable, setOpenPayable] = useState(false);
+  const [openRefund, setOpenRefund] = useState(false);
+  const [openTransaction, setOpenTransaction] = useState(false);
   
   useEffect(() => {
     console.log("FinanceManagement mounted with props:", { userRole, showDiagnostics });
@@ -63,6 +75,76 @@ const FinanceManagement: React.FC<FinanceManagementProps> = ({ userRole = "", sh
             <BarChart2 className="h-8 w-8 text-blue-500" />
           </div>
         </Card>
+      </div>
+
+      <div className="flex flex-wrap gap-2 mb-4">
+        <Dialog open={openReceivable} onOpenChange={setOpenReceivable}>
+          <DialogTrigger asChild>
+            <Button variant="default" className="flex items-center gap-2">
+              <Plus className="h-4 w-4" /> Conta a Receber
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Novo lançamento - Conta a Receber</DialogTitle>
+            </DialogHeader>
+            <ReceivableForm onSuccess={() => {
+              setOpenReceivable(false);
+              toast.success("Conta a receber adicionada com sucesso!");
+            }} />
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={openPayable} onOpenChange={setOpenPayable}>
+          <DialogTrigger asChild>
+            <Button variant="default" className="flex items-center gap-2">
+              <Plus className="h-4 w-4" /> Conta a Pagar
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Novo lançamento - Conta a Pagar</DialogTitle>
+            </DialogHeader>
+            <PayableForm onSuccess={() => {
+              setOpenPayable(false);
+              toast.success("Conta a pagar adicionada com sucesso!");
+            }} />
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={openRefund} onOpenChange={setOpenRefund}>
+          <DialogTrigger asChild>
+            <Button variant="default" className="flex items-center gap-2">
+              <Plus className="h-4 w-4" /> Estorno
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Novo Estorno</DialogTitle>
+            </DialogHeader>
+            <RefundForm onSuccess={() => {
+              setOpenRefund(false);
+              toast.success("Estorno registrado com sucesso!");
+            }} />
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={openTransaction} onOpenChange={setOpenTransaction}>
+          <DialogTrigger asChild>
+            <Button variant="default" className="flex items-center gap-2">
+              <Plus className="h-4 w-4" /> Transação
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Nova Transação</DialogTitle>
+            </DialogHeader>
+            <TransactionForm onSuccess={() => {
+              setOpenTransaction(false);
+              toast.success("Transação registrada com sucesso!");
+            }} />
+          </DialogContent>
+        </Dialog>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>

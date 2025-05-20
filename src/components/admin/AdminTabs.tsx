@@ -28,6 +28,9 @@ const AdminTabs: React.FC<AdminTabsProps> = ({ userRole = "", showDiagnostics = 
       
       const financeContent = document.querySelector('[data-value="finance"]');
       console.log("Elemento de conteúdo financeiro presente:", !!financeContent);
+      
+      // Log da rota atual para verificar se está em hash "#finance"
+      console.log("URL hash atual:", window.location.hash);
     }, 300);
   }, [userRole, showDiagnostics]);
   

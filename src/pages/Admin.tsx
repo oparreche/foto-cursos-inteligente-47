@@ -13,15 +13,18 @@ const Admin = () => {
   const [userRole, setUserRole] = useState('viewer');
   const [isLoading, setIsLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        console.log("Admin page - checking authentication");
         const { data: { session } } = await supabase.auth.getSession();
         const isAuthenticated = !!session?.user;
         setAuthenticated(isAuthenticated);
         
         if (session?.user) {
+          console.log("User authenticated:", session.user.email);
           setUserId(session.user.id);
           
           // Verificar se existe algum usuário na tabela user_roles
@@ -31,36 +34,37 @@ const Admin = () => {
             
           if (countError) {
             console.error("Erro ao verificar contagem de funções:", countError);
+            setError("Erro ao verificar permissões de usuário");
           } else if (roleCount === 0) {
             console.log("Nenhuma função encontrada, configurando primeiro usuário como administrador");
             
             // Se não existe nenhum usuário com função, o primeiro usuário se torna admin
-            if (session.user.email === "midiaputz@gmail.com") {
-              await assignHighestAdminRole(session.user.id);
+            await assignHighestAdminRole(session.user.id);
+            setUserRole('super_admin');
+          } else {
+            // Fetch the user's role from the user_roles table
+            const { data: roleData, error: roleError } = await supabase
+              .from('user_roles')
+              .select('role')
+              .eq('user_id', session.user.id)
+              .single();
+              
+            if (roleError && roleError.code !== 'PGRST116') {
+              console.error("Erro ao buscar função do usuário:", roleError);
+              setError("Erro ao verificar permissões de usuário");
             } else {
-              await createAdminRole(session.user.id);
+              // Set the user role (default to viewer if not found)
+              const role = roleData?.role || 'viewer';
+              console.log("Função do usuário definida como:", role);
+              setUserRole(role);
             }
           }
-          
-          // Fetch the user's role from the user_roles table
-          const { data: roleData, error: roleError } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', session.user.id)
-            .single();
-            
-          if (roleError && roleError.code !== 'PGRST116') {
-            console.error("Erro ao buscar função do usuário:", roleError);
-            toast.error("Erro ao verificar permissões de usuário");
-          }
-          
-          // Set the user role (default to viewer if not found)
-          const role = roleData?.role || 'viewer';
-          setUserRole(role);
-          console.log("Função do usuário definida como:", role);
+        } else {
+          console.log("User not authenticated");
         }
       } catch (error) {
         console.error("Erro na verificação de autenticação:", error);
+        setError("Erro ao verificar autenticação");
         toast.error("Erro ao verificar autenticação");
       } finally {
         setIsLoading(false);
@@ -70,6 +74,7 @@ const Admin = () => {
     checkAuth();
     
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state changed:", event);
       const isAuthenticated = !!session?.user;
       setAuthenticated(isAuthenticated);
       
@@ -103,42 +108,17 @@ const Admin = () => {
     };
   }, []);
 
-  const createAdminRole = async (userId: string) => {
-    try {
-      // Check if the user already has a role
-      const { data: existingRole } = await supabase
-        .from('user_roles')
-        .select('*')
-        .eq('user_id', userId)
-        .single();
-
-      if (existingRole) {
-        console.log("Usuário já tem função atribuída");
-        return;
-      }
-
-      // Create admin role for the user
-      const { error } = await supabase
-        .from('user_roles')
-        .insert({ user_id: userId, role: 'admin' });
-
-      if (error) {
-        throw error;
-      }
-      
-      toast.success("Função de administrador atribuída automaticamente!");
-      setUserRole('admin');
-    } catch (error) {
-      console.error("Erro ao criar função de administrador:", error);
-      toast.error("Erro ao atribuir função de administrador");
-    }
-  };
-
   return (
     <MainLayout>
       <AdminAccess authenticated={authenticated} isLoading={isLoading}>
         <div className="container mx-auto px-4 py-8">
           <h1 className="text-3xl font-bold mb-6">Painel de Administração</h1>
+          
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+              {error}
+            </div>
+          )}
           
           <AdminTabs />
           

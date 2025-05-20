@@ -12,10 +12,21 @@ export const useAISettings = () => {
   const { 
     data: aiConfig,
     isLoading,
-    error
+    error,
+    refetch
   } = useQuery({
     queryKey: ['aiConfig'],
-    queryFn: getAIConfig
+    queryFn: async () => {
+      try {
+        const config = await getAIConfig();
+        console.log("AI Config loaded:", config);
+        return config;
+      } catch (err) {
+        console.error("Error loading AI config:", err);
+        toast.error("Erro ao carregar configurações de IA");
+        throw err;
+      }
+    }
   });
   
   // Update AI settings
@@ -26,12 +37,14 @@ export const useAISettings = () => {
       setIsEditDialogOpen(false);
       toast.success("Configurações de IA atualizadas com sucesso");
     },
-    onError: (error) => {
-      toast.error(`Erro ao atualizar configurações: ${error}`);
+    onError: (error: any) => {
+      console.error("Update error:", error);
+      toast.error(`Erro ao atualizar configurações: ${error?.message || 'Erro desconhecido'}`);
     }
   });
   
   const handleSaveConfig = (config: AIConfig) => {
+    console.log("Saving config:", config);
     updateConfigMutation.mutate(config);
   };
   
@@ -39,6 +52,7 @@ export const useAISettings = () => {
     aiConfig,
     isLoading,
     error,
+    refetch,
     isEditDialogOpen,
     setIsEditDialogOpen,
     handleSaveConfig,

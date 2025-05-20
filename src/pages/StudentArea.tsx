@@ -10,13 +10,25 @@ import StudentDashboard from "@/components/student/StudentDashboard";
 const StudentArea = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState(null);
   
+  // Check authentication status when the component mounts
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        console.log("Student area - checking authentication");
         const { data: { session } } = await supabase.auth.getSession();
-        console.log("Student area auth check:", !!session);
-        setIsLoggedIn(!!session);
+        console.log("Authentication check result:", { hasSession: !!session });
+        
+        if (session?.user) {
+          console.log("User is authenticated:", session.user.email);
+          setUser(session.user);
+          setIsLoggedIn(true);
+        } else {
+          console.log("No active session found");
+          setIsLoggedIn(false);
+          setUser(null);
+        }
       } catch (error) {
         console.error("Error checking authentication:", error);
         toast.error("Erro ao verificar autenticação");
@@ -26,15 +38,31 @@ const StudentArea = () => {
     };
     
     checkAuth();
+    
+    // Set up auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        console.log("Auth state changed:", event);
+        setIsLoggedIn(!!session);
+        setUser(session?.user || null);
+      }
+    );
+    
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const handleLogout = async () => {
     setIsLoading(true);
     try {
+      console.log("Attempting logout");
       await supabase.auth.signOut();
       setIsLoggedIn(false);
+      setUser(null);
       toast.success("Logout realizado com sucesso!");
     } catch (error: any) {
+      console.error("Logout error:", error);
       toast.error(`Erro ao fazer logout: ${error.message}`);
     } finally {
       setIsLoading(false);

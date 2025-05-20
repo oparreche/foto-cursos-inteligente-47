@@ -9,54 +9,59 @@ export const useAdminTabs = () => {
   
   useEffect(() => {
     try {
-      console.log("AdminTabs useEffect executando");
+      console.log("useAdminTabs hook initializing");
       setIsClient(true);
       
-      // Define allowed tabs and validate hash
-      const allowedTabs = ["ai", "dashboard", "classes", "courses", "blog", "users", "finance", "payments"];
-      const hashValue = window.location.hash.substring(1);
-      console.log("Hash detectado:", hashValue || "(nenhum)");
+      // Define allowed tabs explicitly including finance
+      const allowedTabs = [
+        "dashboard", 
+        "users", 
+        "courses", 
+        "classes", 
+        "blog", 
+        "ai", 
+        "finance",
+        "payments"
+      ];
       
-      // Set active tab based on valid hash or default to "dashboard"
+      // Get hash from URL or use default
+      const hashValue = window.location.hash.substring(1);
+      console.log("Current hash value:", hashValue || "(none)");
+      
       if (hashValue && allowedTabs.includes(hashValue)) {
-        console.log(`Tab ${hashValue} selecionada por hash`);
+        console.log(`Setting active tab to ${hashValue} from hash`);
         setActiveTab(hashValue);
         
-        // Force check for the tab content if that's the current hash
+        // Force tab content visibility check
         setTimeout(() => {
-          const tabContent = document.querySelector(`[data-value="${hashValue}"]`);
-          console.log(`${hashValue} TabContent presente após delay:`, !!tabContent);
+          const activeTabContent = document.querySelector(`[data-value="${hashValue}"]`);
+          const activeTabTrigger = document.querySelector(`[data-state="active"]`);
           
-          const tabTrigger = document.querySelector(`[data-state="active"]`);
-          console.log("Tab trigger ativo após delay:", tabTrigger?.getAttribute('value'));
+          console.log(`Tab content for ${hashValue} found:`, !!activeTabContent);
+          console.log(`Active tab trigger:`, activeTabTrigger?.getAttribute('value'));
           
-          if (!tabContent && tabTrigger) {
-            console.log("Forçando clique na tab:", hashValue);
+          // If tab content not found but trigger exists, force click
+          if (!activeTabContent && activeTabTrigger) {
+            console.log(`Forcing click on tab: ${hashValue}`);
             const targetTrigger = document.querySelector(`[value="${hashValue}"]`);
             if (targetTrigger instanceof HTMLElement) {
               targetTrigger.click();
             }
           }
-        }, 500);
+        }, 300);
       } else {
-        console.log("Definindo dashboard como tab padrão");
-        // Se não tiver hash ou se o hash for inválido, use "dashboard"
+        console.log("Using dashboard as default tab");
         setActiveTab("dashboard");
-        // Atualiza o hash para refletir a aba padrão se nenhum hash estiver presente
         if (!hashValue) {
           window.location.hash = "dashboard";
         }
       }
       
-      // Registrar rota atual para depuração
-      console.log("Rota atual:", window.location.pathname);
-      console.log("Hash final:", window.location.hash);
-      
-      // Adicionar evento listener para mudanças de hash
+      // Add hash change listener
       const handleHashChange = () => {
         const newHash = window.location.hash.substring(1);
         if (newHash && allowedTabs.includes(newHash)) {
-          console.log(`Mudança de hash detectada: ${newHash}`);
+          console.log(`Hash changed to: ${newHash}`);
           setActiveTab(newHash);
         }
       };
@@ -65,20 +70,19 @@ export const useAdminTabs = () => {
       return () => {
         window.removeEventListener('hashchange', handleHashChange);
       };
-      
     } catch (error) {
-      console.error("Erro no AdminTabs useEffect:", error);
+      console.error("Error in useAdminTabs hook:", error);
       setHasError(true);
-      setErrorMessage(error instanceof Error ? error.message : "Erro desconhecido");
+      setErrorMessage(error instanceof Error ? error.message : "Unknown error occurred");
     }
   }, []);
 
-  // Use useCallback para prevenir re-renderizações desnecessárias
+  // Handle tab change with useCallback
   const handleTabChange = useCallback((value: string) => {
-    console.log("Tab alterada para:", value);
+    console.log(`Tab changed to: ${value}`);
     setActiveTab(value);
     
-    // Atualizar hash na URL para manter a navegação consistente
+    // Update URL hash
     if (window.location.hash.substring(1) !== value) {
       window.location.hash = value;
     }

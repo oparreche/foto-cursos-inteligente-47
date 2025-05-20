@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
@@ -21,7 +21,17 @@ interface FinanceManagementProps {
 const FinanceManagement: React.FC<FinanceManagementProps> = ({ userRole = "", showDiagnostics = false }) => {
   const [activeTab, setActiveTab] = useState<string>("dashboard");
   
-  console.log("FinanceManagement rendered with:", { userRole, showDiagnostics });
+  useEffect(() => {
+    console.log("FinanceManagement mounted with props:", { userRole, showDiagnostics });
+    
+    // Check if component is visible in DOM
+    const isVisible = document.querySelector('[data-value="finance"]')?.getAttribute('data-state') === 'active';
+    console.log("FinanceManagement tab is visible:", isVisible);
+    
+    // Check if PaymentGateway component will render
+    const paymentTabExists = !!document.querySelector('[value="payment"]');
+    console.log("Payment tab element exists:", paymentTabExists);
+  }, [userRole, showDiagnostics]);
 
   return (
     <div className="space-y-8">

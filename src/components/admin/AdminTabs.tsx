@@ -14,28 +14,19 @@ interface AdminTabsProps {
 }
 
 const AdminTabs: React.FC<AdminTabsProps> = ({ userRole = "", showDiagnostics = false }) => {
-  // Log outside of JSX for better debugging
+  // Debug logs for troubleshooting
   useEffect(() => {
-    console.log("AdminTabs componente montado");
-    console.log("AdminTabs props:", { userRole, showDiagnostics });
-    // Debug log to check if the component is rendering
-    const tabsElement = document.querySelector('[role="tablist"]');
-    console.log("Tabs element presente no DOM:", !!tabsElement);
+    console.log("AdminTabs component mounted");
+    console.log("AdminTabs props received:", { userRole, showDiagnostics });
     
-    // Check active tab from hash
-    const hash = window.location.hash.substring(1);
-    console.log("Hash atual para tabs:", hash || "nenhum");
-    
-    // Force a check for the courses tab if that's the current hash
-    if (hash === "courses") {
-      setTimeout(() => {
-        const coursesContent = document.querySelector('[data-value="courses"]');
-        console.log("Courses content element encontrado:", !!coursesContent);
-        
-        const courseTabTrigger = document.querySelector('[data-state="active"]');
-        console.log("Tab trigger ativo:", courseTabTrigger?.getAttribute('value'));
-      }, 500);
-    }
+    // Check if the DOM is rendering properly
+    setTimeout(() => {
+      const tabElements = document.querySelectorAll('[role="tablist"] [role="tab"]');
+      console.log("Tab elements found:", tabElements.length);
+      
+      const tabContentElements = document.querySelectorAll('[data-state="inactive"], [data-state="active"]');
+      console.log("Tab content elements found:", tabContentElements.length);
+    }, 500);
   }, [userRole, showDiagnostics]);
   
   const {
@@ -50,8 +41,7 @@ const AdminTabs: React.FC<AdminTabsProps> = ({ userRole = "", showDiagnostics = 
     return <div className="p-4 text-center">Carregando interface de administração...</div>;
   }
 
-  // Debug rendering
-  console.log("AdminTabs renderizando com tab ativa:", activeTab);
+  console.log("AdminTabs rendering with active tab:", activeTab);
 
   return (
     <>

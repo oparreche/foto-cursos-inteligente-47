@@ -18,6 +18,17 @@ interface TabContentsProps {
 export const TabContents: React.FC<TabContentsProps> = ({ userRole = "", showDiagnostics = false }) => {
   console.log("TabContents rendering with props:", { userRole, showDiagnostics });
   
+  // Add additional debug info for tab content rendering
+  React.useEffect(() => {
+    setTimeout(() => {
+      const activeContent = document.querySelector('[data-state="active"]');
+      console.log("Active content element:", activeContent?.getAttribute('value'));
+      
+      const financeContent = document.querySelector('[data-value="finance"]');
+      console.log("Finance content element present:", !!financeContent);
+    }, 300);
+  }, []);
+  
   return (
     <>
       <TabsContent value="dashboard">

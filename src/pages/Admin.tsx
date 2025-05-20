@@ -9,8 +9,8 @@ import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { toast } from "sonner";
 
 const Admin = () => {
-  // Changed default to false to disable diagnostics by default
-  const [showDiagnostics, setShowDiagnostics] = useState(false);
+  // Set diagnostics to true for now to help debug issues
+  const [showDiagnostics, setShowDiagnostics] = useState(true);
   const [errorInfo, setErrorInfo] = useState<string | null>(null);
   const [hasRendered, setHasRendered] = useState(false);
   
@@ -22,87 +22,63 @@ const Admin = () => {
   } = useAdminAuth();
 
   useEffect(() => {
-    console.log("Admin page renderizada em", new Date().toISOString());
-    console.log("Estado de autenticação:", { authenticated, userRole, isLoading, error });
+    console.log("Admin page rendered at", new Date().toISOString());
+    console.log("Authentication state:", { authenticated, userRole, isLoading, error });
     
     try {
-      // Verificar módulos críticos
-      console.log("Verificando disponibilidade de módulos críticos...");
-      import("@/components/admin/AIManagement")
-        .then(() => console.log("AIManagement importado com sucesso"))
-        .catch(err => {
-          console.error("Erro ao importar AIManagement:", err);
-          setErrorInfo("Falha ao carregar o módulo AIManagement: " + err.message);
-          toast.error("Erro ao carregar módulo IA");
-        });
+      // Check for critical modules
+      console.log("Checking critical modules...");
       
-      // Verificar carregamento de módulos adicionais
-      import("@/components/admin/tabs/TabContents")
-        .then(() => console.log("TabContents importado com sucesso"))
-        .catch(err => {
-          console.error("Erro ao importar TabContents:", err);
-          setErrorInfo("Falha ao carregar o módulo TabContents: " + err.message);
-        });
+      // Check tab routing
+      const hash = window.location.hash.substring(1) || "dashboard";
+      console.log("Current tab route:", hash);
       
-      // Adicionar uma verificação de montagem bem-sucedida
-      setTimeout(() => {
-        if (!document.querySelector("[data-admin-rendered='true']")) {
-          console.error("Admin page não renderizou elementos esperados após timeout");
-          setErrorInfo(prev => prev || "Falha na renderização da página - componentes não encontrados no DOM");
-        }
-      }, 2000);
-      
-      // Capturar erros não tratados em promises
-      const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-        console.error("Rejeição não tratada:", event.reason);
-        setErrorInfo(`Erro não tratado: ${event.reason?.message || String(event.reason)}`);
-        toast.error("Erro não tratado detectado");
-      };
-      
-      // Capturar erros JavaScript
-      const handleError = (event: ErrorEvent) => {
-        console.error("Erro JavaScript:", event.message);
-        setErrorInfo(`Erro JavaScript: ${event.message}`);
-        toast.error("Erro JavaScript detectado");
-      };
-      
-      window.addEventListener('unhandledrejection', handleUnhandledRejection);
-      window.addEventListener('error', handleError);
-      
-      // Tornar o painel de diagnóstico alternável com atalho de teclado
+      // Add key event listener for diagnostics toggle
       const handleKeyDown = (e: KeyboardEvent) => {
         if (e.key === 'D' && e.ctrlKey) {
-          setShowDiagnostics(prev => !prev);
-          toast.info(showDiagnostics ? "Diagnóstico desativado" : "Diagnóstico ativado");
+          setShowDiagnostics(prev => {
+            const newValue = !prev;
+            toast.info(newValue ? "Diagnostics enabled" : "Diagnostics disabled");
+            return newValue;
+          });
         }
       };
       
       window.addEventListener('keydown', handleKeyDown);
       
+      // Check successful mounting
+      setTimeout(() => {
+        const adminElement = document.querySelector("[data-admin-rendered='true']");
+        console.log("Admin element found:", !!adminElement);
+        
+        if (!adminElement) {
+          console.error("Admin page failed to render expected elements");
+          setErrorInfo("Falha na renderização - elementos não encontrados");
+        }
+      }, 2000);
+      
       setHasRendered(true);
       
       return () => {
         window.removeEventListener('keydown', handleKeyDown);
-        window.removeEventListener('unhandledrejection', handleUnhandledRejection);
-        window.removeEventListener('error', handleError);
       };
     } catch (err) {
-      console.error("Erro no useEffect do Admin:", err);
-      setErrorInfo(`Erro no ciclo de vida do Admin: ${err instanceof Error ? err.message : String(err)}`);
-      toast.error("Erro crítico no Admin");
+      console.error("Error in Admin useEffect:", err);
+      setErrorInfo(`Error in Admin lifecycle: ${err instanceof Error ? err.message : String(err)}`);
+      toast.error("Critical Admin error");
       return () => {};
     }
-  }, [authenticated, userRole, isLoading, error, showDiagnostics]);
+  }, [authenticated, userRole, isLoading, error]);
 
-  // Adicionar um limite de segurança simples
+  // Safety catch for errors
   if (error || errorInfo) {
-    return <AdminErrorDisplay error={error || errorInfo || "Erro desconhecido na página Admin"} />;
+    return <AdminErrorDisplay error={error || errorInfo || "Unknown Admin page error"} />;
   }
 
   return (
     <MainLayout>
       <div data-admin-rendered="true">
-        {showDiagnostics && <AdminErrorDisplay error="Painel de diagnóstico (modo de depuração)" />}
+        {showDiagnostics && <AdminErrorDisplay error="Diagnostic panel (debug mode)" />}
         
         <AdminAccess authenticated={authenticated} isLoading={isLoading}>
           <div className="container mx-auto px-4 py-8">

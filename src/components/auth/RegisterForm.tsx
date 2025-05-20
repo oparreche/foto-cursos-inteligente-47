@@ -48,24 +48,24 @@ const RegisterForm = ({
           setErrorMessage("O registro por email está desativado no Supabase. Ative-o nas configurações de autenticação.");
           toast.error("Registro por email desativado no Supabase");
         } else {
-          throw error;
+          setErrorMessage(`Erro ao criar conta: ${error.message}`);
+          toast.error(`Erro ao criar conta: ${error.message}`);
         }
       } else {
-        // Only show confirmation alert if email verification is needed
-        if (data?.user?.identities?.[0]?.identity_data?.email_verified === false) {
+        // Check if email confirmation is needed
+        if (data?.user?.identities?.[0]?.identity_data?.email_verified === false && 
+            data?.session === null) {
+          // Email confirmation is required
           setShowConfirmationAlert(true);
           toast.success("Cadastro realizado! Verifique seu email para confirmar sua conta.");
         } else {
+          // No email confirmation needed, user is signed in
           toast.success("Cadastro realizado com sucesso!");
-          // Automatically log the user in after successful registration
-          await supabase.auth.signInWithPassword({
-            email,
-            password,
-          });
           navigate("/admin");
         }
       }
     } catch (error: any) {
+      setErrorMessage(`Erro ao criar conta: ${error.message}`);
       toast.error(`Erro ao criar conta: ${error.message}`);
       console.error("Erro completo:", error);
     } finally {

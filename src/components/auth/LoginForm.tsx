@@ -47,18 +47,20 @@ const LoginForm = ({
             error.message.includes("Email logins are disabled")) {
           setErrorMessage("O login por email está desativado no Supabase. Ative-o nas configurações de autenticação.");
           toast.error("Login por email desativado no Supabase");
-        } else if (error.message === "Email not confirmed") {
-          // Only show confirmation alert if this specific error occurs
+        } else if (error.message === "Email not confirmed" && error.status === 400) {
+          // Only show confirmation alert if email confirmation is required
           setShowConfirmationAlert(true);
           toast.error("É necessário confirmar o email antes de fazer login");
         } else {
-          throw error;
+          setErrorMessage(`Erro ao fazer login: ${error.message}`);
+          toast.error(`Erro ao fazer login: ${error.message}`);
         }
       } else {
         toast.success("Login realizado com sucesso!");
         navigate("/admin");
       }
     } catch (error: any) {
+      setErrorMessage(`Erro ao fazer login: ${error.message}`);
       toast.error(`Erro ao fazer login: ${error.message}`);
       console.error("Erro completo:", error);
     } finally {

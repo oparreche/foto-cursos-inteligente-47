@@ -19,11 +19,18 @@ const TabContents: React.FC = () => {
     
     // Check if tab content elements are in the DOM
     setTimeout(() => {
-      const aiTabContent = document.querySelector('[data-value="ai"]');
-      console.log("AI TabContent presente:", !!aiTabContent);
+      const activeTabContent = document.querySelector('[data-state="active"]');
+      console.log("Tab ativa presente:", !!activeTabContent);
       
-      const aiManagement = document.querySelector('[data-testid="ai-management"]');
-      console.log("AIManagement presente:", !!aiManagement);
+      if (activeTabContent) {
+        console.log("Tab ativa:", activeTabContent.getAttribute('value'));
+      }
+      
+      // Add explicit checks for each tab
+      ['dashboard', 'classes', 'courses', 'blog', 'users', 'payments', 'ai'].forEach(tab => {
+        const tabContent = document.querySelector(`[data-value="${tab}"]`);
+        console.log(`${tab} TabContent presente:`, !!tabContent);
+      });
     }, 500);
   }, []);
 
@@ -34,31 +41,37 @@ const TabContents: React.FC = () => {
           <Dashboard />
         </TabContentWrapper>
       </TabsContent>
+      
       <TabsContent value="classes" className="mt-0">
         <TabContentWrapper label="Classes">
           <ClassManagement />
         </TabContentWrapper>
       </TabsContent>
+      
       <TabsContent value="courses" className="mt-0">
         <TabContentWrapper label="Courses">
           <CourseManagement />
         </TabContentWrapper>
       </TabsContent>
+      
       <TabsContent value="blog" className="mt-0">
         <TabContentWrapper label="Blog">
           <BlogManagement />
         </TabContentWrapper>
       </TabsContent>
+      
       <TabsContent value="users" className="mt-0">
         <TabContentWrapper label="Users">
           <UserManagement />
         </TabContentWrapper>
       </TabsContent>
+      
       <TabsContent value="payments" className="mt-0">
         <TabContentWrapper label="Payments">
           <PaymentGateway />
         </TabContentWrapper>
       </TabsContent>
+      
       <TabsContent value="ai" className="mt-0">
         <TabContentWrapper label="AI">
           <AIManagement />

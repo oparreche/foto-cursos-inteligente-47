@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 
 export const useAdminTabs = () => {
-  const [activeTab, setActiveTab] = useState("ai"); // Changed default from "dashboard" to "ai"
+  const [activeTab, setActiveTab] = useState("dashboard");
   const [hasError, setHasError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isClient, setIsClient] = useState(false);
@@ -17,16 +17,16 @@ export const useAdminTabs = () => {
       const hashValue = window.location.hash.substring(1);
       console.log("Hash detectado:", hashValue || "(nenhum)");
       
-      // Set active tab based on valid hash or default to "ai"
-      if (allowedTabs.includes(hashValue)) {
+      // Set active tab based on valid hash or default to "dashboard"
+      if (hashValue && allowedTabs.includes(hashValue)) {
         console.log(`Tab ${hashValue} selecionada por hash`);
         setActiveTab(hashValue);
       } else {
-        console.log("Nenhum hash válido encontrado. Definindo AI como tab padrão");
-        setActiveTab("ai");
-        // Update hash to reflect the default tab
+        console.log("Definindo dashboard como tab padrão");
+        setActiveTab("dashboard");
+        // Update hash to reflect the default tab if no hash is present
         if (!window.location.hash) {
-          window.location.hash = "ai";
+          window.location.hash = "dashboard";
         }
       }
       

@@ -15,11 +15,13 @@ const AISettings = () => {
     isEditDialogOpen, 
     setIsEditDialogOpen,
     handleSaveConfig,
-    isUpdating
+    isUpdating,
+    refetch
   } = useAISettings();
   
   const handleRetry = () => {
-    window.location.reload();
+    console.log("Tentando novamente...");
+    refetch();
   };
   
   if (isLoading) {

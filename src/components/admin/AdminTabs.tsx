@@ -12,6 +12,8 @@ import AIManagement from "@/components/admin/AIManagement";
 import { Layers, BookOpen, FileText, LayoutDashboard, Users, CreditCard, BrainCircuit } from "lucide-react";
 
 const AdminTabs = () => {
+  console.log("AdminTabs renderizando");
+  
   return (
     <Tabs defaultValue="dashboard">
       <TabsList className="grid grid-cols-7 mb-8">
@@ -97,6 +99,7 @@ const AdminTabs = () => {
             <PaymentGateway />
           </TabsContent>
           <TabsContent value="ai" className="mt-0">
+            {console.log("Renderizando componente AIManagement")}
             <AIManagement />
           </TabsContent>
         </CardContent>

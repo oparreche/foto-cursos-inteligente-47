@@ -14,10 +14,12 @@ const AIConfigWarning = ({ isConfigured }: AIConfigWarningProps) => {
   
   const handleGoToSettings = () => {
     // Encontra a tab de configurações e clica nela
-    const settingsTabElement = document.querySelector('[data-state="inactive"][value="settings"]');
+    const settingsTabElement = document.querySelector('[data-value="settings"]');
     if (settingsTabElement instanceof HTMLElement) {
       settingsTabElement.click();
     } else {
+      console.log("Elemento de configurações não encontrado");
+      // Backup - scroll para o topo
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };

@@ -1,28 +1,14 @@
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { AIContentGenerator, AISettings } from "@/components/admin/ai";
 import { toast } from "sonner";
 
 const AIManagement = () => {
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  useEffect(() => {
-    console.log("AIManagement component mounted");
-    try {
-      console.log("AISettings component imported:", typeof AISettings);
-      console.log("AIContentGenerator component imported:", typeof AIContentGenerator);
-      setIsLoaded(true);
-    } catch (error) {
-      console.error("Error in AIManagement:", error);
-      toast.error("Erro ao carregar componentes de IA");
-    }
-  }, []);
-
-  if (!isLoaded) {
-    return <div className="p-4">Carregando componentes de IA...</div>;
-  }
-
+  console.log("AIManagement renderizando");
+  console.log("AISettings componente:", typeof AISettings);
+  console.log("AIContentGenerator componente:", typeof AIContentGenerator);
+  
   return (
     <div className="space-y-8">
       <section>

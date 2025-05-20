@@ -3,9 +3,9 @@ import React, { useEffect } from "react";
 import { Tabs } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { useAdminTabs } from "./tabs/useAdminTabs";
-import TabTriggers from "./tabs/TabTriggers";
+import { TabTriggers } from "./tabs/TabTriggers";
 import TabHeaders from "./tabs/TabHeaders";
-import TabContents from "./tabs/TabContents";
+import { TabContents } from "./tabs/TabContents";
 import ErrorAlert from "./tabs/ErrorAlert";
 
 const AdminTabs = () => {

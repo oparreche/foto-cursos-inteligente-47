@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 
 interface TabTriggersProps {
-  userRole: string;
+  userRole?: string;
 }
 
 export const TabTriggers = ({ userRole }: TabTriggersProps) => {
@@ -48,3 +48,5 @@ export const TabTriggers = ({ userRole }: TabTriggersProps) => {
     </TabsList>
   );
 };
+
+export default TabTriggers;

@@ -1,6 +1,5 @@
 
 import React, { useState } from "react";
-import PaymentGateway from "./payment/PaymentGateway";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
@@ -116,7 +115,10 @@ const FinanceManagement = () => {
         </TabsContent>
         
         <TabsContent value="payment">
-          <PaymentGateway />
+          <Card className="p-6">
+            <h3 className="text-lg font-semibold mb-4">Gateway de Pagamento</h3>
+            <p>Configure as integrações de pagamento.</p>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

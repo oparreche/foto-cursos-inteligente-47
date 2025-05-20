@@ -8,57 +8,59 @@ import ClassManagement from "@/components/admin/ClassManagement";
 import BlogManagement from "@/components/admin/BlogManagement";
 import AIManagement from "@/components/admin/AIManagement";
 import FinanceManagement from "@/components/admin/FinanceManagement";
-import { TabContentWrapper } from "@/components/admin/tabs/TabContentWrapper";
+import TabContentWrapper from "@/components/admin/tabs/TabContentWrapper";
 
 interface TabContentsProps {
-  userRole: string;
-  showDiagnostics: boolean;
+  userRole?: string;
+  showDiagnostics?: boolean;
 }
 
-export const TabContents = ({ userRole, showDiagnostics }: TabContentsProps) => {
+export const TabContents = ({ userRole = "", showDiagnostics = false }: TabContentsProps) => {
   return (
     <>
       <TabsContent value="dashboard">
-        <TabContentWrapper title="Dashboard">
+        <TabContentWrapper label="Dashboard">
           <Dashboard />
         </TabContentWrapper>
       </TabsContent>
 
       <TabsContent value="users">
-        <TabContentWrapper title="Gerenciamento de Usuários">
+        <TabContentWrapper label="Gerenciamento de Usuários">
           <UserManagement userRole={userRole} />
         </TabContentWrapper>
       </TabsContent>
 
       <TabsContent value="courses">
-        <TabContentWrapper title="Gerenciamento de Cursos">
+        <TabContentWrapper label="Gerenciamento de Cursos">
           <CourseManagement />
         </TabContentWrapper>
       </TabsContent>
 
       <TabsContent value="classes">
-        <TabContentWrapper title="Gerenciamento de Turmas">
+        <TabContentWrapper label="Gerenciamento de Turmas">
           <ClassManagement />
         </TabContentWrapper>
       </TabsContent>
 
       <TabsContent value="blog">
-        <TabContentWrapper title="Gerenciamento do Blog">
+        <TabContentWrapper label="Gerenciamento do Blog">
           <BlogManagement showDiagnostics={showDiagnostics} />
         </TabContentWrapper>
       </TabsContent>
 
       <TabsContent value="ai">
-        <TabContentWrapper title="Inteligência Artificial">
+        <TabContentWrapper label="Inteligência Artificial">
           <AIManagement />
         </TabContentWrapper>
       </TabsContent>
       
       <TabsContent value="finance">
-        <TabContentWrapper title="Sistema Financeiro">
+        <TabContentWrapper label="Sistema Financeiro">
           <FinanceManagement />
         </TabContentWrapper>
       </TabsContent>
     </>
   );
 };
+
+export default TabContents;

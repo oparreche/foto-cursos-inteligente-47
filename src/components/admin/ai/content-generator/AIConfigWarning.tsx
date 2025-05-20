@@ -2,13 +2,13 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, memo } from "react";
 
 interface AIConfigWarningProps {
   isConfigured: boolean;
 }
 
-const AIConfigWarning = ({ isConfigured }: AIConfigWarningProps) => {
+const AIConfigWarning = memo(({ isConfigured }: AIConfigWarningProps) => {
   useEffect(() => {
     console.log("AIConfigWarning rendered with isConfigured:", isConfigured);
   }, [isConfigured]);
@@ -18,7 +18,7 @@ const AIConfigWarning = ({ isConfigured }: AIConfigWarningProps) => {
   }
   
   // Define the handler with useCallback to prevent recreation on each render
-  const handleGoToSettings = useCallback(() => {
+  const handleGoToSettings = () => {
     // Scrolling to the settings section
     console.log("Tentando encontrar e rolar até a seção de configurações");
     
@@ -46,7 +46,7 @@ const AIConfigWarning = ({ isConfigured }: AIConfigWarningProps) => {
       console.log("Tab de IA não encontrada, rolando para o topo");
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  }, []); // Empty dependency array as this doesn't depend on props or state
+  };
   
   return (
     <Alert variant="destructive">
@@ -64,6 +64,8 @@ const AIConfigWarning = ({ isConfigured }: AIConfigWarningProps) => {
       </AlertDescription>
     </Alert>
   );
-};
+});
+
+AIConfigWarning.displayName = 'AIConfigWarning';
 
 export default AIConfigWarning;

@@ -59,13 +59,18 @@ export const useAISettings = () => {
     }
   });
   
+  // Wrap in useCallback to prevent recreation on each render
+  const setIsEditDialogOpenHandler = useCallback((value: boolean) => {
+    setIsEditDialogOpen(value);
+  }, []);
+  
   return {
     aiConfig,
     isLoading,
     error,
     refetch,
     isEditDialogOpen,
-    setIsEditDialogOpen,
+    setIsEditDialogOpen: setIsEditDialogOpenHandler,
     handleSaveConfig,
     isUpdating: updateConfigMutation.isPending
   };

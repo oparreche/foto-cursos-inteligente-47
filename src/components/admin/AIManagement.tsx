@@ -1,11 +1,9 @@
 
-import React, { useEffect } from 'react';
-
-// Import components directly from their source files to avoid duplicated imports
+import React, { useEffect, memo } from 'react';
 import AISettings from "@/components/admin/ai/settings/AISettings";
 import AIContentGenerator from "@/components/admin/ai/content-generator/AIContentGenerator";
 
-const AIManagement = () => {
+const AIManagement = memo(() => {
   useEffect(() => {
     console.log("AIManagement component mounted");
   }, []);
@@ -23,6 +21,8 @@ const AIManagement = () => {
       </section>
     </div>
   );
-};
+});
+
+AIManagement.displayName = 'AIManagement';
 
 export default AIManagement;

@@ -1,5 +1,5 @@
 
-import { useCallback } from "react";
+import { memo, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAISettings } from "@/hooks/useAISettings";
@@ -10,7 +10,7 @@ import ErrorState from "./ErrorState";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 
-const AISettings = () => {
+const AISettings = memo(() => {
   const { 
     aiConfig, 
     isLoading, 
@@ -27,6 +27,18 @@ const AISettings = () => {
     console.log("Tentando novamente...");
     if (refetch) refetch();
   }, [refetch]);
+  
+  // Use a handler function for opening the dialog to avoid inline functions
+  const openEditDialog = useCallback(() => {
+    setIsEditDialogOpen(true);
+  }, [setIsEditDialogOpen]);
+  
+  console.log("AISettings rendering with state:", { 
+    hasConfig: !!aiConfig, 
+    isLoading, 
+    hasError: !!error,
+    dialogOpen: isEditDialogOpen
+  });
   
   if (isLoading) {
     return <LoadingState />;
@@ -60,11 +72,6 @@ const AISettings = () => {
     );
   }
   
-  // Use a handler function for opening the dialog to avoid inline functions
-  const openEditDialog = useCallback(() => {
-    setIsEditDialogOpen(true);
-  }, [setIsEditDialogOpen]);
-  
   return (
     <Card data-testid="ai-settings">
       <CardHeader>
@@ -87,6 +94,8 @@ const AISettings = () => {
       />
     </Card>
   );
-};
+});
+
+AISettings.displayName = 'AISettings';
 
 export default AISettings;

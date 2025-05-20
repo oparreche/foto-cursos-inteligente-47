@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, memo } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ContentPrompt, AIResponse } from "@/components/admin/ai/types";
@@ -16,7 +16,7 @@ interface AIContentGeneratorProps {
   onSelectContent?: (content: string) => void;
 }
 
-const AIContentGenerator = ({ onSelectContent }: AIContentGeneratorProps) => {
+const AIContentGenerator = memo(({ onSelectContent }: AIContentGeneratorProps) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedContent, setGeneratedContent] = useState<AIResponse | null>(null);
   const [prompt, setPrompt] = useState<ContentPrompt>({
@@ -45,7 +45,7 @@ const AIContentGenerator = ({ onSelectContent }: AIContentGeneratorProps) => {
   }, [aiConfig]);
 
   // Safe check for configuration - prevent infinite loops by not calling setState here
-  const aiConfigured = aiConfig?.apiKey ? true : false;
+  const aiConfigured = !!aiConfig?.apiKey;
 
   const handleGenerateContent = useCallback(async () => {
     setIsGenerating(true);
@@ -67,6 +67,12 @@ const AIContentGenerator = ({ onSelectContent }: AIContentGeneratorProps) => {
       await navigator.clipboard.writeText(generatedContent.content);
     }
   }, [generatedContent]);
+
+  console.log("AIContentGenerator rendering:", {
+    isLoading,
+    isError,
+    aiConfigured
+  });
 
   // Show loading state
   if (isLoading) {
@@ -145,6 +151,8 @@ const AIContentGenerator = ({ onSelectContent }: AIContentGeneratorProps) => {
       </CardFooter>
     </Card>
   );
-};
+});
+
+AIContentGenerator.displayName = 'AIContentGenerator';
 
 export default AIContentGenerator;

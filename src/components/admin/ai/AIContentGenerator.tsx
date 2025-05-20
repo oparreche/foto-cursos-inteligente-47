@@ -1,431 +1,194 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useForm } from "react-hook-form";
-import { ContentPrompt, AIResponse, generateContent } from "@/components/admin/ai";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { toast } from "sonner";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area"; 
+import { ContentPrompt, AIResponse, generateContent } from "@/components/admin/ai";
+import { useQuery } from "@tanstack/react-query";
+import { getAIConfig } from "@/components/admin/ai";
 
 interface AIContentGeneratorProps {
   onSelectContent?: (content: string) => void;
-  aiConfigured?: boolean;
 }
 
-const AIContentGenerator = ({ onSelectContent, aiConfigured }: AIContentGeneratorProps) => {
+const AIContentGenerator = ({ onSelectContent }: AIContentGeneratorProps) => {
   const [contentType, setContentType] = useState<'blog' | 'course' | 'seo' | 'dashboard'>('blog');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedContent, setGeneratedContent] = useState<AIResponse | null>(null);
-  
-  const form = useForm<ContentPrompt>({
-    defaultValues: {
-      type: 'blog',
-      topic: '',
-      keywords: [],
-      targetAudience: '',
-      tone: 'formal',
-      length: 'medium',
-      additionalInstructions: '',
-    }
+  const [prompt, setPrompt] = useState<ContentPrompt>({
+    type: 'blog',
+    topic: '',
+    keywords: [],
+    targetAudience: '',
+    tone: 'casual',
+    length: 'medium'
   });
-  
-  const handleContentTypeChange = (value: 'blog' | 'course' | 'seo' | 'dashboard') => {
-    setContentType(value);
-    form.setValue('type', value);
-  };
-  
-  const handleKeywordsChange = (value: string) => {
-    const keywords = value.split(',').map(k => k.trim()).filter(k => k);
-    form.setValue('keywords', keywords);
-  };
-  
-  const handleSubmit = async (values: ContentPrompt) => {
+
+  // Fetch AI configuration to check if it's configured
+  const { data: aiConfig } = useQuery({
+    queryKey: ['aiConfig'],
+    queryFn: getAIConfig
+  });
+
+  const aiConfigured = !!aiConfig?.apiKey;
+
+  const handleGenerateContent = async () => {
     setIsGenerating(true);
-    
     try {
-      const response = await generateContent(values);
-      
-      if (response) {
-        setGeneratedContent(response);
+      const response = await generateContent(prompt);
+      setGeneratedContent(response);
+      if (response?.content && onSelectContent) {
+        onSelectContent(response.content);
       }
-    } catch (error) {
-      console.error("Error generating content:", error);
-      toast.error("Ocorreu um erro ao gerar o conteúdo");
     } finally {
       setIsGenerating(false);
     }
   };
-  
-  const handleUseContent = () => {
-    if (generatedContent && onSelectContent) {
-      onSelectContent(generatedContent.content);
+
+  const handleCopyToClipboard = async () => {
+    if (generatedContent?.content) {
+      await navigator.clipboard.writeText(generatedContent.content);
     }
   };
-  
+
   return (
-    <div className="space-y-6">
-      <Tabs value={contentType} onValueChange={(v) => handleContentTypeChange(v as any)}>
-        <TabsList className="grid grid-cols-4">
-          <TabsTrigger value="blog">Artigo de Blog</TabsTrigger>
-          <TabsTrigger value="course">Descrição de Curso</TabsTrigger>
-          <TabsTrigger value="seo">Otimização SEO</TabsTrigger>
-          <TabsTrigger value="dashboard">KPIs & Insights</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="blog" className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Gerar Artigo de Blog</CardTitle>
-              <CardDescription>Use IA para criar artigos de blog completos ou esboços</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Form {...form}>
-                <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
-                  <FormField
-                    name="topic"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Tópico</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Ex: Técnicas avançadas de edição de vídeo" {...field} />
-                        </FormControl>
-                        <FormDescription>
-                          O tema principal do artigo
-                        </FormDescription>
-                      </FormItem>
-                    )}
+    <Card>
+      <CardHeader>
+        <CardTitle>Gerador de Conteúdo com IA</CardTitle>
+        <CardDescription>
+          Crie conteúdo otimizado para diversas finalidades com o poder da inteligência artificial.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {!aiConfigured ? (
+          <div className="text-red-500">
+            <p>Atenção: As configurações de IA não foram definidas. Por favor, configure as credenciais de IA para usar este recurso.</p>
+          </div>
+        ) : (
+          <Tabs defaultValue="prompt" className="space-y-4">
+            <TabsList>
+              <TabsTrigger value="prompt">Configurações do Prompt</TabsTrigger>
+              <TabsTrigger value="content">Conteúdo Gerado</TabsTrigger>
+            </TabsList>
+            <TabsContent value="prompt" className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="contentType">Tipo de Conteúdo</Label>
+                  <Select onValueChange={(value) => setContentType(value as 'blog' | 'course' | 'seo' | 'dashboard')}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="blog">Blog Post</SelectItem>
+                      <SelectItem value="course">Descrição de Curso</SelectItem>
+                      <SelectItem value="seo">SEO Meta Description</SelectItem>
+                      <SelectItem value="dashboard">Dashboard</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="topic">Tópico</Label>
+                  <Input
+                    id="topic"
+                    placeholder="Insira o tópico"
+                    value={prompt.topic || ''}
+                    onChange={(e) => setPrompt({ ...prompt, topic: e.target.value })}
                   />
-                  
-                  <FormField
-                    name="keywords"
-                    render={() => (
-                      <FormItem>
-                        <FormLabel>Palavras-chave</FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder="Ex: vídeo, edição, pós-produção" 
-                            onChange={(e) => handleKeywordsChange(e.target.value)} 
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          Palavras-chave separadas por vírgulas
-                        </FormDescription>
-                      </FormItem>
-                    )}
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="keywords">Palavras-chave</Label>
+                  <Input
+                    id="keywords"
+                    placeholder="Palavras-chave separadas por vírgula"
+                    value={prompt.keywords?.join(', ') || ''}
+                    onChange={(e) =>
+                      setPrompt({ ...prompt, keywords: e.target.value.split(',').map((k) => k.trim()) })
+                    }
                   />
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      name="tone"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Tom</FormLabel>
-                          <Select 
-                            onValueChange={field.onChange} 
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Selecionar tom" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="formal">Formal</SelectItem>
-                              <SelectItem value="casual">Casual</SelectItem>
-                              <SelectItem value="technical">Técnico</SelectItem>
-                              <SelectItem value="friendly">Amigável</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      name="length"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Comprimento</FormLabel>
-                          <Select 
-                            onValueChange={field.onChange} 
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Selecionar comprimento" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="short">Curto</SelectItem>
-                              <SelectItem value="medium">Médio</SelectItem>
-                              <SelectItem value="long">Longo</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  
-                  <FormField
-                    name="targetAudience"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Público-alvo</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Ex: Estudantes de audiovisual" {...field} />
-                        </FormControl>
-                      </FormItem>
-                    )}
+                </div>
+                <div>
+                  <Label htmlFor="targetAudience">Público-alvo</Label>
+                  <Input
+                    id="targetAudience"
+                    placeholder="Defina o público-alvo"
+                    value={prompt.targetAudience || ''}
+                    onChange={(e) => setPrompt({ ...prompt, targetAudience: e.target.value })}
                   />
-                  
-                  <FormField
-                    name="additionalInstructions"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Instruções adicionais</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            placeholder="Ex: Incluir exemplos práticos e referências a softwares atuais" 
-                            className="min-h-[80px]" 
-                            {...field} 
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <Button 
-                    type="submit" 
-                    className="w-full" 
-                    disabled={isGenerating}
-                  >
-                    {isGenerating ? "Gerando..." : "Gerar Conteúdo"}
-                  </Button>
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="course" className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Gerar Descrição de Curso</CardTitle>
-              <CardDescription>Use IA para criar descrições atraentes para seus cursos</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Form {...form}>
-                <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
-                  <FormField
-                    name="topic"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Nome do Curso</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Ex: Design de Interface para Web" {...field} />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    name="targetAudience"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Público-alvo</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Ex: Designers iniciantes e desenvolvedores front-end" {...field} />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    name="additionalInstructions"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Detalhes do curso</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            placeholder="Ex: O curso deve cobrir princípios básicos de UI/UX e incluir projetos práticos" 
-                            className="min-h-[120px]" 
-                            {...field} 
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <Button 
-                    type="submit" 
-                    className="w-full" 
-                    disabled={isGenerating}
-                  >
-                    {isGenerating ? "Gerando..." : "Gerar Descrição"}
-                  </Button>
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="seo" className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Otimização SEO</CardTitle>
-              <CardDescription>Gere meta descrições, tags e recomendações SEO para seu conteúdo</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Form {...form}>
-                <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
-                  <FormField
-                    name="topic"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Título do conteúdo</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Ex: Curso de Marketing Digital para Iniciantes" {...field} />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    name="keywords"
-                    render={() => (
-                      <FormItem>
-                        <FormLabel>Palavras-chave alvo</FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder="Ex: marketing digital, SEO, redes sociais" 
-                            onChange={(e) => handleKeywordsChange(e.target.value)} 
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          Palavras-chave separadas por vírgulas
-                        </FormDescription>
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    name="additionalInstructions"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Descrição do conteúdo</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            placeholder="Cole aqui o conteúdo ou um resumo que você quer otimizar" 
-                            className="min-h-[120px]" 
-                            {...field} 
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <Button 
-                    type="submit" 
-                    className="w-full" 
-                    disabled={isGenerating}
-                  >
-                    {isGenerating ? "Analisando..." : "Gerar Otimização SEO"}
-                  </Button>
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="dashboard" className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>KPIs e Insights</CardTitle>
-              <CardDescription>Gere análises e insights para seus dashboards</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Form {...form}>
-                <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
-                  <FormField
-                    name="topic"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Área de análise</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Ex: Desempenho de vendas de cursos" {...field} />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    name="additionalInstructions"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Dados para análise</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            placeholder="Ex: Coloque aqui os dados que deseja analisar, ou especifique que tipo de KPIs e insights você precisa" 
-                            className="min-h-[120px]" 
-                            {...field} 
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <Button 
-                    type="submit" 
-                    className="w-full" 
-                    disabled={isGenerating}
-                  >
-                    {isGenerating ? "Analisando..." : "Gerar Análise"}
-                  </Button>
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-      
-      {generatedContent && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Conteúdo Gerado</CardTitle>
-            <CardDescription>
-              {generatedContent.metadata?.processingTime && 
-                `Gerado em ${(generatedContent.metadata.processingTime / 1000).toFixed(1)} segundos`}
-                
-              {generatedContent.metadata?.tokens && 
-                ` • ${generatedContent.metadata.tokens} tokens utilizados`}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Textarea 
-              value={generatedContent.content} 
-              className="min-h-[300px] font-mono text-sm"
-              readOnly
-            />
-          </CardContent>
-          <CardFooter className="flex justify-between">
-            <Button 
-              variant="outline" 
-              onClick={() => setGeneratedContent(null)}
-            >
-              Limpar
-            </Button>
-            {onSelectContent && (
-              <Button onClick={handleUseContent}>
-                Usar Este Conteúdo
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="tone">Tom de Voz</Label>
+                  <Select onValueChange={(value) => setPrompt({ ...prompt, tone: value as 'formal' | 'casual' | 'technical' | 'friendly' })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o tom" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="formal">Formal</SelectItem>
+                      <SelectItem value="casual">Casual</SelectItem>
+                      <SelectItem value="technical">Técnico</SelectItem>
+                      <SelectItem value="friendly">Amigável</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="length">Comprimento</Label>
+                  <Select onValueChange={(value) => setPrompt({ ...prompt, length: value as 'short' | 'medium' | 'long' })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o comprimento" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="short">Curto</SelectItem>
+                      <SelectItem value="medium">Médio</SelectItem>
+                      <SelectItem value="long">Longo</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="additionalInstructions">Instruções Adicionais</Label>
+                <Textarea
+                  id="additionalInstructions"
+                  placeholder="Instruções adicionais para a IA"
+                  value={prompt.additionalInstructions || ''}
+                  onChange={(e) => setPrompt({ ...prompt, additionalInstructions: e.target.value })}
+                />
+              </div>
+              <Button onClick={handleGenerateContent} disabled={isGenerating}>
+                {isGenerating ? 'Gerando...' : 'Gerar Conteúdo'}
               </Button>
-            )}
-          </CardFooter>
-        </Card>
-      )}
-    </div>
+            </TabsContent>
+            <TabsContent value="content">
+              {generatedContent ? (
+                <div className="space-y-4">
+                  <ScrollArea className="h-[400px] w-full rounded-md border">
+                    <Textarea readOnly value={generatedContent.content} className="min-h-[300px]" />
+                  </ScrollArea>
+                  <div className="flex justify-end space-x-2">
+                    <Button variant="secondary" onClick={handleCopyToClipboard}>
+                      Copiar para a Área de Transferência
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <p>Nenhum conteúdo gerado ainda. Configure o prompt e clique em "Gerar Conteúdo".</p>
+              )}
+            </TabsContent>
+          </Tabs>
+        )}
+      </CardContent>
+      <CardFooter>
+        <p className="text-sm text-muted-foreground">
+          Dica: Utilize palavras-chave relevantes e um tom de voz adequado para obter melhores resultados.
+        </p>
+      </CardFooter>
+    </Card>
   );
 };
 

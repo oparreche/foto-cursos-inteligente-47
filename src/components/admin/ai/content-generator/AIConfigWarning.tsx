@@ -2,7 +2,7 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 
 interface AIConfigWarningProps {
   isConfigured: boolean;
@@ -17,7 +17,8 @@ const AIConfigWarning = ({ isConfigured }: AIConfigWarningProps) => {
     return null;
   }
   
-  const handleGoToSettings = () => {
+  // Define the handler with useCallback to prevent recreation on each render
+  const handleGoToSettings = useCallback(() => {
     // Scrolling to the settings section
     console.log("Tentando encontrar e rolar até a seção de configurações");
     
@@ -45,7 +46,7 @@ const AIConfigWarning = ({ isConfigured }: AIConfigWarningProps) => {
       console.log("Tab de IA não encontrada, rolando para o topo");
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  };
+  }, []); // Empty dependency array as this doesn't depend on props or state
   
   return (
     <Alert variant="destructive">
@@ -55,7 +56,7 @@ const AIConfigWarning = ({ isConfigured }: AIConfigWarningProps) => {
         <Button 
           variant="outline" 
           size="sm" 
-          onClick={() => handleGoToSettings()} 
+          onClick={handleGoToSettings} 
           className="w-fit mt-2"
         >
           Ir para Configurações

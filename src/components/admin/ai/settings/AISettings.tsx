@@ -1,5 +1,5 @@
 
-import { useEffect } from "react";
+import { useCallback } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAISettings } from "@/hooks/useAISettings";
@@ -22,19 +22,11 @@ const AISettings = () => {
     refetch
   } = useAISettings();
   
-  // Add debugging logs
-  useEffect(() => {
-    console.log("AISettings - Estado atual:", { 
-      temConfiguracao: !!aiConfig, 
-      isLoading, 
-      temErro: !!error 
-    });
-  }, [aiConfig, isLoading, error]);
-  
-  const handleRetry = () => {
+  // Add a memoized retry handler to avoid recreating on every render
+  const handleRetry = useCallback(() => {
     console.log("Tentando novamente...");
     if (refetch) refetch();
-  };
+  }, [refetch]);
   
   if (isLoading) {
     return <LoadingState />;
@@ -57,7 +49,7 @@ const AISettings = () => {
                 variant="outline" 
                 size="sm" 
                 className="mt-2"
-                onClick={() => handleRetry()}
+                onClick={handleRetry}
               >
                 Tentar novamente
               </Button>
@@ -67,6 +59,11 @@ const AISettings = () => {
       </Card>
     );
   }
+  
+  // Use a handler function for opening the dialog to avoid inline functions
+  const openEditDialog = useCallback(() => {
+    setIsEditDialogOpen(true);
+  }, [setIsEditDialogOpen]);
   
   return (
     <Card data-testid="ai-settings">
@@ -78,7 +75,7 @@ const AISettings = () => {
         <ConfigDisplay aiConfig={aiConfig} />
       </CardContent>
       <CardFooter>
-        <Button onClick={() => setIsEditDialogOpen(true)}>Editar Configurações</Button>
+        <Button onClick={openEditDialog}>Editar Configurações</Button>
       </CardFooter>
       
       <ConfigDialog 

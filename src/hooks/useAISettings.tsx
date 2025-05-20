@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AIConfig } from "@/components/admin/ai/types";
 import { getAIConfig, updateAIConfig } from "@/components/admin/ai/configService";
@@ -39,6 +39,12 @@ export const useAISettings = () => {
     temErro: !!error 
   });
   
+  // Update AI settings with useCallback to prevent function recreation
+  const handleSaveConfig = useCallback((config: AIConfig) => {
+    console.log("Salvando configuração:", config);
+    updateConfigMutation.mutate(config);
+  }, []);
+  
   // Update AI settings
   const updateConfigMutation = useMutation({
     mutationFn: updateAIConfig,
@@ -52,11 +58,6 @@ export const useAISettings = () => {
       toast.error(`Erro ao atualizar configurações: ${error?.message || 'Erro desconhecido'}`);
     }
   });
-  
-  const handleSaveConfig = (config: AIConfig) => {
-    console.log("Salvando configuração:", config);
-    updateConfigMutation.mutate(config);
-  };
   
   return {
     aiConfig,

@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ContentPrompt, AIResponse } from "@/components/admin/ai/types";
@@ -47,7 +47,7 @@ const AIContentGenerator = ({ onSelectContent }: AIContentGeneratorProps) => {
   // Safe check for configuration - prevent infinite loops by not calling setState here
   const aiConfigured = aiConfig?.apiKey ? true : false;
 
-  const handleGenerateContent = async () => {
+  const handleGenerateContent = useCallback(async () => {
     setIsGenerating(true);
     try {
       const response = await generateContent(prompt);
@@ -60,13 +60,13 @@ const AIContentGenerator = ({ onSelectContent }: AIContentGeneratorProps) => {
     } finally {
       setIsGenerating(false);
     }
-  };
+  }, [prompt, onSelectContent]);
 
-  const handleCopyToClipboard = async () => {
+  const handleCopyToClipboard = useCallback(async () => {
     if (generatedContent?.content) {
       await navigator.clipboard.writeText(generatedContent.content);
     }
-  };
+  }, [generatedContent]);
 
   // Show loading state
   if (isLoading) {

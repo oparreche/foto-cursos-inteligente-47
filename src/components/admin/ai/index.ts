@@ -1,7 +1,7 @@
 
 // Re-export components
-export { default as AIContentGenerator } from './content-generator/AIContentGenerator';
-export { default as AISettings } from './settings/AISettings';
+export { default as AIContentGenerator } from './AIContentGenerator';
+export { default as AISettings } from './AISettings';
 
 // Re-export types and services
 export * from './types';

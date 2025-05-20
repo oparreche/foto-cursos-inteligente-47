@@ -14,11 +14,25 @@ const AIConfigWarning = ({ isConfigured }: AIConfigWarningProps) => {
   
   const handleGoToSettings = () => {
     // Encontra a tab de configurações e clica nela
-    const settingsTabElement = document.querySelector('[data-value="settings"]');
+    console.log("Tentando encontrar e clicar na tab de configurações");
+    const settingsTabElement = document.querySelector('[data-value="ai"]');
     if (settingsTabElement instanceof HTMLElement) {
+      console.log("Tab de IA encontrada, clicando nela");
       settingsTabElement.click();
+      
+      // Rolando até a seção de configurações após selecionar a tab de IA
+      setTimeout(() => {
+        const configSection = document.querySelector('h2:contains("Configurações de IA")');
+        if (configSection) {
+          console.log("Seção de configurações encontrada, rolando até ela");
+          configSection.scrollIntoView({ behavior: 'smooth' });
+        } else {
+          console.log("Seção de configurações não encontrada");
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      }, 200);
     } else {
-      console.log("Elemento de configurações não encontrado");
+      console.log("Tab de IA não encontrada");
       // Backup - scroll para o topo
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }

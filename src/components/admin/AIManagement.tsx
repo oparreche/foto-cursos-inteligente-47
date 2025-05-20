@@ -1,13 +1,17 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { AIContentGenerator, AISettings } from "@/components/admin/ai";
 import { toast } from "sonner";
 
 const AIManagement = () => {
-  console.log("AIManagement renderizando");
-  console.log("AISettings componente:", typeof AISettings);
-  console.log("AIContentGenerator componente:", typeof AIContentGenerator);
+  useEffect(() => {
+    console.log("AIManagement renderizou (useEffect)");
+    console.log("AISettings componente:", typeof AISettings);
+    console.log("AIContentGenerator componente:", typeof AIContentGenerator);
+  }, []);
+
+  console.log("AIManagement renderizando (corpo do componente)");
   
   return (
     <div className="space-y-8">

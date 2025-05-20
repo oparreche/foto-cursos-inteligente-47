@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import ClassManagement from "@/components/admin/ClassManagement";
@@ -14,6 +14,13 @@ import { Layers, BookOpen, FileText, LayoutDashboard, Users, CreditCard, BrainCi
 const AdminTabs = () => {
   console.log("AdminTabs renderizando");
   
+  useEffect(() => {
+    // Log when AI tab is rendered
+    if (window.location.hash === "#ai") {
+      console.log("Tab de IA selecionada");
+    }
+  }, []);
+
   return (
     <Tabs defaultValue="dashboard">
       <TabsList className="grid grid-cols-7 mb-8">
@@ -41,7 +48,7 @@ const AdminTabs = () => {
           <CreditCard className="h-4 w-4" />
           <span>Pagamentos</span>
         </TabsTrigger>
-        <TabsTrigger value="ai" className="flex items-center gap-2">
+        <TabsTrigger value="ai" className="flex items-center gap-2" data-value="ai">
           <BrainCircuit className="h-4 w-4" />
           <span>IA</span>
         </TabsTrigger>
@@ -99,7 +106,6 @@ const AdminTabs = () => {
             <PaymentGateway />
           </TabsContent>
           <TabsContent value="ai" className="mt-0">
-            {console.log("Renderizando componente AIManagement")}
             <AIManagement />
           </TabsContent>
         </CardContent>

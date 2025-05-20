@@ -1,84 +1,64 @@
 
-import React, { useEffect } from "react";
+import React from "react";
 import { TabsContent } from "@/components/ui/tabs";
-import { CardContent } from "@/components/ui/card";
-import TabContentWrapper from "./TabContentWrapper";
-
-// Import components
 import Dashboard from "@/components/admin/Dashboard";
-import ClassManagement from "@/components/admin/ClassManagement";
-import CourseManagement from "@/components/admin/CourseManagement";
-import BlogManagement from "@/components/admin/BlogManagement";
 import UserManagement from "@/components/admin/UserManagement";
-import PaymentGateway from "@/components/admin/PaymentGateway";
+import CourseManagement from "@/components/admin/CourseManagement";
+import ClassManagement from "@/components/admin/ClassManagement";
+import BlogManagement from "@/components/admin/BlogManagement";
 import AIManagement from "@/components/admin/AIManagement";
+import FinanceManagement from "@/components/admin/FinanceManagement";
+import { TabContentWrapper } from "@/components/admin/tabs/TabContentWrapper";
 
-const TabContents: React.FC = () => {
-  useEffect(() => {
-    console.log("TabContents componente montado");
-    
-    // Verificar se os elementos de conteúdo das abas estão no DOM
-    setTimeout(() => {
-      const activeTabContent = document.querySelector('[data-state="active"]');
-      console.log("Tab ativa presente:", !!activeTabContent);
-      
-      if (activeTabContent) {
-        console.log("Tab ativa:", activeTabContent.getAttribute('value'));
-      }
-      
-      // Verificar cada aba explicitamente
-      ['dashboard', 'classes', 'courses', 'blog', 'users', 'payments', 'ai'].forEach(tab => {
-        const tabContent = document.querySelector(`[data-value="${tab}"]`);
-        console.log(`${tab} TabContent presente:`, !!tabContent);
-      });
-    }, 500);
-  }, []);
+interface TabContentsProps {
+  userRole: string;
+  showDiagnostics: boolean;
+}
 
+export const TabContents = ({ userRole, showDiagnostics }: TabContentsProps) => {
   return (
-    <CardContent>
-      <TabsContent value="dashboard" className="mt-0">
-        <TabContentWrapper label="Dashboard">
+    <>
+      <TabsContent value="dashboard">
+        <TabContentWrapper title="Dashboard">
           <Dashboard />
         </TabContentWrapper>
       </TabsContent>
-      
-      <TabsContent value="classes" className="mt-0">
-        <TabContentWrapper label="Classes">
-          <ClassManagement />
+
+      <TabsContent value="users">
+        <TabContentWrapper title="Gerenciamento de Usuários">
+          <UserManagement userRole={userRole} />
         </TabContentWrapper>
       </TabsContent>
-      
-      <TabsContent value="courses" className="mt-0" data-value="courses">
-        <TabContentWrapper label="Courses">
+
+      <TabsContent value="courses">
+        <TabContentWrapper title="Gerenciamento de Cursos">
           <CourseManagement />
         </TabContentWrapper>
       </TabsContent>
-      
-      <TabsContent value="blog" className="mt-0">
-        <TabContentWrapper label="Blog">
-          <BlogManagement />
+
+      <TabsContent value="classes">
+        <TabContentWrapper title="Gerenciamento de Turmas">
+          <ClassManagement />
         </TabContentWrapper>
       </TabsContent>
-      
-      <TabsContent value="users" className="mt-0">
-        <TabContentWrapper label="Users">
-          <UserManagement />
+
+      <TabsContent value="blog">
+        <TabContentWrapper title="Gerenciamento do Blog">
+          <BlogManagement showDiagnostics={showDiagnostics} />
         </TabContentWrapper>
       </TabsContent>
-      
-      <TabsContent value="payments" className="mt-0">
-        <TabContentWrapper label="Payments">
-          <PaymentGateway />
-        </TabContentWrapper>
-      </TabsContent>
-      
-      <TabsContent value="ai" className="mt-0">
-        <TabContentWrapper label="AI">
+
+      <TabsContent value="ai">
+        <TabContentWrapper title="Inteligência Artificial">
           <AIManagement />
         </TabContentWrapper>
       </TabsContent>
-    </CardContent>
+      
+      <TabsContent value="finance">
+        <TabContentWrapper title="Sistema Financeiro">
+          <FinanceManagement />
+        </TabContentWrapper>
+      </TabsContent>
+    </>
   );
 };
-
-export default TabContents;

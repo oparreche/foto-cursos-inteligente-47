@@ -6,7 +6,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import CoursesTab from "./tabs/CoursesTab";
 import MaterialsTab from "./tabs/MaterialsTab";
 import CertificatesTab from "./tabs/CertificatesTab";
-import FinancesTab from "./tabs/FinancesTab";
 import QuizTab from "./tabs/QuizTab";
 import AccountTab from "./tabs/AccountTab";
 import { preferencesService } from "@/utils/preferencesService";
@@ -48,16 +47,7 @@ const StudentDashboard = ({ onLogout }: StudentDashboardProps) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <Button 
-          onClick={() => navigate('/financeiro')} 
-          variant="outline" 
-          className="py-6 h-auto flex flex-col items-center"
-        >
-          <span className="text-xl mb-1">Financeiro</span>
-          <span className="text-sm text-gray-500">Gerencie suas finanças</span>
-        </Button>
-        
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <Button 
           onClick={() => navigate('/quiz')} 
           variant="outline" 
@@ -102,7 +92,6 @@ const StudentDashboard = ({ onLogout }: StudentDashboardProps) => {
           <TabsTrigger value="materials">Materiais</TabsTrigger>
           <TabsTrigger value="certificates">Certificados</TabsTrigger>
           <TabsTrigger value="account">Minha Conta</TabsTrigger>
-          <TabsTrigger value="finances">Financeiro</TabsTrigger>
           <TabsTrigger value="quiz">Quiz</TabsTrigger>
         </TabsList>
         
@@ -116,10 +105,6 @@ const StudentDashboard = ({ onLogout }: StudentDashboardProps) => {
         
         <TabsContent value="certificates">
           <CertificatesTab />
-        </TabsContent>
-        
-        <TabsContent value="finances">
-          <FinancesTab />
         </TabsContent>
         
         <TabsContent value="quiz">

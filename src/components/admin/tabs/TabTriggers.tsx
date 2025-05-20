@@ -1,57 +1,50 @@
 
-import React, { useEffect } from "react";
+import React from "react";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
-  Layers, BookOpen, FileText, LayoutDashboard, 
-  Users, CreditCard, BrainCircuit 
+  Home, 
+  Users, 
+  BookOpen, 
+  Calendar, 
+  Pencil, 
+  Sparkles,
+  DollarSign
 } from "lucide-react";
 
-const TabTriggers: React.FC = () => {
-  useEffect(() => {
-    console.log("TabTriggers componente montado");
-    
-    // Check if tabs are rendered
-    setTimeout(() => {
-      const tabElements = document.querySelectorAll('[role="tab"]');
-      console.log("Número de tabs renderizadas:", tabElements.length);
-      
-      const aiTab = document.querySelector('[data-value="ai"]');
-      console.log("AI tab presente:", !!aiTab);
-    }, 200);
-  }, []);
+interface TabTriggersProps {
+  userRole: string;
+}
 
+export const TabTriggers = ({ userRole }: TabTriggersProps) => {
   return (
-    <TabsList className="grid grid-cols-7 mb-8">
+    <TabsList className="mb-4">
       <TabsTrigger value="dashboard" className="flex items-center gap-2">
-        <LayoutDashboard className="h-4 w-4" />
-        <span>Dashboard</span>
+        <Home className="h-4 w-4" /> Dashboard
       </TabsTrigger>
-      <TabsTrigger value="classes" className="flex items-center gap-2">
-        <Layers className="h-4 w-4" />
-        <span>Turmas</span>
-      </TabsTrigger>
-      <TabsTrigger value="courses" className="flex items-center gap-2">
-        <BookOpen className="h-4 w-4" />
-        <span>Cursos</span>
-      </TabsTrigger>
-      <TabsTrigger value="blog" className="flex items-center gap-2">
-        <FileText className="h-4 w-4" />
-        <span>Blog</span>
-      </TabsTrigger>
+
       <TabsTrigger value="users" className="flex items-center gap-2">
-        <Users className="h-4 w-4" />
-        <span>Usuários</span>
+        <Users className="h-4 w-4" /> Usuários
       </TabsTrigger>
-      <TabsTrigger value="payments" className="flex items-center gap-2">
-        <CreditCard className="h-4 w-4" />
-        <span>Pagamentos</span>
+
+      <TabsTrigger value="courses" className="flex items-center gap-2">
+        <BookOpen className="h-4 w-4" /> Cursos
       </TabsTrigger>
-      <TabsTrigger value="ai" className="flex items-center gap-2" data-value="ai">
-        <BrainCircuit className="h-4 w-4" />
-        <span>IA</span>
+
+      <TabsTrigger value="classes" className="flex items-center gap-2">
+        <Calendar className="h-4 w-4" /> Turmas
+      </TabsTrigger>
+
+      <TabsTrigger value="blog" className="flex items-center gap-2">
+        <Pencil className="h-4 w-4" /> Blog
+      </TabsTrigger>
+
+      <TabsTrigger value="ai" className="flex items-center gap-2">
+        <Sparkles className="h-4 w-4" /> IA
+      </TabsTrigger>
+      
+      <TabsTrigger value="finance" className="flex items-center gap-2">
+        <DollarSign className="h-4 w-4" /> Financeiro
       </TabsTrigger>
     </TabsList>
   );
 };
-
-export default TabTriggers;

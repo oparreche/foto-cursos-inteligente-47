@@ -138,7 +138,7 @@ const Admin = () => {
     <MainLayout>
       <AdminAccess authenticated={authenticated} isLoading={isLoading}>
         <div className="container mx-auto px-4 py-8">
-          <h1 className="heading-lg mb-6">Painel de Administração</h1>
+          <h1 className="text-3xl font-bold mb-6">Painel de Administração</h1>
           
           <AdminTabs />
           

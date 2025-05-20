@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -36,26 +35,26 @@ export const getAIConfig = async (): Promise<AIConfig | null> => {
   try {
     // Use the database function for getting AI settings
     const { data, error } = await supabase
-      .rpc('get_ai_settings')
-      .single();
+      .rpc('get_ai_settings');
       
     if (error) {
       console.error('Error fetching AI configuration:', error);
       return null;
     }
     
-    if (!data) {
+    if (!data || data.length === 0) {
       console.error('No AI configuration found');
       return null;
     }
     
     // Convert the returned data to our AIConfig format with proper type casting
+    const record = data[0];
     return {
-      provider: data.provider as 'openai' | 'perplexity' | null,
-      model: data.model as AIModel | null,
-      apiKey: data.api_key,
-      lastUpdated: data.last_updated || undefined,
-      updatedBy: data.updated_by || undefined
+      provider: record.provider as 'openai' | 'perplexity' | null,
+      model: record.model as AIModel | null,
+      apiKey: record.api_key,
+      lastUpdated: record.last_updated || undefined,
+      updatedBy: record.updated_by || undefined
     };
   } catch (error) {
     console.error('Exception when fetching AI configuration:', error);

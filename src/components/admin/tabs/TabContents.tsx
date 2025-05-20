@@ -16,11 +16,11 @@ interface TabContentsProps {
 }
 
 export const TabContents: React.FC<TabContentsProps> = ({ userRole = "", showDiagnostics = false }) => {
-  // Apenas logue se estiver no modo de diagnóstico
+  // Debug logs only in diagnostic mode
   if (showDiagnostics) {
     console.log("TabContents rendering with props:", { userRole, showDiagnostics });
     
-    // Adicionar informações de depuração adicionais para renderização de conteúdo de guias
+    // Additional debugging information for tab content rendering
     React.useEffect(() => {
       setTimeout(() => {
         const activeContent = document.querySelector('[data-state="active"]');

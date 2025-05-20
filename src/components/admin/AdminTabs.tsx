@@ -14,13 +14,13 @@ interface AdminTabsProps {
 }
 
 const AdminTabs: React.FC<AdminTabsProps> = ({ userRole = "", showDiagnostics = false }) => {
-  // Debug logs para solução de problemas (apenas em modo de diagnóstico)
+  // Debug logs for troubleshooting (only in diagnostic mode)
   useEffect(() => {
     if (showDiagnostics) {
       console.log("AdminTabs component mounted");
       console.log("AdminTabs props received:", { userRole, showDiagnostics });
       
-      // Verificar se o DOM está renderizando corretamente
+      // Check if DOM is rendering correctly
       setTimeout(() => {
         const tabElements = document.querySelectorAll('[role="tablist"] [role="tab"]');
         console.log("Tab elements found:", tabElements.length);

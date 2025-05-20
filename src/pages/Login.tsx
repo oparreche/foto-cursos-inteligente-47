@@ -1,21 +1,16 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 import MainLayout from "@/components/layout/MainLayout";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Info } from "lucide-react";
+import LoginForm from "@/components/auth/LoginForm";
+import RegisterForm from "@/components/auth/RegisterForm";
+import AlertMessages from "@/components/auth/AlertMessages";
 
 const Login = () => {
   const [email, setEmail] = useState("midiaputz@gmail.com");
   const [password, setPassword] = useState("*Putz123");
-  const [loading, setLoading] = useState(false);
   const [showConfirmationAlert, setShowConfirmationAlert] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
@@ -33,89 +28,6 @@ const Login = () => {
     setShowConfirmationAlert(false);
   }, [location]);
 
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setErrorMessage("");
-    setShowConfirmationAlert(false);
-    
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      
-      if (error) {
-        console.error("Login error:", error);
-        
-        if (error.message.includes("Email provider is not enabled") || 
-            error.message.includes("Email logins are disabled")) {
-          setErrorMessage("O login por email está desativado no Supabase. Ative-o nas configurações de autenticação.");
-          toast.error("Login por email desativado no Supabase");
-        } else if (error.message === "Email not confirmed") {
-          // Only show confirmation alert if this specific error occurs
-          setShowConfirmationAlert(true);
-          toast.error("É necessário confirmar o email antes de fazer login");
-        } else {
-          throw error;
-        }
-      } else {
-        toast.success("Login realizado com sucesso!");
-        navigate("/admin");
-      }
-    } catch (error: any) {
-      toast.error(`Erro ao fazer login: ${error.message}`);
-      console.error("Erro completo:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setErrorMessage("");
-    setShowConfirmationAlert(false);
-    
-    try {
-      const { error, data } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-      
-      if (error) {
-        console.error("Signup error:", error);
-        
-        if (error.message.includes("Email provider is not enabled") || 
-            error.message.includes("Email logins are disabled")) {
-          setErrorMessage("O registro por email está desativado no Supabase. Ative-o nas configurações de autenticação.");
-          toast.error("Registro por email desativado no Supabase");
-        } else {
-          throw error;
-        }
-      } else {
-        // Only show confirmation alert if email verification is needed
-        if (data?.user?.identities?.[0]?.identity_data?.email_verified === false) {
-          setShowConfirmationAlert(true);
-          toast.success("Cadastro realizado! Verifique seu email para confirmar sua conta.");
-        } else {
-          toast.success("Cadastro realizado com sucesso!");
-          // Automatically log the user in after successful registration
-          await supabase.auth.signInWithPassword({
-            email,
-            password,
-          });
-          navigate("/admin");
-        }
-      }
-    } catch (error: any) {
-      toast.error(`Erro ao criar conta: ${error.message}`);
-      console.error("Erro completo:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <MainLayout>
       <div className="container mx-auto flex items-center justify-center py-16">
@@ -127,24 +39,11 @@ const Login = () => {
             </CardDescription>
           </CardHeader>
           
-          {errorMessage && (
-            <Alert className="mx-6 mb-4 bg-red-50">
-              <Info className="h-4 w-4 text-red-500" />
-              <AlertDescription className="text-red-700">
-                {errorMessage}
-              </AlertDescription>
-            </Alert>
-          )}
-          
-          {showConfirmationAlert && (
-            <Alert className="mx-6 mb-4 bg-blue-50">
-              <Info className="h-4 w-4 text-blue-500" />
-              <AlertDescription className="text-blue-700">
-                Um email de confirmação foi enviado para {email}. 
-                Por favor, verifique sua caixa de entrada e confirme seu email antes de fazer login.
-              </AlertDescription>
-            </Alert>
-          )}
+          <AlertMessages 
+            errorMessage={errorMessage}
+            showConfirmationAlert={showConfirmationAlert}
+            email={email}
+          />
           
           <Tabs defaultValue={defaultTab} value={defaultTab} onValueChange={setDefaultTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
@@ -152,68 +51,24 @@ const Login = () => {
               <TabsTrigger value="register">Cadastro</TabsTrigger>
             </TabsList>
             <TabsContent value="login">
-              <form onSubmit={handleSignIn}>
-                <CardContent className="space-y-4 pt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="seu@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Senha</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Entrando..." : "Entrar"}
-                  </Button>
-                </CardFooter>
-              </form>
+              <LoginForm 
+                email={email}
+                setEmail={setEmail}
+                password={password}
+                setPassword={setPassword}
+                setShowConfirmationAlert={setShowConfirmationAlert}
+                setErrorMessage={setErrorMessage}
+              />
             </TabsContent>
             <TabsContent value="register">
-              <form onSubmit={handleSignUp}>
-                <CardContent className="space-y-4 pt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
-                    <Input
-                      id="signup-email"
-                      type="email"
-                      placeholder="seu@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">Senha</Label>
-                    <Input
-                      id="signup-password"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Cadastrando..." : "Cadastrar"}
-                  </Button>
-                </CardFooter>
-              </form>
+              <RegisterForm 
+                email={email}
+                setEmail={setEmail}
+                password={password}
+                setPassword={setPassword}
+                setShowConfirmationAlert={setShowConfirmationAlert}
+                setErrorMessage={setErrorMessage}
+              />
             </TabsContent>
           </Tabs>
         </Card>

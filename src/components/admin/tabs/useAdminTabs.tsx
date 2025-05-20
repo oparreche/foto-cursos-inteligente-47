@@ -35,18 +35,11 @@ export const useAdminTabs = () => {
         // Force tab content visibility check
         setTimeout(() => {
           const activeTabContent = document.querySelector(`[data-value="${hashValue}"]`);
-          const activeTabTrigger = document.querySelector(`[data-state="active"]`);
-          
           console.log(`Tab content for ${hashValue} found:`, !!activeTabContent);
-          console.log(`Active tab trigger:`, activeTabTrigger?.getAttribute('value'));
           
-          // If tab content not found but trigger exists, force click
-          if (!activeTabContent && activeTabTrigger) {
-            console.log(`Forcing click on tab: ${hashValue}`);
-            const targetTrigger = document.querySelector(`[value="${hashValue}"]`);
-            if (targetTrigger instanceof HTMLElement) {
-              targetTrigger.click();
-            }
+          if (!activeTabContent) {
+            console.log(`Forcing hash update for tab: ${hashValue}`);
+            window.location.hash = hashValue;
           }
         }, 300);
       } else {

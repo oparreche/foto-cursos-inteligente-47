@@ -14,19 +14,21 @@ interface AdminTabsProps {
 }
 
 const AdminTabs: React.FC<AdminTabsProps> = ({ userRole = "", showDiagnostics = false }) => {
-  // Debug logs for troubleshooting
+  // Debug logs para solução de problemas (apenas em modo de diagnóstico)
   useEffect(() => {
-    console.log("AdminTabs component mounted");
-    console.log("AdminTabs props received:", { userRole, showDiagnostics });
-    
-    // Check if the DOM is rendering properly
-    setTimeout(() => {
-      const tabElements = document.querySelectorAll('[role="tablist"] [role="tab"]');
-      console.log("Tab elements found:", tabElements.length);
+    if (showDiagnostics) {
+      console.log("AdminTabs component mounted");
+      console.log("AdminTabs props received:", { userRole, showDiagnostics });
       
-      const tabContentElements = document.querySelectorAll('[data-state="inactive"], [data-state="active"]');
-      console.log("Tab content elements found:", tabContentElements.length);
-    }, 500);
+      // Verificar se o DOM está renderizando corretamente
+      setTimeout(() => {
+        const tabElements = document.querySelectorAll('[role="tablist"] [role="tab"]');
+        console.log("Tab elements found:", tabElements.length);
+        
+        const tabContentElements = document.querySelectorAll('[data-state="inactive"], [data-state="active"]');
+        console.log("Tab content elements found:", tabContentElements.length);
+      }, 500);
+    }
   }, [userRole, showDiagnostics]);
   
   const {
@@ -40,8 +42,6 @@ const AdminTabs: React.FC<AdminTabsProps> = ({ userRole = "", showDiagnostics = 
   if (!isClient) {
     return <div className="p-4 text-center">Carregando interface de administração...</div>;
   }
-
-  console.log("AdminTabs rendering with active tab:", activeTab);
 
   return (
     <>

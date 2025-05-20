@@ -16,18 +16,21 @@ interface TabContentsProps {
 }
 
 export const TabContents: React.FC<TabContentsProps> = ({ userRole = "", showDiagnostics = false }) => {
-  console.log("TabContents rendering with props:", { userRole, showDiagnostics });
-  
-  // Add additional debug info for tab content rendering
-  React.useEffect(() => {
-    setTimeout(() => {
-      const activeContent = document.querySelector('[data-state="active"]');
-      console.log("Active content element:", activeContent?.getAttribute('value'));
-      
-      const financeContent = document.querySelector('[data-value="finance"]');
-      console.log("Finance content element present:", !!financeContent);
-    }, 300);
-  }, []);
+  // Apenas logue se estiver no modo de diagnóstico
+  if (showDiagnostics) {
+    console.log("TabContents rendering with props:", { userRole, showDiagnostics });
+    
+    // Adicionar informações de depuração adicionais para renderização de conteúdo de guias
+    React.useEffect(() => {
+      setTimeout(() => {
+        const activeContent = document.querySelector('[data-state="active"]');
+        console.log("Active content element:", activeContent?.getAttribute('value'));
+        
+        const financeContent = document.querySelector('[data-value="finance"]');
+        console.log("Finance content element present:", !!financeContent);
+      }, 300);
+    }, []);
+  }
   
   return (
     <>
@@ -39,8 +42,7 @@ export const TabContents: React.FC<TabContentsProps> = ({ userRole = "", showDia
 
       <TabsContent value="users">
         <TabContentWrapper label="Gerenciamento de Usuários">
-          {/* Use React.createElement to bypass TypeScript's type checking */}
-          {React.createElement(UserManagement, { userRole } as any)}
+          <UserManagement userRole={userRole} />
         </TabContentWrapper>
       </TabsContent>
 
@@ -58,8 +60,7 @@ export const TabContents: React.FC<TabContentsProps> = ({ userRole = "", showDia
 
       <TabsContent value="blog">
         <TabContentWrapper label="Gerenciamento do Blog">
-          {/* Use React.createElement to bypass TypeScript's type checking */}
-          {React.createElement(BlogManagement, { showDiagnostics } as any)}
+          <BlogManagement showDiagnostics={showDiagnostics} />
         </TabContentWrapper>
       </TabsContent>
 
@@ -71,8 +72,7 @@ export const TabContents: React.FC<TabContentsProps> = ({ userRole = "", showDia
       
       <TabsContent value="finance">
         <TabContentWrapper label="Sistema Financeiro">
-          {/* Use React.createElement to bypass TypeScript's type checking */}
-          {React.createElement(FinanceManagement, { userRole, showDiagnostics } as any)}
+          <FinanceManagement userRole={userRole} showDiagnostics={showDiagnostics} />
         </TabContentWrapper>
       </TabsContent>
     </>

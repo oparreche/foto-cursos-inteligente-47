@@ -35,11 +35,11 @@ class ErrorBoundary extends React.Component<
       return (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Rendering Error</AlertTitle>
+          <AlertTitle>Erro na renderização</AlertTitle>
           <AlertDescription>
-            <p>An error occurred while loading content: {this.state.error?.message}</p>
+            <p>Ocorreu um erro ao carregar o conteúdo: {this.state.error?.message}</p>
             <p className="text-sm text-muted-foreground mt-2">
-              Check console for more details.
+              Verifique o console para mais detalhes.
             </p>
           </AlertDescription>
         </Alert>
@@ -100,16 +100,16 @@ const AdminContent: React.FC<AdminContentProps> = ({ userRole, showDiagnostics }
 
   return (
     <>
-      {/* Always show diagnostic component to help with debugging */}
+      {/* Somente mostrar o diagnóstico se for explicitamente habilitado */}
       {showDiagnostics && <DiagnosticDisplay />}
       
-      {/* Show current render state */}
-      <RenderStateTracker renderState={renderState} />
+      {/* Somente mostrar o rastreador de estado se o diagnóstico estiver habilitado */}
+      {showDiagnostics && <RenderStateTracker renderState={renderState} />}
       
       {contentError && (
         <Alert variant="destructive" className="mb-4">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Content Error</AlertTitle>
+          <AlertTitle>Erro de conteúdo</AlertTitle>
           <AlertDescription>
             <p>{contentError}</p>
           </AlertDescription>

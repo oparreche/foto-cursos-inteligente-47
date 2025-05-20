@@ -34,35 +34,6 @@ export const assignHighestAdminRole = async (userId: string): Promise<boolean> =
 };
 
 /**
- * Assigns the default admin role to a user
- */
-export const assignDefaultAdminRole = async (userId: string): Promise<boolean> => {
-  try {
-    console.log("Atribuindo papel de administrador padrão ao usuário");
-    
-    const { error: roleError } = await supabase
-      .from('user_roles')
-      .insert({
-        user_id: userId,
-        role: 'admin' // Regular admin role
-      });
-    
-    if (roleError) {
-      console.error("Erro ao atribuir função de administrador padrão:", roleError);
-      toast.error("Não foi possível definir papel de administrador");
-      return false;
-    }
-    
-    toast.success("Função de administrador atribuída com sucesso");
-    return true;
-  } catch (error) {
-    console.error("Erro ao atribuir função de administrador padrão:", error);
-    toast.error("Erro ao definir papel de administrador");
-    return false;
-  }
-};
-
-/**
  * Check if a user has a specific role
  */
 export const hasRole = async (userId: string, role: string): Promise<boolean> => {

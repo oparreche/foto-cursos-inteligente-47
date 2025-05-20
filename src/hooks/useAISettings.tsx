@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { AIConfig, getAIConfig, updateAIConfig } from "@/components/admin/ai/aiService";
+import { AIConfig, getAIConfig, updateAIConfig } from "@/components/admin/ai";
 import { toast } from "sonner";
 
 export const useAISettings = () => {

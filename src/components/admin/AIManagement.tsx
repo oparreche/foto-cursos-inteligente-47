@@ -22,15 +22,8 @@ const AIManagement = () => {
         <h2 className="text-xl font-semibold mb-4">Configurações de IA</h2>
         <Card>
           <CardContent className="pt-6">
-            {/* Pass correct props according to the component's definition */}
-            <AISettings 
-              aiConfig={aiConfig} 
-              isLoading={isLoading} 
-              isDialogOpen={isEditDialogOpen}
-              setIsDialogOpen={setIsEditDialogOpen}
-              onSaveConfig={handleSaveConfig}
-              isUpdating={isUpdating}
-            />
+            {/* AISettings now manages its own state via useAISettings hook directly */}
+            <AISettings />
           </CardContent>
         </Card>
       </section>
@@ -39,7 +32,6 @@ const AIManagement = () => {
         <h2 className="text-xl font-semibold mb-4">Gerador de Conteúdo</h2>
         <Card>
           <CardContent className="pt-6">
-            {/* Pass correct props according to the component's definition */}
             <AIContentGenerator />
           </CardContent>
         </Card>

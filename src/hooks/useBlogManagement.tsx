@@ -3,10 +3,8 @@ import { useState } from "react";
 import { useBlogAuthentication } from "./useBlogAuthentication";
 import { useAdminBlogPosts } from "./useBlogPosts";
 import { useBlogMutations } from "./useBlogMutations";
-import { BlogPost } from "@/types/blog";
+import { BlogPost, CreatePostPayload } from "@/types/blog";
 import { toast } from "sonner";
-
-export type { BlogPost } from "@/types/blog";
 
 export const useBlogManagement = () => {
   const [isEditing, setIsEditing] = useState(false);

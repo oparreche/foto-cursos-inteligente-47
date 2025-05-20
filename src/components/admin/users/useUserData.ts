@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 
 // User type definition
@@ -5,7 +6,7 @@ export type User = {
   id: number;
   name: string;
   email: string;
-  role: "admin" | "instructor" | "student" | "viewer" | string; // Updated to allow string
+  role: "admin" | "instructor" | "student" | "viewer" | string; // Support string to align with both types
   status: "active" | "inactive";
   createdAt: Date;
   lastLogin: Date;
@@ -60,33 +61,50 @@ const mockUsers: User[] = [
   },
 ];
 
-export const useUserData = () => {
-  const [users, setUsers] = useState<User[]>([]);
+export const useUserData = (isAuthenticated: boolean = true, initialUsers: User[] = []) => {
+  const [users, setUsers] = useState<User[]>(initialUsers.length > 0 ? initialUsers : []);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  
+  // Filter users based on search term
+  const filteredUsers = users.filter(user => 
+    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.role.toLowerCase().includes(searchTerm.toLowerCase())
+  );
   
   useEffect(() => {
-    // In a real app, this would be an API call
-    // For now, we're using mock data
-    const fetchUsers = async () => {
-      try {
-        // Simulating API delay
-        await new Promise(resolve => setTimeout(resolve, 800));
-        setUsers(mockUsers);
-        setLoading(false);
-      } catch (err) {
-        setError(err instanceof Error ? err : new Error('Unknown error'));
+    // Only fetch data if no initial users were provided
+    if (initialUsers.length === 0) {
+      // In a real app, this would be an API call
+      // For now, we're using mock data
+      const fetchUsers = async () => {
+        try {
+          // Simulating API delay
+          await new Promise(resolve => setTimeout(resolve, 800));
+          setUsers(mockUsers);
+          setLoading(false);
+        } catch (err) {
+          setError(err instanceof Error ? err : new Error('Unknown error'));
+          setLoading(false);
+        }
+      };
+      
+      if (isAuthenticated) {
+        fetchUsers();
+      } else {
         setLoading(false);
       }
-    };
-    
-    fetchUsers();
-  }, []);
+    } else {
+      setLoading(false);
+    }
+  }, [isAuthenticated, initialUsers]);
   
   const addUser = (user: Omit<User, 'id' | 'createdAt'>) => {
     const newUser: User = {
       ...user,
-      id: Math.max(...users.map(u => u.id)) + 1,
+      id: users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1,
       createdAt: new Date(),
     };
     setUsers([...users, newUser]);
@@ -104,7 +122,12 @@ export const useUserData = () => {
   
   return {
     users,
-    loading,
+    filteredUsers,
+    searchTerm,
+    setSearchTerm,
+    setUsers,
+    loading: loading,
+    isLoading: loading,
     error,
     addUser,
     updateUser,

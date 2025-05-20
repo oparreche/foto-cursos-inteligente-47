@@ -1,17 +1,24 @@
 
-import { User } from "../types";
+import { User } from "./useUserData";
 import { useUserAuth } from "./useUserAuth";
 import { useUserData } from "./useUserData";
 import { useUserActions } from "./useUserActions";
 
 export const useUserManagement = (initialUsers: User[] = []) => {
-  // Gerenciar autenticação
+  // Manage authentication
   const { isAuthenticated, currentUserId } = useUserAuth();
   
-  // Gerenciar dados de usuário
-  const { users, setUsers, filteredUsers, searchTerm, setSearchTerm, isLoading } = useUserData(isAuthenticated, initialUsers);
+  // Manage user data
+  const { 
+    users, 
+    setUsers, 
+    filteredUsers, 
+    searchTerm, 
+    setSearchTerm, 
+    isLoading 
+  } = useUserData(isAuthenticated, initialUsers);
   
-  // Gerenciar ações de usuário
+  // Manage user actions
   const {
     isAddDialogOpen,
     setIsAddDialogOpen,
@@ -24,7 +31,7 @@ export const useUserManagement = (initialUsers: User[] = []) => {
     handleAddUser
   } = useUserActions(users, setUsers, isAuthenticated);
 
-  // Retornar todas as funcionalidades necessárias
+  // Return all necessary functionality
   return {
     users,
     filteredUsers,

@@ -5,6 +5,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { BlogPost } from '@/types/blog';
 
+// Re-export the BlogPost type for components that import it from here
+export type { BlogPost } from '@/types/blog';
+
 export const useBlogPosts = () => {
   const fetchPosts = async (): Promise<BlogPost[]> => {
     const { data, error } = await supabase

@@ -3,7 +3,7 @@ import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useTransactionActions, useCategories } from "@/hooks/useFinance";
+import { useTransactionActions } from "@/hooks/useFinance";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -43,6 +43,8 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onSuccess }) => {
       await addTransaction.mutateAsync({
         ...values,
         amount: parseFloat(values.amount),
+        reference_id: null,
+        reference_type: null
       });
       
       form.reset();

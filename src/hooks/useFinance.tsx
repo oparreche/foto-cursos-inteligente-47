@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -113,9 +112,14 @@ export const useReceivableActions = () => {
   // Adicionar conta a receber
   const addReceivable = useMutation({
     mutationFn: async (values: ReceivableFormValues) => {
+      // Garantir que payment_date seja null para contas pendentes
+      const dataToInsert = values.status === 'paid' 
+        ? { ...values } 
+        : { ...values, payment_date: null };
+      
       const { data, error } = await supabase
         .from('receivables')
-        .insert([values])
+        .insert([dataToInsert])
         .select()
         .single();
       
@@ -240,9 +244,14 @@ export const usePayableActions = () => {
   // Adicionar conta a pagar
   const addPayable = useMutation({
     mutationFn: async (values: PayableFormValues) => {
+      // Garantir que payment_date seja null para contas pendentes
+      const dataToInsert = values.status === 'paid' 
+        ? { ...values } 
+        : { ...values, payment_date: null };
+      
       const { data, error } = await supabase
         .from('payables')
-        .insert([values])
+        .insert([dataToInsert])
         .select()
         .single();
       

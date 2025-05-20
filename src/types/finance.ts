@@ -9,9 +9,26 @@ export type Transaction = Database['public']['Tables']['transactions']['Row'];
 
 // Tipos para formulários
 export type CategoryFormValues = Omit<FinancialCategory, 'id' | 'created_at' | 'updated_at'>;
-export type ReceivableFormValues = Omit<Receivable, 'id' | 'created_at' | 'updated_at'>;
-export type PayableFormValues = Omit<Payable, 'id' | 'created_at' | 'updated_at'>;
-export type TransactionFormValues = Omit<Transaction, 'id' | 'created_at' | 'updated_at'>;
+export type ReceivableFormValues = Omit<Partial<Receivable>, 'id' | 'created_at' | 'updated_at'> & {
+  description: string;
+  amount: number | string;
+  customer: string;
+  due_date: string;
+  status: 'pending' | 'paid' | 'overdue' | 'canceled';
+};
+export type PayableFormValues = Omit<Partial<Payable>, 'id' | 'created_at' | 'updated_at'> & {
+  description: string;
+  amount: number | string;
+  supplier: string;
+  due_date: string;
+  status: 'pending' | 'paid' | 'overdue' | 'canceled';
+};
+export type TransactionFormValues = Omit<Partial<Transaction>, 'id' | 'created_at' | 'updated_at'> & {
+  description: string;
+  amount: number | string;
+  type: 'income' | 'expense' | 'transfer' | 'refund';
+  transaction_date: string;
+};
 
 // Status de pagamento
 export type PaymentStatus = 'pending' | 'paid' | 'overdue' | 'canceled';

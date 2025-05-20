@@ -1,6 +1,6 @@
 
-import React from "react";
-import { Tabs, TabsContent } from "@/components/ui/tabs";
+import React, { useEffect } from "react";
+import { Tabs } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { useAdminTabs } from "./tabs/useAdminTabs";
 import TabTriggers from "./tabs/TabTriggers";
@@ -9,8 +9,10 @@ import TabContents from "./tabs/TabContents";
 import ErrorAlert from "./tabs/ErrorAlert";
 
 const AdminTabs = () => {
-  // Log outside of JSX
-  console.log("AdminTabs renderizando");
+  // Log outside of JSX for better debugging
+  useEffect(() => {
+    console.log("AdminTabs componente montado");
+  }, []);
   
   const {
     activeTab,
@@ -21,7 +23,7 @@ const AdminTabs = () => {
   } = useAdminTabs();
 
   if (!isClient) {
-    return <div>Carregando...</div>;
+    return <div className="p-4 text-center">Carregando interface de administração...</div>;
   }
 
   return (

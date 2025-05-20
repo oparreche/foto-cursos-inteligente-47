@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-// Importações diretas dos caminhos absolutos para evitar problemas
+// Importações explícitas com caminhos absolutos para evitar problemas
 import AISettings from "@/components/admin/ai/settings/AISettings";
 import AIContentGenerator from "@/components/admin/ai/content-generator/AIContentGenerator";
 

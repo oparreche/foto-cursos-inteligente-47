@@ -107,7 +107,7 @@ const AIContentGenerator = ({ onSelectContent }: AIContentGeneratorProps) => {
         <AIConfigWarning isConfigured={aiConfigured} />
         
         {!aiConfigured && (
-          <Alert variant="warning" className="mb-4">
+          <Alert variant="destructive" className="mb-4">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
               As configurações de IA não foram encontradas ou estão incompletas. Verifique sua chave de API na seção de Configurações.

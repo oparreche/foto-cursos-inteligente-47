@@ -49,7 +49,7 @@ const AISettings = () => {
     return (
       <Card data-testid="ai-settings-no-config">
         <CardContent className="pt-6">
-          <Alert variant="warning">
+          <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
               Não foi possível carregar as configurações de IA. Verifique sua conexão com o banco de dados.

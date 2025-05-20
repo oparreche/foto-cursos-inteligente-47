@@ -8,6 +8,19 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { 
+  DollarSign, 
+  BarChart2,
+  PiggyBank,
+  CreditCard,
+  TrendingUp,
+  RefreshCcw,
+  Tag,
+  BarChart  
+} from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { QuizDifficulty, QuizCategory } from '@/types/quiz';
+import { useQuizQuestions, useQuizCategories } from '@/hooks/useQuiz';
 
 const StudentArea = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -16,6 +29,14 @@ const StudentArea = () => {
     email: "midiaputz@gmail.com",
     password: "*Putz123"
   });
+  
+  // Quiz states
+  const [difficulty, setDifficulty] = useState<QuizDifficulty>('all');
+  const [category, setCategory] = useState<QuizCategory>('all');
+  const [questionCount, setQuestionCount] = useState<number>(5);
+  
+  const { data: categories = [], isLoading: isLoadingCategories } = useQuizCategories();
+  
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -181,6 +202,8 @@ const StudentArea = () => {
                   <TabsTrigger value="courses">Meus Cursos</TabsTrigger>
                   <TabsTrigger value="materials">Materiais</TabsTrigger>
                   <TabsTrigger value="certificates">Certificados</TabsTrigger>
+                  <TabsTrigger value="finances">Financeiro</TabsTrigger>
+                  <TabsTrigger value="quiz">Quiz</TabsTrigger>
                   <TabsTrigger value="account">Minha Conta</TabsTrigger>
                 </TabsList>
                 
@@ -268,6 +291,204 @@ const StudentArea = () => {
                           <p className="text-sm text-gray-600">Concluído em 01/09/2023</p>
                         </div>
                         <Button size="sm">Ver certificado</Button>
+                      </div>
+                    </Card>
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="finances">
+                  <h3 className="text-xl font-bold mb-6 flex items-center">
+                    <DollarSign className="mr-2 h-5 w-5" />
+                    Sistema Financeiro
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                    <Card className="p-6">
+                      <div className="flex items-center mb-4">
+                        <BarChart2 className="h-6 w-6 mr-3 text-blue-500" />
+                        <h4 className="font-bold text-lg">Dashboard</h4>
+                      </div>
+                      <p className="text-gray-600 mb-4">Visão geral das suas finanças e métricas principais.</p>
+                      <Button 
+                        onClick={() => navigate('/financeiro/dashboard')} 
+                        className="w-full"
+                      >
+                        Acessar
+                      </Button>
+                    </Card>
+                    
+                    <Card className="p-6">
+                      <div className="flex items-center mb-4">
+                        <PiggyBank className="h-6 w-6 mr-3 text-green-500" />
+                        <h4 className="font-bold text-lg">Contas a Receber</h4>
+                      </div>
+                      <p className="text-gray-600 mb-4">Gerencie os pagamentos pendentes e recebidos.</p>
+                      <Button 
+                        onClick={() => navigate('/financeiro/receivables')} 
+                        className="w-full"
+                      >
+                        Acessar
+                      </Button>
+                    </Card>
+                    
+                    <Card className="p-6">
+                      <div className="flex items-center mb-4">
+                        <CreditCard className="h-6 w-6 mr-3 text-red-500" />
+                        <h4 className="font-bold text-lg">Contas a Pagar</h4>
+                      </div>
+                      <p className="text-gray-600 mb-4">Controle suas despesas e pagamentos pendentes.</p>
+                      <Button 
+                        onClick={() => navigate('/financeiro/payables')} 
+                        className="w-full"
+                      >
+                        Acessar
+                      </Button>
+                    </Card>
+                    
+                    <Card className="p-6">
+                      <div className="flex items-center mb-4">
+                        <TrendingUp className="h-6 w-6 mr-3 text-purple-500" />
+                        <h4 className="font-bold text-lg">Fluxo de Caixa</h4>
+                      </div>
+                      <p className="text-gray-600 mb-4">Acompanhe suas entradas e saídas financeiras.</p>
+                      <Button 
+                        onClick={() => navigate('/financeiro/cashflow')} 
+                        className="w-full"
+                      >
+                        Acessar
+                      </Button>
+                    </Card>
+                    
+                    <Card className="p-6">
+                      <div className="flex items-center mb-4">
+                        <RefreshCcw className="h-6 w-6 mr-3 text-orange-500" />
+                        <h4 className="font-bold text-lg">Estornos</h4>
+                      </div>
+                      <p className="text-gray-600 mb-4">Visualize e solicite estornos de pagamentos.</p>
+                      <Button 
+                        onClick={() => navigate('/financeiro/refunds')} 
+                        className="w-full"
+                      >
+                        Acessar
+                      </Button>
+                    </Card>
+                    
+                    <Card className="p-6">
+                      <div className="flex items-center mb-4">
+                        <Tag className="h-6 w-6 mr-3 text-teal-500" />
+                        <h4 className="font-bold text-lg">Categorias</h4>
+                      </div>
+                      <p className="text-gray-600 mb-4">Organize suas finanças com categorias personalizadas.</p>
+                      <Button 
+                        onClick={() => navigate('/financeiro/categories')} 
+                        className="w-full"
+                      >
+                        Acessar
+                      </Button>
+                    </Card>
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="quiz">
+                  <h3 className="text-xl font-bold mb-6 flex items-center">
+                    <BarChart className="mr-2 h-5 w-5" />
+                    Quiz de Fotografia
+                  </h3>
+                  
+                  <Card className="p-6 mb-6">
+                    <h4 className="font-bold text-lg mb-4">Configurações do Quiz</h4>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="difficulty">Dificuldade</Label>
+                        <Select value={difficulty} onValueChange={(value) => setDifficulty(value as QuizDifficulty)}>
+                          <SelectTrigger id="difficulty">
+                            <SelectValue placeholder="Selecione a dificuldade" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Todas</SelectItem>
+                            <SelectItem value="easy">Fácil</SelectItem>
+                            <SelectItem value="medium">Médio</SelectItem>
+                            <SelectItem value="hard">Difícil</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="category">Categoria</Label>
+                        <Select value={category} onValueChange={(value) => setCategory(value)}>
+                          <SelectTrigger id="category">
+                            <SelectValue placeholder="Selecione a categoria" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Todas</SelectItem>
+                            {categories.map((cat) => (
+                              <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="questionCount">Número de Questões</Label>
+                        <Select 
+                          value={questionCount.toString()} 
+                          onValueChange={(value) => setQuestionCount(parseInt(value, 10))}
+                        >
+                          <SelectTrigger id="questionCount">
+                            <SelectValue placeholder="Número de questões" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="5">5 questões</SelectItem>
+                            <SelectItem value="10">10 questões</SelectItem>
+                            <SelectItem value="15">15 questões</SelectItem>
+                            <SelectItem value="20">20 questões</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <Button 
+                        onClick={() => navigate('/quiz')} 
+                        className="w-full mt-2"
+                      >
+                        Iniciar Quiz
+                      </Button>
+                    </div>
+                  </Card>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Card className="p-6">
+                      <h4 className="font-bold mb-2">Seu Histórico de Quiz</h4>
+                      <div className="space-y-4">
+                        <div className="flex justify-between py-2 border-b">
+                          <span>Quiz de Fotografia Básica</span>
+                          <span className="font-medium">8/10 pontos</span>
+                        </div>
+                        <div className="flex justify-between py-2 border-b">
+                          <span>Quiz de Composição</span>
+                          <span className="font-medium">7/10 pontos</span>
+                        </div>
+                        <div className="flex justify-between py-2 border-b">
+                          <span>Quiz de Iluminação</span>
+                          <span className="font-medium">9/10 pontos</span>
+                        </div>
+                      </div>
+                    </Card>
+                    
+                    <Card className="p-6">
+                      <h4 className="font-bold mb-2">Suas Conquistas</h4>
+                      <div className="grid grid-cols-2 gap-4 mt-4">
+                        <div className="text-center">
+                          <div className="bg-yellow-100 rounded-full p-4 mx-auto w-16 h-16 flex items-center justify-center mb-2">
+                            <BarChart className="h-8 w-8 text-yellow-500" />
+                          </div>
+                          <p className="text-sm font-medium">Conhecedor de Fotografia</p>
+                        </div>
+                        <div className="text-center">
+                          <div className="bg-purple-100 rounded-full p-4 mx-auto w-16 h-16 flex items-center justify-center mb-2">
+                            <BarChart className="h-8 w-8 text-purple-500" />
+                          </div>
+                          <p className="text-sm font-medium">Mestre das Cores</p>
+                        </div>
                       </div>
                     </Card>
                   </div>

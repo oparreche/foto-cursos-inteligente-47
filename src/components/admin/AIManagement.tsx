@@ -2,8 +2,10 @@
 import React, { useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 
-// Import directly from file paths to avoid any import issues
+// Import the settings component 
 import AISettings from "@/components/admin/ai/settings/AISettings";
+
+// Import the content generator component
 import AIContentGenerator from "@/components/admin/ai/content-generator/AIContentGenerator";
 
 const AIManagement = () => {

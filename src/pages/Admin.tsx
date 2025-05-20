@@ -8,6 +8,9 @@ import DiagnosticDisplay from "@/components/admin/DiagnosticDisplay";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { assignHighestAdminRole } from "@/components/admin/services/roleService";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 
 const Admin = () => {
   const [authenticated, setAuthenticated] = useState(false);
@@ -15,11 +18,19 @@ const Admin = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  // Add a debug mode state
+  // Always enable diagnostics when developing
   const [showDiagnostics, setShowDiagnostics] = useState(true);
+  // New state to track rendering progress
+  const [renderState, setRenderState] = useState({
+    mainLayoutLoaded: false,
+    adminAccessLoaded: false,
+    adminTabsStarted: false,
+    adminTabsLoaded: false,
+  });
 
   useEffect(() => {
-    console.log("Admin page rendered");
+    console.log("Admin page rendered at", new Date().toISOString());
+    setRenderState(prev => ({...prev, mainLayoutLoaded: true}));
     
     // Make the diagnostic panel toggleable with a keyboard shortcut
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -82,6 +93,7 @@ const Admin = () => {
         toast.error("Erro ao verificar autenticação");
       } finally {
         setIsLoading(false);
+        setRenderState(prev => ({...prev, adminAccessLoaded: true}));
       }
     };
     
@@ -144,19 +156,52 @@ const Admin = () => {
     );
   }
 
+  // Simple fallback before AdminTabs is rendered
+  const renderAdminTabs = () => {
+    try {
+      setRenderState(prev => ({...prev, adminTabsStarted: true}));
+      const tabs = <AdminTabs />;
+      setRenderState(prev => ({...prev, adminTabsLoaded: true}));
+      return tabs;
+    } catch (error) {
+      console.error("Erro ao renderizar AdminTabs:", error);
+      return (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Erro ao carregar interface</AlertTitle>
+          <AlertDescription>
+            Ocorreu um erro ao carregar a interface de administração. 
+            Detalhes: {error instanceof Error ? error.message : "Erro desconhecido"}
+          </AlertDescription>
+        </Alert>
+      );
+    }
+  };
+
   return (
     <MainLayout>
       <AdminAccess authenticated={authenticated} isLoading={isLoading}>
         <div className="container mx-auto px-4 py-8">
           <h1 className="text-3xl font-bold mb-6">Painel de Administração</h1>
           
-          {/* Always show the diagnostic component initially to help debug */}
+          {/* Always show the diagnostic component to help debug */}
           {showDiagnostics && <DiagnosticDisplay />}
           
-          {/* Wrap with try-catch to avoid blank screen */}
-          <div>
-            <AdminTabs />
-          </div>
+          {/* Show the current rendering state */}
+          <Card className="mb-4 border border-amber-500">
+            <CardContent className="pt-4">
+              <p className="text-sm text-amber-800">Estado atual do carregamento:</p>
+              <ul className="text-xs space-y-1 mt-2">
+                <li>MainLayout: {renderState.mainLayoutLoaded ? "✅" : "❌"}</li>
+                <li>AdminAccess: {renderState.adminAccessLoaded ? "✅" : "❌"}</li>
+                <li>AdminTabs iniciado: {renderState.adminTabsStarted ? "✅" : "❌"}</li>
+                <li>AdminTabs carregado: {renderState.adminTabsLoaded ? "✅" : "❌"}</li>
+              </ul>
+            </CardContent>
+          </Card>
+          
+          {/* Wrap AdminTabs with try-catch to avoid blank screen */}
+          {renderAdminTabs()}
           
           {(userRole === 'admin' || userRole === 'super_admin') && 
             <PermissionsSheet userRole={userRole} />}

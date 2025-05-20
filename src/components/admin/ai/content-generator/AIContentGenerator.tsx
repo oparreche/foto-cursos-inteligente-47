@@ -56,7 +56,7 @@ const AIContentGenerator = ({ onSelectContent }: AIContentGeneratorProps) => {
   };
 
   return (
-    <Card>
+    <Card data-testid="ai-content-generator">
       <CardHeader>
         <CardTitle>Gerador de Conteúdo com IA</CardTitle>
         <CardDescription>

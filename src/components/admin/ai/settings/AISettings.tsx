@@ -33,7 +33,7 @@ const AISettings = () => {
   }
   
   return (
-    <Card>
+    <Card data-testid="ai-settings">
       <CardHeader>
         <CardTitle>Configurações de IA</CardTitle>
         <CardDescription>Configure o serviço de inteligência artificial para geração de conteúdo</CardDescription>

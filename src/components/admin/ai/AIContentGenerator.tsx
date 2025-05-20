@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,9 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area"; 
-import { ContentPrompt, AIResponse, generateContent } from "@/components/admin/ai";
+import { ContentPrompt, AIResponse } from "@/components/admin/ai/types";
+import { generateContent } from "@/components/admin/ai/contentService";
 import { useQuery } from "@tanstack/react-query";
-import { getAIConfig } from "@/components/admin/ai";
+import { getAIConfig } from "@/components/admin/ai/configService";
 
 interface AIContentGeneratorProps {
   onSelectContent?: (content: string) => void;

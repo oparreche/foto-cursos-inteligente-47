@@ -15,6 +15,7 @@ const AISettings = memo(() => {
     aiConfig, 
     isLoading, 
     error, 
+    saveError,
     isEditDialogOpen, 
     setIsEditDialogOpen,
     handleSaveConfig,
@@ -38,6 +39,7 @@ const AISettings = memo(() => {
     hasConfig: !!aiConfig, 
     isLoading, 
     hasError: !!error,
+    hasSaveError: !!saveError,
     dialogOpen: isEditDialogOpen
   });
   
@@ -83,7 +85,9 @@ const AISettings = memo(() => {
         <ConfigDisplay aiConfig={aiConfig} />
       </CardContent>
       <CardFooter>
-        <Button onClick={openEditDialog}>Editar Configurações</Button>
+        <Button onClick={openEditDialog} disabled={isUpdating}>
+          {isUpdating ? 'Salvando...' : 'Editar Configurações'}
+        </Button>
       </CardFooter>
       
       <ConfigDialog 
@@ -92,6 +96,7 @@ const AISettings = memo(() => {
         aiConfig={aiConfig}
         onSave={handleSaveConfig}
         isUpdating={isUpdating}
+        saveError={saveError}
       />
     </Card>
   );

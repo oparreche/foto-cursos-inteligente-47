@@ -8,6 +8,7 @@ import { toast } from "sonner";
 export const useAISettings = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const queryClient = useQueryClient();
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   console.log("useAISettings hook inicializado");
   
@@ -36,13 +37,15 @@ export const useAISettings = () => {
   console.log("Estado atual do hook useAISettings:", { 
     temConfiguracao: !!aiConfig, 
     isLoading, 
-    temErro: !!error 
+    temErro: !!error,
+    temErroSalvamento: !!saveError
   });
   
   // Update AI settings with mutation
   const updateConfigMutation = useMutation({
     mutationFn: async (config: AIConfig) => {
       console.log("Iniciando mutação para salvar config:", config);
+      setSaveError(null);
       const result = await updateAIConfig(config);
       if (!result) {
         throw new Error("Falha ao atualizar configurações");
@@ -51,6 +54,7 @@ export const useAISettings = () => {
     },
     onMutate: () => {
       console.log("Mutação iniciada");
+      setSaveError(null);
       // Não fechar o diálogo até que a operação seja concluída
     },
     onSuccess: () => {
@@ -58,21 +62,36 @@ export const useAISettings = () => {
       queryClient.invalidateQueries({ queryKey: ['aiConfig'] });
       setIsEditDialogOpen(false);
       toast.success("Configurações de IA atualizadas com sucesso");
+      setSaveError(null);
     },
     onError: (error: any) => {
       console.error("Erro na atualização:", error);
-      toast.error(`Erro ao atualizar configurações: ${error?.message || 'Erro desconhecido'}`);
+      const errorMessage = error?.message || 'Erro desconhecido';
+      setSaveError(errorMessage);
+      toast.error(`Erro ao atualizar configurações: ${errorMessage}`);
     }
   });
   
   // Update AI settings
   const handleSaveConfig = useCallback((config: AIConfig) => {
     console.log("Salvando configuração:", config);
+    
+    // Validar dados antes de enviar para a mutation
+    if (!config.provider || !config.model || !config.apiKey) {
+      toast.error("Preencha todos os campos obrigatórios");
+      setSaveError("Dados incompletos");
+      return;
+    }
+    
     updateConfigMutation.mutate(config);
   }, [updateConfigMutation]);
   
   // Wrap in useCallback to prevent recreation on each render
   const setIsEditDialogOpenHandler = useCallback((value: boolean) => {
+    if (!value) {
+      // Resetar erro quando o diálogo for fechado
+      setSaveError(null);
+    }
     setIsEditDialogOpen(value);
   }, []);
   
@@ -80,6 +99,7 @@ export const useAISettings = () => {
     aiConfig,
     isLoading,
     error,
+    saveError,
     refetch,
     isEditDialogOpen,
     setIsEditDialogOpen: setIsEditDialogOpenHandler,

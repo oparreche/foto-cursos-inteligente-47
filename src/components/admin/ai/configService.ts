@@ -35,7 +35,7 @@ export const getAIConfig = async (): Promise<AIConfig | null> => {
   }
 };
 
-// Update AI configuration
+// Update AI configuration with improved error handling
 export const updateAIConfig = async (config: AIConfig): Promise<boolean> => {
   try {
     console.log('Iniciando atualização da configuração de IA:', {
@@ -43,6 +43,12 @@ export const updateAIConfig = async (config: AIConfig): Promise<boolean> => {
       model: config.model,
       apiKeyLength: config.apiKey ? config.apiKey.length : 0
     });
+    
+    if (!config.provider || !config.model || !config.apiKey) {
+      console.error('Dados inválidos ao atualizar configuração de IA');
+      toast.error('Dados inválidos. Preencha todos os campos.');
+      return false;
+    }
     
     // Use the database function for updating AI settings
     const { error, data } = await supabase

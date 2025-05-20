@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 import { AIConfig, AIModel } from "@/components/admin/ai/types";
 import { toast } from "sonner";
 
@@ -15,14 +17,17 @@ interface ConfigDialogProps {
   aiConfig: AIConfig | null;
   onSave: (config: AIConfig) => void;
   isUpdating: boolean;
+  saveError?: string | null;
 }
 
-const ConfigDialog = ({ isOpen, onOpenChange, aiConfig, onSave, isUpdating }: ConfigDialogProps) => {
+const ConfigDialog = ({ isOpen, onOpenChange, aiConfig, onSave, isUpdating, saveError }: ConfigDialogProps) => {
   const [editConfig, setEditConfig] = useState<AIConfig>({
     provider: null,
     model: null,
     apiKey: null
   });
+  
+  const [validationError, setValidationError] = useState<string | null>(null);
   
   useEffect(() => {
     if (isOpen && aiConfig) {
@@ -31,12 +36,14 @@ const ConfigDialog = ({ isOpen, onOpenChange, aiConfig, onSave, isUpdating }: Co
         model: aiConfig.model,
         apiKey: aiConfig.apiKey,
       });
+      setValidationError(null); // Reset validation error when dialog opens
     } else if (isOpen) {
       setEditConfig({
         provider: null,
         model: null,
         apiKey: null
       });
+      setValidationError(null);
     }
   }, [isOpen, aiConfig]);
   
@@ -47,6 +54,7 @@ const ConfigDialog = ({ isOpen, onOpenChange, aiConfig, onSave, isUpdating }: Co
       provider,
       model: null
     });
+    setValidationError(null);
   };
   
   const handleModelChange = (model: AIModel) => {
@@ -54,6 +62,7 @@ const ConfigDialog = ({ isOpen, onOpenChange, aiConfig, onSave, isUpdating }: Co
       ...editConfig,
       model
     });
+    setValidationError(null);
   };
   
   const handleApiKeyChange = (apiKey: string) => {
@@ -61,13 +70,34 @@ const ConfigDialog = ({ isOpen, onOpenChange, aiConfig, onSave, isUpdating }: Co
       ...editConfig,
       apiKey
     });
+    setValidationError(null);
+  };
+  
+  const validateConfig = (): boolean => {
+    if (!editConfig.provider) {
+      setValidationError("Selecione um provedor de IA");
+      return false;
+    }
+    
+    if (!editConfig.model) {
+      setValidationError("Selecione um modelo de IA");
+      return false;
+    }
+    
+    if (!editConfig.apiKey || editConfig.apiKey.trim().length < 10) {
+      setValidationError("Insira uma chave API válida");
+      return false;
+    }
+    
+    setValidationError(null);
+    return true;
   };
   
   const handleSubmit = () => {
     console.log("Enviando configuração para salvar:", editConfig);
     
-    if (!editConfig.provider || !editConfig.model || !editConfig.apiKey) {
-      toast.error("Preencha todos os campos para salvar");
+    if (!validateConfig()) {
+      toast.error("Dados inválidos. Verifique todos os campos.");
       return;
     }
     
@@ -76,10 +106,10 @@ const ConfigDialog = ({ isOpen, onOpenChange, aiConfig, onSave, isUpdating }: Co
     } catch (error) {
       console.error("Erro ao enviar configuração:", error);
       toast.error("Falha ao processar o pedido de salvamento");
+      setValidationError("Erro ao processar o pedido de salvamento");
     }
   };
 
-  // Resto do código permanece igual
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -89,6 +119,15 @@ const ConfigDialog = ({ isOpen, onOpenChange, aiConfig, onSave, isUpdating }: Co
             Configure o serviço de IA para geração de conteúdo. Apenas super administradores podem alterar estas configurações.
           </DialogDescription>
         </DialogHeader>
+        
+        {(saveError || validationError) && (
+          <Alert variant="destructive" className="my-2">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              {saveError || validationError}
+            </AlertDescription>
+          </Alert>
+        )}
         
         <div className="space-y-6 py-4">
           <div className="space-y-2">
@@ -142,6 +181,7 @@ const ConfigDialog = ({ isOpen, onOpenChange, aiConfig, onSave, isUpdating }: Co
               onChange={(e) => handleApiKeyChange(e.target.value)}
               placeholder="Insira sua chave API"
               type="password"
+              className="font-mono"
             />
             <p className="text-xs text-muted-foreground">
               {editConfig.provider === 'openai' ? 
@@ -153,15 +193,24 @@ const ConfigDialog = ({ isOpen, onOpenChange, aiConfig, onSave, isUpdating }: Co
           </div>
         </div>
         
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+        <DialogFooter className="flex items-center justify-between">
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isUpdating}>
             Cancelar
           </Button>
           <Button 
             onClick={handleSubmit} 
             disabled={!editConfig.provider || !editConfig.model || !editConfig.apiKey || isUpdating}
+            className="relative"
           >
             {isUpdating ? 'Salvando...' : 'Salvar'}
+            {isUpdating && (
+              <span className="absolute inset-0 flex items-center justify-center">
+                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </span>
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

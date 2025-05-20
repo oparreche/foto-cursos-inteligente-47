@@ -11,6 +11,7 @@ import {
   Tag, 
   Settings 
 } from 'lucide-react';
+import PaymentGateway from "./PaymentGateway";
 
 const FinanceManagement = () => {
   const [activeTab, setActiveTab] = useState<string>("dashboard");
@@ -48,7 +49,7 @@ const FinanceManagement = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
+        <TabsList className="mb-4">
           <TabsTrigger value="dashboard" className="flex items-center gap-2">
             <BarChart2 className="h-4 w-4" /> Dashboard
           </TabsTrigger>
@@ -117,7 +118,7 @@ const FinanceManagement = () => {
         <TabsContent value="payment">
           <Card className="p-6">
             <h3 className="text-lg font-semibold mb-4">Gateway de Pagamento</h3>
-            <p>Configure as integrações de pagamento.</p>
+            <PaymentGateway />
           </Card>
         </TabsContent>
       </Tabs>

@@ -1,70 +1,113 @@
+import { useState, useEffect } from 'react';
 
-import { useState, useEffect } from "react";
-import { User } from "../types";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+// User type definition
+export type User = {
+  id: number;
+  name: string;
+  email: string;
+  role: "admin" | "instructor" | "student" | "viewer" | string; // Updated to allow string
+  status: "active" | "inactive";
+  createdAt: Date;
+  lastLogin: Date;
+};
 
-export function useUserData(isAuthenticated: boolean, initialUsers: User[] = []) {
-  const [users, setUsers] = useState<User[]>(initialUsers);
-  const [isLoading, setIsLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
+// Mock data for development purposes
+const mockUsers: User[] = [
+  {
+    id: 1,
+    name: 'João Silva',
+    email: 'joao@example.com',
+    role: 'admin',
+    status: 'active',
+    createdAt: new Date('2023-01-15'),
+    lastLogin: new Date('2023-05-20'),
+  },
+  {
+    id: 2,
+    name: 'Maria Oliveira',
+    email: 'maria@example.com',
+    role: 'instructor',
+    status: 'active',
+    createdAt: new Date('2023-02-01'),
+    lastLogin: new Date('2023-05-22'),
+  },
+  {
+    id: 3,
+    name: 'Carlos Pereira',
+    email: 'carlos@example.com',
+    role: 'student',
+    status: 'inactive',
+    createdAt: new Date('2023-03-10'),
+    lastLogin: new Date('2023-04-15'),
+  },
+  {
+    id: 4,
+    name: 'Ana Souza',
+    email: 'ana@example.com',
+    role: 'viewer',
+    status: 'active',
+    createdAt: new Date('2023-04-05'),
+    lastLogin: new Date('2023-05-25'),
+  },
+  {
+    id: 5,
+    name: 'Ricardo Alves',
+    email: 'ricardo@example.com',
+    role: 'admin',
+    status: 'active',
+    createdAt: new Date('2023-05-01'),
+    lastLogin: new Date('2023-05-28'),
+  },
+];
 
-  // Carregar usuários do Supabase
+export const useUserData = () => {
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  
   useEffect(() => {
+    // In a real app, this would be an API call
+    // For now, we're using mock data
     const fetchUsers = async () => {
-      if (!isAuthenticated) return;
-      
-      setIsLoading(true);
       try {
-        // Carregar todos os perfis com suas funções
-        const { data: profiles, error: profileError } = await supabase
-          .from('profiles')
-          .select('*');
-        
-        if (profileError) throw profileError;
-
-        // Buscar todas as funções de usuários
-        const { data: userRoles, error: roleError } = await supabase
-          .from('user_roles')
-          .select('*');
-
-        if (roleError) throw roleError;
-        
-        // Mapear os perfis e funções para o formato User
-        const mappedUsers: User[] = profiles.map(profile => {
-          // Encontrar a função do usuário
-          const userRole = userRoles?.find(role => role.user_id === profile.id);
-          
-          return {
-            id: parseInt(profile.id.toString().substring(0, 8), 16),
-            name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Usuário sem nome',
-            email: profile.id, // Usando ID como email por enquanto
-            role: userRole?.role || "viewer",
-            status: profile.is_active ? "active" : "inactive",
-            createdAt: new Date(profile.created_at),
-            lastLogin: new Date() // Placeholder
-          };
-        });
-        
-        setUsers(mappedUsers);
-      } catch (error) {
-        console.error("Erro ao carregar usuários:", error);
-        toast.error("Erro ao carregar usuários");
-      } finally {
-        setIsLoading(false);
+        // Simulating API delay
+        await new Promise(resolve => setTimeout(resolve, 800));
+        setUsers(mockUsers);
+        setLoading(false);
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error('Unknown error'));
+        setLoading(false);
       }
     };
     
     fetchUsers();
-  }, [isAuthenticated]);
-
-  // Filtrar usuários com base no termo de pesquisa
-  const filteredUsers = users.filter(
-    (user) =>
-      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.role.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  return { users, setUsers, filteredUsers, searchTerm, setSearchTerm, isLoading };
-}
+  }, []);
+  
+  const addUser = (user: Omit<User, 'id' | 'createdAt'>) => {
+    const newUser: User = {
+      ...user,
+      id: Math.max(...users.map(u => u.id)) + 1,
+      createdAt: new Date(),
+    };
+    setUsers([...users, newUser]);
+  };
+  
+  const updateUser = (id: number, userData: Partial<User>) => {
+    setUsers(users.map(user => 
+      user.id === id ? { ...user, ...userData } : user
+    ));
+  };
+  
+  const deleteUser = (id: number) => {
+    setUsers(users.filter(user => user.id !== id));
+  };
+  
+  return {
+    users,
+    loading,
+    error,
+    addUser,
+    updateUser,
+    deleteUser
+  };
+};

@@ -9,6 +9,7 @@ import { BlogFormValues } from "./blog/BlogForm";
 import { useBlogManagement } from "@/hooks/useBlogManagement";
 import BlogTable from "./blog/BlogTable";
 import BlogForm from "./blog/BlogForm";
+import { BlogPost } from "@/types/blog";
 
 const BlogManagement = () => {
   const {
@@ -75,7 +76,7 @@ const BlogManagement = () => {
         categories: categories,
         content: values.content,
         excerpt: values.excerpt,
-        image_url: currentImage,
+        image_url: currentImage || "",
         status: values.status,
         created_at: now,
         updated_at: now,
@@ -121,7 +122,7 @@ const BlogManagement = () => {
             </DialogHeader>
             
             <BlogForm
-              currentPost={currentPost}
+              currentPost={currentPost as any}
               isEditing={isEditing}
               currentImage={currentImage}
               setCurrentImage={setCurrentImage}
@@ -138,7 +139,7 @@ const BlogManagement = () => {
       <BlogTable
         isLoading={isLoading}
         error={error}
-        filteredPosts={filteredPosts}
+        filteredPosts={filteredPosts as any[]}
         searchTerm={searchTerm}
         onEdit={handleEdit}
         onDelete={handleDelete}

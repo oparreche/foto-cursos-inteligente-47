@@ -3,22 +3,7 @@ import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-
-export type BlogPost = {
-  id: string;
-  title: string;
-  slug: string;
-  image_url: string | null;
-  excerpt: string | null;
-  author: string | null;
-  published_at: string | null;
-  read_time: string | null;
-  categories: string[] | null;
-  content: string | null;
-  status: string | null;
-  created_at?: string | null;
-  updated_at?: string | null;
-};
+import { BlogPost } from '@/types/blog';
 
 export const useBlogPosts = () => {
   const fetchPosts = async (): Promise<BlogPost[]> => {
@@ -92,5 +77,24 @@ export const useAllBlogCategories = () => {
       // Remove duplicates
       return [...new Set(allCategories)];
     }
+  });
+};
+
+export const useAdminBlogPosts = () => {
+  return useQuery({
+    queryKey: ['adminBlogPosts'],
+    queryFn: async (): Promise<BlogPost[]> => {
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error("Error fetching posts:", error);
+        throw new Error(error.message);
+      }
+      
+      return data || [];
+    },
   });
 };

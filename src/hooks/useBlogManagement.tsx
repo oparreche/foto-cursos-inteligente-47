@@ -1,25 +1,12 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useBlogAuthentication } from "./useBlogAuthentication";
+import { useAdminBlogPosts } from "./useBlogPosts";
+import { useBlogMutations } from "./useBlogMutations";
+import { BlogPost } from "@/types/blog";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-export interface BlogPost {
-  id: string;
-  title: string;
-  content?: string;
-  excerpt?: string;
-  slug: string;
-  image_url?: string;
-  published_at?: string;
-  created_at?: string;
-  updated_at?: string;
-  status?: string;
-  categories?: string[];
-  author?: string;
-  author_id?: string;
-  read_time?: string;
-}
+export type { BlogPost } from "@/types/blog";
 
 export const useBlogManagement = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -27,175 +14,19 @@ export const useBlogManagement = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentImage, setCurrentImage] = useState("");
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [userProfile, setUserProfile] = useState<any>(null);
-  const [userId, setUserId] = useState<string | null>(null);
-  const queryClient = useQueryClient();
+  
+  // Authentication state
+  const { isAuthenticated, userProfile, userId } = useBlogAuthentication();
 
-  // Check authentication status
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      const currentUserId = session?.user?.id;
-      setIsAuthenticated(!!session?.user);
-      setUserId(currentUserId || null);
-      
-      if (currentUserId) {
-        // Fetch user profile data
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', currentUserId)
-          .single();
-          
-        if (!profileError && profileData) {
-          setUserProfile(profileData);
-        } else {
-          console.log("Perfil não encontrado ou erro:", profileError);
-        }
-      }
-    };
-    
-    checkAuth();
-    
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      const currentUserId = session?.user?.id;
-      setIsAuthenticated(!!session?.user);
-      setUserId(currentUserId || null);
-      
-      if (currentUserId) {
-        // Fetch user profile data on auth state change
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', currentUserId)
-          .single();
-          
-        if (!profileError && profileData) {
-          setUserProfile(profileData);
-        }
-      } else {
-        setUserProfile(null);
-      }
-    });
-    
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  // Fetch blog posts
-  const { data: posts = [], isLoading, error } = useQuery({
-    queryKey: ['adminBlogPosts'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) {
-        console.error("Error fetching posts:", error);
-        throw new Error(error.message);
-      }
-      
-      return data || [];
-    },
-  });
-
-  // Create post mutation
-  const createPostMutation = useMutation({
-    mutationFn: async (post: Omit<BlogPost, 'id'>) => {
-      // Verify authentication first
-      const { data: { session } } = await supabase.auth.getSession();
-      const currentUserId = session?.user?.id;
-      
-      if (!currentUserId) {
-        throw new Error("User must be logged in to create a post");
-      }
-      
-      // Add author_id to the post if not already set
-      const postToCreate = {
-        ...post,
-        author_id: post.author_id || currentUserId
-      };
-      
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .insert([postToCreate])
-        .select()
-        .single();
-      
-      if (error) throw new Error(error.message);
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminBlogPosts'] });
-      queryClient.invalidateQueries({ queryKey: ['blogPosts'] });
-      toast.success("Post criado com sucesso!");
-      resetAndCloseDialog();
-    },
-    onError: (error) => {
-      toast.error(`Erro ao criar post: ${error.message}`);
-    }
-  });
-
-  // Update post mutation
-  const updatePostMutation = useMutation({
-    mutationFn: async ({ id, post }: { id: string, post: Partial<BlogPost> }) => {
-      // Verify authentication first
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) {
-        throw new Error("User must be logged in to update a post");
-      }
-      
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .update(post)
-        .eq('id', id)
-        .select()
-        .single();
-      
-      if (error) throw new Error(error.message);
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminBlogPosts'] });
-      queryClient.invalidateQueries({ queryKey: ['blogPosts'] });
-      queryClient.invalidateQueries({ queryKey: ['blogPost'] });
-      toast.success("Post atualizado com sucesso!");
-      resetAndCloseDialog();
-    },
-    onError: (error) => {
-      toast.error(`Erro ao atualizar post: ${error.message}`);
-    }
-  });
-
-  // Delete post mutation
-  const deletePostMutation = useMutation({
-    mutationFn: async (id: string) => {
-      // Verify authentication first
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) {
-        throw new Error("User must be logged in to delete a post");
-      }
-      
-      const { error } = await supabase
-        .from('blog_posts')
-        .delete()
-        .eq('id', id);
-      
-      if (error) throw new Error(error.message);
-      return id;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminBlogPosts'] });
-      queryClient.invalidateQueries({ queryKey: ['blogPosts'] });
-      toast.success("Post excluído com sucesso!");
-    },
-    onError: (error) => {
-      toast.error(`Erro ao excluir post: ${error.message}`);
-    }
-  });
+  // Blog post data
+  const { data: posts = [], isLoading, error } = useAdminBlogPosts();
+  
+  // Mutations
+  const { 
+    createPostMutation, 
+    updatePostMutation, 
+    deletePostMutation 
+  } = useBlogMutations();
 
   // Filter posts based on search term
   const filteredPosts = posts.filter(post => 

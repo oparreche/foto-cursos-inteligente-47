@@ -27,7 +27,11 @@ const AlertMessages = ({ errorMessage, showConfirmationAlert, email }: AlertMess
             Um email de confirmação foi enviado para <strong>{email}</strong>. 
             Por favor, verifique sua caixa de entrada e confirme seu email antes de fazer login.
             <br />
-            <span className="text-xs mt-1 block">(Verifique também sua pasta de spam)</span>
+            <span className="text-xs mt-1 block">
+              (Verifique também sua pasta de spam) 
+              <br />
+              Para administradores: faça login mesmo sem confirmar o email
+            </span>
           </AlertDescription>
         </Alert>
       )}

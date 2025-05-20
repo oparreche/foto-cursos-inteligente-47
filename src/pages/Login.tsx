@@ -9,8 +9,8 @@ import RegisterForm from "@/components/auth/RegisterForm";
 import AlertMessages from "@/components/auth/AlertMessages";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("midiaputz@gmail.com");
+  const [password, setPassword] = useState("*Putz123");
   const [showConfirmationAlert, setShowConfirmationAlert] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();

@@ -31,6 +31,16 @@ export interface AIResponse {
   };
 }
 
+// Defining the structure of the AI settings table data
+interface AISettingsRecord {
+  id: number;
+  provider: 'openai' | 'perplexity' | null;
+  model: AIModel | null;
+  api_key: string | null;
+  last_updated: string | null;
+  updated_by: string | null;
+}
+
 // Get AI configuration from database
 export const getAIConfig = async (): Promise<AIConfig | null> => {
   try {
@@ -44,7 +54,15 @@ export const getAIConfig = async (): Promise<AIConfig | null> => {
       return null;
     }
     
-    return data as AIConfig;
+    const record = data as AISettingsRecord;
+    
+    return {
+      provider: record.provider,
+      model: record.model,
+      apiKey: record.api_key,
+      lastUpdated: record.last_updated || undefined,
+      updatedBy: record.updated_by || undefined
+    };
   } catch (error) {
     console.error('Exception when fetching AI configuration:', error);
     return null;
@@ -59,9 +77,9 @@ export const updateAIConfig = async (config: AIConfig): Promise<boolean> => {
       .update({
         provider: config.provider,
         model: config.model,
-        apiKey: config.apiKey,
-        lastUpdated: new Date().toISOString(),
-        updatedBy: (await supabase.auth.getUser()).data.user?.id
+        api_key: config.apiKey,
+        last_updated: new Date().toISOString(),
+        updated_by: (await supabase.auth.getUser()).data.user?.id
       })
       .eq('id', 1); // Assuming we have a single configuration record
       

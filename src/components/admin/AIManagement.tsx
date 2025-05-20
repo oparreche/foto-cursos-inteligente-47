@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 
 // Import the components directly from their file paths
-import AISettings from "@/components/admin/ai/AISettings";
+import AISettings from "@/components/admin/ai/settings/AISettings";
 import AIContentGenerator from "@/components/admin/ai/AIContentGenerator";
 
 const AIManagement = () => {

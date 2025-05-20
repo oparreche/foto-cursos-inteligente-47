@@ -4,6 +4,7 @@ import MainLayout from "@/components/layout/MainLayout";
 import AdminTabs from "@/components/admin/AdminTabs";
 import AdminAccess from "@/components/admin/AdminAccess";
 import PermissionsSheet from "@/components/admin/PermissionsSheet";
+import DiagnosticDisplay from "@/components/admin/DiagnosticDisplay";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { assignHighestAdminRole } from "@/components/admin/services/roleService";
@@ -14,8 +15,21 @@ const Admin = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Add a debug mode state
+  const [showDiagnostics, setShowDiagnostics] = useState(true);
 
   useEffect(() => {
+    console.log("Admin page rendered");
+    
+    // Make the diagnostic panel toggleable with a keyboard shortcut
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'D' && e.ctrlKey) {
+        setShowDiagnostics(prev => !prev);
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    
     const checkAuth = async () => {
       try {
         console.log("Admin page - checking authentication");
@@ -105,6 +119,7 @@ const Admin = () => {
     
     return () => {
       subscription.unsubscribe();
+      window.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
 
@@ -119,6 +134,9 @@ const Admin = () => {
               {error}
             </div>
           )}
+          
+          {/* Show diagnostic component in debug mode */}
+          {showDiagnostics && <DiagnosticDisplay />}
           
           <AdminTabs />
           

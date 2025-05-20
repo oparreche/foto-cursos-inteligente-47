@@ -21,7 +21,7 @@ const AISettings = () => {
   
   const handleRetry = () => {
     console.log("Tentando novamente...");
-    refetch();
+    if (refetch) refetch();
   };
   
   if (isLoading) {

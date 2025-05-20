@@ -2,6 +2,7 @@
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Download, Star } from "lucide-react";
 
 const CertificatesTab = () => {
   return (
@@ -18,7 +19,31 @@ const CertificatesTab = () => {
               <h4 className="font-medium">Fotografia Básica</h4>
               <p className="text-sm text-gray-600">Concluído em 01/09/2023</p>
             </div>
-            <Button size="sm">Ver certificado</Button>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline">
+                <Star className="h-4 w-4 mr-1" /> Favoritar
+              </Button>
+              <Button size="sm">
+                <Download className="h-4 w-4 mr-1" /> Ver certificado
+              </Button>
+            </div>
+          </div>
+        </Card>
+        
+        <Card className="p-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <h4 className="font-medium">Fotografia de Paisagem</h4>
+              <p className="text-sm text-gray-600">Concluído em 15/10/2023</p>
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline">
+                <Star className="h-4 w-4 mr-1" /> Favoritar
+              </Button>
+              <Button size="sm">
+                <Download className="h-4 w-4 mr-1" /> Ver certificado
+              </Button>
+            </div>
           </div>
         </Card>
       </div>

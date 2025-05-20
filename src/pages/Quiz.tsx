@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,16 +10,19 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Camera, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Camera, ChevronLeft, ChevronRight, Save } from 'lucide-react';
 import { useQuizQuestions, useQuizCategories, useQuizState } from '@/hooks/useQuiz';
 import { QuizDifficulty, QuizCategory } from '@/types/quiz';
 import QuizCard from '@/components/quiz/QuizCard';
 import QuizResult from '@/components/quiz/QuizResult';
+import { preferencesService } from '@/utils/preferencesService';
+import { toast } from 'sonner';
 
 const Quiz: React.FC = () => {
-  const [difficulty, setDifficulty] = useState<QuizDifficulty>('all');
-  const [category, setCategory] = useState<QuizCategory>('all');
-  const [questionCount, setQuestionCount] = useState<number>(5);
+  const userPreferences = preferencesService.getPreferences();
+  const [difficulty, setDifficulty] = useState<QuizDifficulty>(userPreferences.quizPreferences.difficulty as QuizDifficulty);
+  const [category, setCategory] = useState<QuizCategory>(userPreferences.quizPreferences.category);
+  const [questionCount, setQuestionCount] = useState<number>(userPreferences.quizPreferences.questionCount);
   const [hasStarted, setHasStarted] = useState(false);
   
   const { data: categories = [], isLoading: isLoadingCategories } = useQuizCategories();
@@ -51,6 +53,30 @@ const Quiz: React.FC = () => {
   const handleFinishQuiz = () => {
     finishQuiz();
   };
+
+  const handleSavePreferences = () => {
+    preferencesService.saveQuizPreferences({
+      difficulty,
+      category,
+      questionCount
+    });
+    toast.success("Preferências de quiz salvas com sucesso!");
+  };
+  
+  // Handle difficulty change
+  const handleDifficultyChange = (value: string) => {
+    setDifficulty(value as QuizDifficulty);
+  };
+
+  // Handle category change
+  const handleCategoryChange = (value: string) => {
+    setCategory(value);
+  };
+
+  // Handle question count change
+  const handleQuestionCountChange = (value: string) => {
+    setQuestionCount(parseInt(value, 10));
+  };
   
   const renderConfiguration = () => (
     <Card className="w-full max-w-lg">
@@ -63,7 +89,7 @@ const Quiz: React.FC = () => {
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="difficulty">Dificuldade</Label>
-          <Select value={difficulty} onValueChange={(value) => setDifficulty(value as QuizDifficulty)}>
+          <Select value={difficulty} onValueChange={handleDifficultyChange}>
             <SelectTrigger id="difficulty">
               <SelectValue placeholder="Selecione a dificuldade" />
             </SelectTrigger>
@@ -78,7 +104,7 @@ const Quiz: React.FC = () => {
         
         <div className="space-y-2">
           <Label htmlFor="category">Categoria</Label>
-          <Select value={category} onValueChange={(value) => setCategory(value)}>
+          <Select value={category} onValueChange={handleCategoryChange}>
             <SelectTrigger id="category">
               <SelectValue placeholder="Selecione a categoria" />
             </SelectTrigger>
@@ -95,7 +121,7 @@ const Quiz: React.FC = () => {
           <Label htmlFor="questionCount">Número de Questões</Label>
           <Select 
             value={questionCount.toString()} 
-            onValueChange={(value) => setQuestionCount(parseInt(value, 10))}
+            onValueChange={handleQuestionCountChange}
           >
             <SelectTrigger id="questionCount">
               <SelectValue placeholder="Número de questões" />
@@ -109,13 +135,22 @@ const Quiz: React.FC = () => {
           </Select>
         </div>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="flex flex-col gap-3">
         <Button 
           onClick={handleStartQuiz} 
           disabled={isLoadingQuestions || questions.length === 0} 
           className="w-full"
         >
           {isLoadingQuestions ? "Carregando Questões..." : "Iniciar Quiz"}
+        </Button>
+        
+        <Button 
+          onClick={handleSavePreferences}
+          variant="outline"
+          className="w-full flex gap-2 items-center"
+        >
+          <Save className="h-4 w-4" />
+          Salvar Preferências
         </Button>
       </CardFooter>
     </Card>

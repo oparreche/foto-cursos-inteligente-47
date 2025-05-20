@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,6 +9,8 @@ import CertificatesTab from "./tabs/CertificatesTab";
 import FinancesTab from "./tabs/FinancesTab";
 import QuizTab from "./tabs/QuizTab";
 import AccountTab from "./tabs/AccountTab";
+import { preferencesService } from "@/utils/preferencesService";
+import { toast } from "sonner";
 
 interface StudentDashboardProps {
   onLogout: () => void;
@@ -16,6 +18,25 @@ interface StudentDashboardProps {
 
 const StudentDashboard = ({ onLogout }: StudentDashboardProps) => {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<string>('courses');
+  
+  // Load user preferences when component mounts
+  useEffect(() => {
+    const userPrefs = preferencesService.getPreferences();
+    setActiveTab(userPrefs.defaultTab);
+  }, []);
+  
+  // Handle tab change and save preference
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    preferencesService.saveDefaultTab(value);
+  };
+
+  // Save this tab as default
+  const saveDefaultTab = () => {
+    preferencesService.saveDefaultTab(activeTab);
+    toast.success(`Tab "${activeTab}" saved as default view`);
+  };
   
   return (
     <div>
@@ -63,7 +84,19 @@ const StudentDashboard = ({ onLogout }: StudentDashboardProps) => {
         </Button>
       </div>
 
-      <Tabs defaultValue="courses">
+      <div className="flex justify-between items-center mb-2">
+        <div></div>
+        <Button 
+          variant="ghost" 
+          size="sm"
+          className="text-sm"
+          onClick={saveDefaultTab}
+        >
+          Definir aba atual como padrão
+        </Button>
+      </div>
+
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList className="mb-6">
           <TabsTrigger value="courses">Meus Cursos</TabsTrigger>
           <TabsTrigger value="materials">Materiais</TabsTrigger>

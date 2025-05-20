@@ -1,126 +1,175 @@
 
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue 
+} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { BarChart } from 'lucide-react';
-import { QuizDifficulty, QuizCategory } from '@/types/quiz';
-import { useQuizCategories } from '@/hooks/useQuiz';
+import { preferencesService } from "@/utils/preferencesService";
+import { toast } from "sonner";
 
 const QuizTab = () => {
-  const [difficulty, setDifficulty] = useState<QuizDifficulty>('all');
-  const [category, setCategory] = useState<QuizCategory>('all');
-  const [questionCount, setQuestionCount] = useState<number>(5);
-  
-  const { data: categories = [], isLoading: isLoadingCategories } = useQuizCategories();
   const navigate = useNavigate();
+  const userPrefs = preferencesService.getPreferences();
+  
+  const [difficulty, setDifficulty] = useState(userPrefs.quizPreferences.difficulty);
+  const [category, setCategory] = useState(userPrefs.quizPreferences.category);
+  const [questionCount, setQuestionCount] = useState(userPrefs.quizPreferences.questionCount.toString());
+
+  const handleSavePreferences = () => {
+    preferencesService.saveQuizPreferences({
+      difficulty,
+      category,
+      questionCount: parseInt(questionCount, 10)
+    });
+    toast.success("Preferências de quiz salvas com sucesso!");
+  };
+
+  const handleStartQuiz = () => {
+    // Save preferences before navigating
+    handleSavePreferences();
+    navigate("/quiz");
+  };
 
   return (
     <>
-      <h3 className="text-xl font-bold mb-6 flex items-center">
-        <BarChart className="mr-2 h-5 w-5" />
-        Quiz de Fotografia
-      </h3>
-      
-      <Card className="p-6 mb-6">
-        <h4 className="font-bold text-lg mb-4">Configurações do Quiz</h4>
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="difficulty">Dificuldade</Label>
-            <Select value={difficulty} onValueChange={(value) => setDifficulty(value as QuizDifficulty)}>
-              <SelectTrigger id="difficulty">
-                <SelectValue placeholder="Selecione a dificuldade" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas</SelectItem>
-                <SelectItem value="easy">Fácil</SelectItem>
-                <SelectItem value="medium">Médio</SelectItem>
-                <SelectItem value="hard">Difícil</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="category">Categoria</Label>
-            <Select value={category} onValueChange={(value) => setCategory(value)}>
-              <SelectTrigger id="category">
-                <SelectValue placeholder="Selecione a categoria" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas</SelectItem>
-                {categories.map((cat) => (
-                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="questionCount">Número de Questões</Label>
-            <Select 
-              value={questionCount.toString()} 
-              onValueChange={(value) => setQuestionCount(parseInt(value, 10))}
-            >
-              <SelectTrigger id="questionCount">
-                <SelectValue placeholder="Número de questões" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="5">5 questões</SelectItem>
-                <SelectItem value="10">10 questões</SelectItem>
-                <SelectItem value="15">15 questões</SelectItem>
-                <SelectItem value="20">20 questões</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <Button 
-            onClick={() => navigate('/quiz')} 
-            className="w-full mt-2"
-          >
-            Iniciar Quiz
-          </Button>
-        </div>
-      </Card>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="p-6">
-          <h4 className="font-bold mb-2">Seu Histórico de Quiz</h4>
-          <div className="space-y-4">
-            <div className="flex justify-between py-2 border-b">
-              <span>Quiz de Fotografia Básica</span>
-              <span className="font-medium">8/10 pontos</span>
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-xl font-bold">Quiz de Fotografia</h3>
+        <Button onClick={handleStartQuiz}>Iniciar Quiz Completo</Button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Minhas Preferências de Quiz</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="difficulty">Dificuldade Preferida</Label>
+              <Select value={difficulty} onValueChange={setDifficulty}>
+                <SelectTrigger id="difficulty">
+                  <SelectValue placeholder="Selecione a dificuldade" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas</SelectItem>
+                  <SelectItem value="easy">Fácil</SelectItem>
+                  <SelectItem value="medium">Médio</SelectItem>
+                  <SelectItem value="hard">Difícil</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <div className="flex justify-between py-2 border-b">
-              <span>Quiz de Composição</span>
-              <span className="font-medium">7/10 pontos</span>
+            
+            <div className="space-y-2">
+              <Label htmlFor="category">Categoria Preferida</Label>
+              <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger id="category">
+                  <SelectValue placeholder="Selecione a categoria" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas</SelectItem>
+                  <SelectItem value="composition">Composição</SelectItem>
+                  <SelectItem value="lighting">Iluminação</SelectItem>
+                  <SelectItem value="equipment">Equipamento</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <div className="flex justify-between py-2 border-b">
-              <span>Quiz de Iluminação</span>
-              <span className="font-medium">9/10 pontos</span>
+            
+            <div className="space-y-2">
+              <Label htmlFor="questionCount">Número de Questões</Label>
+              <Select value={questionCount} onValueChange={setQuestionCount}>
+                <SelectTrigger id="questionCount">
+                  <SelectValue placeholder="Número de questões" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="5">5 questões</SelectItem>
+                  <SelectItem value="10">10 questões</SelectItem>
+                  <SelectItem value="15">15 questões</SelectItem>
+                  <SelectItem value="20">20 questões</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-          </div>
+          </CardContent>
+          <CardFooter>
+            <Button onClick={handleSavePreferences} className="w-full">Salvar Preferências</Button>
+          </CardFooter>
         </Card>
         
-        <Card className="p-6">
-          <h4 className="font-bold mb-2">Suas Conquistas</h4>
-          <div className="grid grid-cols-2 gap-4 mt-4">
-            <div className="text-center">
-              <div className="bg-yellow-100 rounded-full p-4 mx-auto w-16 h-16 flex items-center justify-center mb-2">
-                <BarChart className="h-8 w-8 text-yellow-500" />
+        <Card>
+          <CardHeader>
+            <CardTitle>Meu Histórico</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <p className="font-medium">Quiz de Composição</p>
+                <p className="text-sm text-gray-600">8/10 pontos</p>
               </div>
-              <p className="text-sm font-medium">Conhecedor de Fotografia</p>
-            </div>
-            <div className="text-center">
-              <div className="bg-purple-100 rounded-full p-4 mx-auto w-16 h-16 flex items-center justify-center mb-2">
-                <BarChart className="h-8 w-8 text-purple-500" />
+              <div className="h-2 bg-gray-100 rounded-full">
+                <div className="h-full bg-green-500 rounded-full" style={{ width: '80%' }}></div>
               </div>
-              <p className="text-sm font-medium">Mestre das Cores</p>
+              <p className="text-xs text-gray-500">Realizado em 10/05/2023</p>
             </div>
-          </div>
+            
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <p className="font-medium">Quiz de Iluminação</p>
+                <p className="text-sm text-gray-600">6/10 pontos</p>
+              </div>
+              <div className="h-2 bg-gray-100 rounded-full">
+                <div className="h-full bg-yellow-500 rounded-full" style={{ width: '60%' }}></div>
+              </div>
+              <p className="text-xs text-gray-500">Realizado em 05/05/2023</p>
+            </div>
+          </CardContent>
         </Card>
       </div>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>Minhas Conquistas</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="flex flex-col items-center p-3 border rounded-md">
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-2">
+                <span className="text-purple-600 text-xl">🏆</span>
+              </div>
+              <p className="text-center text-sm font-medium">Quiz Master</p>
+              <p className="text-xs text-center text-gray-500">Completou 10 quizzes</p>
+            </div>
+            
+            <div className="flex flex-col items-center p-3 border rounded-md">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-2">
+                <span className="text-blue-600 text-xl">🎯</span>
+              </div>
+              <p className="text-center text-sm font-medium">Nota Perfeita</p>
+              <p className="text-xs text-center text-gray-500">100% em um quiz</p>
+            </div>
+            
+            <div className="flex flex-col items-center p-3 border rounded-md opacity-50">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-2">
+                <span className="text-gray-400 text-xl">🔒</span>
+              </div>
+              <p className="text-center text-sm font-medium">Especialista</p>
+              <p className="text-xs text-center text-gray-500">Bloqueado</p>
+            </div>
+            
+            <div className="flex flex-col items-center p-3 border rounded-md opacity-50">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-2">
+                <span className="text-gray-400 text-xl">🔒</span>
+              </div>
+              <p className="text-center text-sm font-medium">Maratonista</p>
+              <p className="text-xs text-center text-gray-500">Bloqueado</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </>
   );
 };

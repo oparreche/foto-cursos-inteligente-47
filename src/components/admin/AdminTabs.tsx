@@ -45,7 +45,7 @@ const AdminTabs = () => {
         <p>Cliente inicializado: {isClient ? "Sim" : "Não"}</p>
       </div>
     
-      <Tabs value={activeTab} onValueChange={handleTabChange} defaultValue="dashboard">
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabTriggers />
         
         <Card>

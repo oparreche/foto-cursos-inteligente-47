@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 
 export const useAdminTabs = () => {
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const [activeTab, setActiveTab] = useState("ai"); // Changed default from "dashboard" to "ai"
   const [hasError, setHasError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isClient, setIsClient] = useState(false);
@@ -12,23 +12,27 @@ export const useAdminTabs = () => {
       console.log("AdminTabs useEffect executando");
       setIsClient(true);
       
-      // Verificar se hash está definido para a aba AI
-      if (window.location.hash === "#ai") {
-        console.log("AI tab selecionada por hash");
+      // Define allowed tabs and validate hash
+      const allowedTabs = ["ai", "dashboard", "classes", "courses", "blog", "users", "payments"];
+      const hashValue = window.location.hash.substring(1);
+      console.log("Hash detectado:", hashValue || "(nenhum)");
+      
+      // Set active tab based on valid hash or default to "ai"
+      if (allowedTabs.includes(hashValue)) {
+        console.log(`Tab ${hashValue} selecionada por hash`);
+        setActiveTab(hashValue);
+      } else {
+        console.log("Nenhum hash válido encontrado. Definindo AI como tab padrão");
         setActiveTab("ai");
-      } else if (window.location.hash) {
-        // Suporte para outros valores de hash
-        const tabFromHash = window.location.hash.substring(1);
-        console.log(`Tab ${tabFromHash} selecionada por hash`);
-        setActiveTab(tabFromHash);
+        // Update hash to reflect the default tab
+        if (!window.location.hash) {
+          window.location.hash = "ai";
+        }
       }
       
       // Registrar rota atual para depuração
       console.log("Rota atual:", window.location.pathname);
-      console.log("Hash atual:", window.location.hash);
-      
-      // Verificação de componentes sem referência a AIManagement
-      console.log("Verificando componentes disponíveis na aplicação");
+      console.log("Hash final:", window.location.hash);
     } catch (error) {
       console.error("Erro no AdminTabs useEffect:", error);
       setHasError(true);

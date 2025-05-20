@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import AdminAccess from "@/components/admin/AdminAccess";
@@ -64,7 +65,6 @@ const Admin = () => {
       const handleKeyDown = (e: KeyboardEvent) => {
         if (e.key === 'D' && e.ctrlKey) {
           setShowDiagnostics(prev => !prev);
-          // Fix: Use a string directly instead of a callback for toast.info
           toast.info(showDiagnostics ? "Diagnóstico desativado" : "Diagnóstico ativado");
         }
       };
@@ -73,16 +73,20 @@ const Admin = () => {
       
       setHasRendered(true);
       
-      // Simular navegação por hash se necessário
-      if (window.location.hash === "#ai") {
-        setTimeout(() => {
-          const aiTab = document.querySelector('[data-value="ai"]');
-          if (aiTab instanceof HTMLElement) {
-            console.log("Forçando abertura da aba AI por hash");
-            aiTab.click();
-          }
-        }, 500);
+      // Simular navegação por hash - FORÇA ABERTURA DA TAB AI
+      if (!window.location.hash) {
+        window.location.hash = "ai";
+        console.log("Definindo hash para 'ai' - forçando abertura da aba de IA");
       }
+      
+      // Verificar se precisamos forçar clique na tab AI
+      setTimeout(() => {
+        const aiTab = document.querySelector('[data-value="ai"]');
+        if (aiTab instanceof HTMLElement && window.location.hash === "#ai") {
+          console.log("Forçando abertura da aba AI por hash");
+          aiTab.click();
+        }
+      }, 500);
       
       return () => {
         window.removeEventListener('keydown', handleKeyDown);

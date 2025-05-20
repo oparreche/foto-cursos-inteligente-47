@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import AdminAccess from "@/components/admin/AdminAccess";
@@ -65,8 +64,8 @@ const Admin = () => {
       const handleKeyDown = (e: KeyboardEvent) => {
         if (e.key === 'D' && e.ctrlKey) {
           setShowDiagnostics(prev => !prev);
-          // Fix: Use a ReactNode instead of a callback function for toast.info
-          toast.info(prev ? "Diagnóstico desativado" : "Diagnóstico ativado");
+          // Fix: Use a string directly instead of a callback for toast.info
+          toast.info(showDiagnostics ? "Diagnóstico desativado" : "Diagnóstico ativado");
         }
       };
       
@@ -96,7 +95,7 @@ const Admin = () => {
       toast.error("Erro crítico no Admin");
       return () => {};
     }
-  }, [authenticated, userRole, isLoading, error]);
+  }, [authenticated, userRole, isLoading, error, showDiagnostics]);
 
   // Adicionar um limite de segurança simples
   if (error || errorInfo) {

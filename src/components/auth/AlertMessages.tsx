@@ -24,8 +24,10 @@ const AlertMessages = ({ errorMessage, showConfirmationAlert, email }: AlertMess
         <Alert className="mx-6 mb-4 bg-blue-50">
           <Info className="h-4 w-4 text-blue-500" />
           <AlertDescription className="text-blue-700">
-            Um email de confirmação foi enviado para {email}. 
+            Um email de confirmação foi enviado para <strong>{email}</strong>. 
             Por favor, verifique sua caixa de entrada e confirme seu email antes de fazer login.
+            <br />
+            <span className="text-xs mt-1 block">(Verifique também sua pasta de spam)</span>
           </AlertDescription>
         </Alert>
       )}

@@ -12,19 +12,55 @@ export const useBlogManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentImage, setCurrentImage] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   // Check authentication status
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
+      const currentUserId = session?.user?.id;
       setIsAuthenticated(!!session?.user);
+      setUserId(currentUserId || null);
+      
+      if (currentUserId) {
+        // Fetch user profile data
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', currentUserId)
+          .single();
+          
+        if (!profileError && profileData) {
+          setUserProfile(profileData);
+        } else {
+          console.log("Perfil não encontrado ou erro:", profileError);
+        }
+      }
     };
     
     checkAuth();
     
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      const currentUserId = session?.user?.id;
       setIsAuthenticated(!!session?.user);
+      setUserId(currentUserId || null);
+      
+      if (currentUserId) {
+        // Fetch user profile data on auth state change
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', currentUserId)
+          .single();
+          
+        if (!profileError && profileData) {
+          setUserProfile(profileData);
+        }
+      } else {
+        setUserProfile(null);
+      }
     });
     
     return () => {
@@ -55,16 +91,16 @@ export const useBlogManagement = () => {
     mutationFn: async (post: Omit<BlogPost, 'id'>) => {
       // Verify authentication first
       const { data: { session } } = await supabase.auth.getSession();
-      const userId = session?.user?.id;
+      const currentUserId = session?.user?.id;
       
-      if (!userId) {
+      if (!currentUserId) {
         throw new Error("User must be logged in to create a post");
       }
       
-      // Add author_id to the post
+      // Add author_id to the post if not already set
       const postWithAuthorId = {
         ...post,
-        author_id: userId
+        author_id: post.author_id || currentUserId
       };
       
       const { data, error } = await supabase
@@ -213,6 +249,8 @@ export const useBlogManagement = () => {
     handleNewPost,
     handleDelete,
     resetAndCloseDialog,
-    isAuthenticated
+    isAuthenticated,
+    userProfile,
+    userId
   };
 };

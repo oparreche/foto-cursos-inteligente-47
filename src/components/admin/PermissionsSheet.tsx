@@ -92,8 +92,9 @@ const PermissionsSheet = ({ userRole }: PermissionsSheetProps) => {
   const roleLabels: Record<string, string> = {
     super_admin: "Super Admin",
     admin: "Administrador",
+    instructor: "Instrutor",
     coordinator: "Coordenador",
-    professor: "Professor",
+    editor: "Editor",
     student: "Estudante",
     viewer: "Visualizador"
   };

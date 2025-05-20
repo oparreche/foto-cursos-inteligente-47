@@ -1,7 +1,9 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Role, UserRole, RolePermission } from "../users/types";
 
+// Assign admin role to a user
 export async function assignDefaultAdminRole(userId: string) {
   try {
     const { error } = await supabase
@@ -21,6 +23,7 @@ export async function assignDefaultAdminRole(userId: string) {
   }
 }
 
+// Assign highest admin role (super_admin) to a user
 export async function assignHighestAdminRole(userId: string) {
   try {
     const { error } = await supabase
@@ -36,6 +39,117 @@ export async function assignHighestAdminRole(userId: string) {
   } catch (error) {
     console.error("Erro ao atribuir função de administrador máximo:", error);
     toast.error("Erro ao atribuir função de administrador máximo");
+    return false;
+  }
+}
+
+// Get all available roles
+export async function getRoles(): Promise<Role[]> {
+  try {
+    const { data, error } = await supabase
+      .from('roles')
+      .select('*')
+      .order('name');
+    
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error("Erro ao buscar funções:", error);
+    toast.error("Erro ao carregar funções");
+    return [];
+  }
+}
+
+// Get user's roles
+export async function getUserRoles(userId: string): Promise<UserRole[]> {
+  try {
+    const { data, error } = await supabase
+      .from('user_roles')
+      .select('*')
+      .eq('user_id', userId);
+    
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error("Erro ao buscar funções do usuário:", error);
+    toast.error("Erro ao carregar funções do usuário");
+    return [];
+  }
+}
+
+// Assign role to user
+export async function assignRoleToUser(userId: string, role: string): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from('user_roles')
+      .upsert({ user_id: userId, role });
+    
+    if (error) throw error;
+    toast.success("Função atribuída com sucesso!");
+    return true;
+  } catch (error) {
+    console.error("Erro ao atribuir função:", error);
+    toast.error("Erro ao atribuir função");
+    return false;
+  }
+}
+
+// Remove role from user
+export async function removeRoleFromUser(userRoleId: string): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from('user_roles')
+      .delete()
+      .eq('id', userRoleId);
+    
+    if (error) throw error;
+    toast.success("Função removida com sucesso!");
+    return true;
+  } catch (error) {
+    console.error("Erro ao remover função:", error);
+    toast.error("Erro ao remover função");
+    return false;
+  }
+}
+
+// Get role permissions
+export async function getRolePermissions(role: string): Promise<RolePermission[]> {
+  try {
+    const { data, error } = await supabase
+      .from('role_permissions')
+      .select('*')
+      .eq('role', role)
+      .order('module');
+    
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error("Erro ao buscar permissões:", error);
+    toast.error("Erro ao carregar permissões");
+    return [];
+  }
+}
+
+// Update role permission
+export async function updateRolePermission(
+  role: string, 
+  module: string, 
+  permissionType: 'can_view' | 'can_create' | 'can_edit' | 'can_delete', 
+  value: boolean
+): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from('role_permissions')
+      .update({ [permissionType]: value })
+      .eq('role', role)
+      .eq('module', module);
+    
+    if (error) throw error;
+    toast.success("Permissão atualizada com sucesso!");
+    return true;
+  } catch (error) {
+    console.error("Erro ao atualizar permissão:", error);
+    toast.error("Erro ao atualizar permissão");
     return false;
   }
 }

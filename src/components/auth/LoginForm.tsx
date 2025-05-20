@@ -55,9 +55,6 @@ const LoginForm = ({
             const { data: adminData, error: adminError } = await supabase.auth.signInWithPassword({
               email,
               password,
-              options: {
-                emailRedirectTo: null // Disable email redirect
-              }
             });
             
             if (!adminError && adminData.session) {

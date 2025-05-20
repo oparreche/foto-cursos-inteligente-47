@@ -30,7 +30,8 @@ const BlogManagement = () => {
     handleNewPost,
     handleDelete,
     resetAndCloseDialog,
-    isAuthenticated
+    isAuthenticated,
+    userProfile
   } = useBlogManagement();
 
   // Handle form submission (add or edit)
@@ -55,7 +56,7 @@ const BlogManagement = () => {
         image_url: currentImage || currentPost.image_url,
         read_time: values.read_time,
         updated_at: now,
-        published_at: undefined as string | null | undefined, // Adding the missing property with proper type
+        published_at: undefined as string | null | undefined,
       };
       
       // If status changed from draft to published, add published_at date
@@ -65,11 +66,12 @@ const BlogManagement = () => {
       
       updatePostMutation.mutate({ id: currentPost.id, post: updatedPost });
     } else {
-      // Add new post
+      // Add new post with author data
       const newPost = {
         title: values.title,
         slug: values.slug,
         author: values.author,
+        author_id: userProfile?.id, // Link to the current user ID
         categories: categories,
         content: values.content,
         excerpt: values.excerpt,
@@ -126,6 +128,7 @@ const BlogManagement = () => {
               onSubmit={handleSubmit}
               onCancel={resetAndCloseDialog}
               isSubmitting={createPostMutation.isPending || updatePostMutation.isPending}
+              userProfile={userProfile}
             />
           </DialogContent>
         </Dialog>

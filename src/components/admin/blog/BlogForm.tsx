@@ -33,6 +33,7 @@ interface BlogFormProps {
   onSubmit: (values: BlogFormValues) => void;
   onCancel: () => void;
   isSubmitting: boolean;
+  userProfile?: any;
 }
 
 const BlogForm = ({
@@ -42,14 +43,17 @@ const BlogForm = ({
   setCurrentImage,
   onSubmit,
   onCancel,
-  isSubmitting
+  isSubmitting,
+  userProfile
 }: BlogFormProps) => {
   const form = useForm<BlogFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
       slug: "",
-      author: "",
+      author: userProfile?.first_name && userProfile?.last_name 
+        ? `${userProfile.first_name} ${userProfile.last_name}` 
+        : userProfile?.first_name || "",
       categories: "",
       status: "draft",
       excerpt: "",
@@ -90,10 +94,14 @@ const BlogForm = ({
         read_time: currentPost.read_time || "5 min",
       });
     } else {
+      const authorName = userProfile?.first_name && userProfile?.last_name 
+        ? `${userProfile.first_name} ${userProfile.last_name}` 
+        : userProfile?.first_name || "";
+        
       form.reset({
         title: "",
         slug: "",
-        author: "",
+        author: authorName,
         categories: "",
         status: "draft",
         excerpt: "",
@@ -101,7 +109,7 @@ const BlogForm = ({
         read_time: "5 min",
       });
     }
-  }, [currentPost, form]);
+  }, [currentPost, userProfile, form]);
 
   return (
     <Form {...form}>

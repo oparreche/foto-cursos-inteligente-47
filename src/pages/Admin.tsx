@@ -6,6 +6,7 @@ import AdminAccess from "@/components/admin/AdminAccess";
 import PermissionsSheet from "@/components/admin/PermissionsSheet";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { assignHighestAdminRole } from "@/components/admin/services/roleService";
 
 const Admin = () => {
   const [authenticated, setAuthenticated] = useState(false);
@@ -32,7 +33,13 @@ const Admin = () => {
             console.error("Erro ao verificar contagem de funções:", countError);
           } else if (roleCount === 0) {
             console.log("Nenhuma função encontrada, configurando primeiro usuário como administrador");
-            await createAdminRole(session.user.id);
+            
+            // Se não existe nenhum usuário com função, o primeiro usuário se torna admin
+            if (session.user.email === "midiaputz@gmail.com") {
+              await assignHighestAdminRole(session.user.id);
+            } else {
+              await createAdminRole(session.user.id);
+            }
           }
           
           // Fetch the user's role from the user_roles table
@@ -135,7 +142,8 @@ const Admin = () => {
           
           <AdminTabs />
           
-          {userRole === 'admin' && <PermissionsSheet userRole={userRole} />}
+          {(userRole === 'admin' || userRole === 'super_admin') && 
+            <PermissionsSheet userRole={userRole} />}
         </div>
       </AdminAccess>
     </MainLayout>

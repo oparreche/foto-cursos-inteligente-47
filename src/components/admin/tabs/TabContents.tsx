@@ -17,7 +17,7 @@ const TabContents: React.FC = () => {
   useEffect(() => {
     console.log("TabContents componente montado");
     
-    // Check if tab content elements are in the DOM
+    // Verificar se os elementos de conteúdo das abas estão no DOM
     setTimeout(() => {
       const activeTabContent = document.querySelector('[data-state="active"]');
       console.log("Tab ativa presente:", !!activeTabContent);
@@ -26,7 +26,7 @@ const TabContents: React.FC = () => {
         console.log("Tab ativa:", activeTabContent.getAttribute('value'));
       }
       
-      // Add explicit checks for each tab
+      // Verificar cada aba explicitamente
       ['dashboard', 'classes', 'courses', 'blog', 'users', 'payments', 'ai'].forEach(tab => {
         const tabContent = document.querySelector(`[data-value="${tab}"]`);
         console.log(`${tab} TabContent presente:`, !!tabContent);
@@ -48,7 +48,7 @@ const TabContents: React.FC = () => {
         </TabContentWrapper>
       </TabsContent>
       
-      <TabsContent value="courses" className="mt-0">
+      <TabsContent value="courses" className="mt-0" data-value="courses">
         <TabContentWrapper label="Courses">
           <CourseManagement />
         </TabContentWrapper>

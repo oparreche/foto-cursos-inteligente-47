@@ -15,13 +15,12 @@ const TabContentWrapper: React.FC<TabContentWrapperProps> = ({ children, label }
   useEffect(() => {
     console.log(`TabContent (${label}) montado`);
     
-    // Reportar montagem bem-sucedida para diagnóstico
     return () => {
       console.log(`TabContent (${label}) desmontado`);
     };
   }, [label]);
   
-  // Função para renderizar o conteúdo com segurança
+  // Utilizando ErrorBoundary em forma de try/catch para conteúdo
   const renderSafeContent = () => {
     try {
       return children;
@@ -44,7 +43,11 @@ const TabContentWrapper: React.FC<TabContentWrapperProps> = ({ children, label }
     );
   }
   
-  return <div data-testid={`tab-content-${label.toLowerCase()}`}>{renderSafeContent()}</div>;
+  return (
+    <div className="w-full" data-testid={`tab-content-${label.toLowerCase()}`}>
+      {renderSafeContent()}
+    </div>
+  );
 };
 
 export default TabContentWrapper;

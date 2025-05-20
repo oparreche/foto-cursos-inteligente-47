@@ -23,9 +23,10 @@ export const useAdminTabs = () => {
         setActiveTab(hashValue);
       } else {
         console.log("Definindo dashboard como tab padrão");
+        // Se não tiver hash ou se o hash for inválido, use "dashboard"
         setActiveTab("dashboard");
-        // Update hash to reflect the default tab if no hash is present
-        if (!window.location.hash) {
+        // Atualiza o hash para refletir a aba padrão se nenhum hash estiver presente
+        if (!hashValue) {
           window.location.hash = "dashboard";
         }
       }
@@ -33,6 +34,21 @@ export const useAdminTabs = () => {
       // Registrar rota atual para depuração
       console.log("Rota atual:", window.location.pathname);
       console.log("Hash final:", window.location.hash);
+      
+      // Adicionar evento listener para mudanças de hash
+      const handleHashChange = () => {
+        const newHash = window.location.hash.substring(1);
+        if (newHash && allowedTabs.includes(newHash)) {
+          console.log(`Mudança de hash detectada: ${newHash}`);
+          setActiveTab(newHash);
+        }
+      };
+      
+      window.addEventListener('hashchange', handleHashChange);
+      return () => {
+        window.removeEventListener('hashchange', handleHashChange);
+      };
+      
     } catch (error) {
       console.error("Erro no AdminTabs useEffect:", error);
       setHasError(true);
@@ -46,7 +62,9 @@ export const useAdminTabs = () => {
     setActiveTab(value);
     
     // Atualizar hash na URL para manter a navegação consistente
-    window.location.hash = value;
+    if (window.location.hash.substring(1) !== value) {
+      window.location.hash = value;
+    }
   }, []);
 
   return {

@@ -19,6 +19,17 @@ const AdminTabs = () => {
     // Check active tab from hash
     const hash = window.location.hash.substring(1);
     console.log("Hash atual para tabs:", hash || "nenhum");
+    
+    // Force a check for the courses tab if that's the current hash
+    if (hash === "courses") {
+      setTimeout(() => {
+        const coursesContent = document.querySelector('[data-value="courses"]');
+        console.log("Courses content element encontrado:", !!coursesContent);
+        
+        const courseTabTrigger = document.querySelector('[data-state="active"]');
+        console.log("Tab trigger ativo:", courseTabTrigger?.getAttribute('value'));
+      }, 500);
+    }
   }, []);
   
   const {
@@ -40,7 +51,12 @@ const AdminTabs = () => {
     <>
       {hasError && <ErrorAlert message={errorMessage} />}
       
-      <Tabs value={activeTab} onValueChange={handleTabChange}>
+      <Tabs 
+        value={activeTab} 
+        onValueChange={handleTabChange} 
+        defaultValue={activeTab}
+        className="w-full"
+      >
         <TabTriggers />
         
         <Card>

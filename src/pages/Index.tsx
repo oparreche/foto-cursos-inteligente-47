@@ -3,7 +3,7 @@ import { lazy, Suspense } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import HeroSection from "@/components/home/HeroSection";
 import BenefitsSection from "@/components/home/BenefitsSection";
-import GallerySection from "@/components/home/GallerySection"; // Direct import instead of lazy loading
+import GallerySection from "@/components/home/GallerySection"; // Import directly
 import { Skeleton } from "@/components/ui/skeleton";
 
 // Lazy load components that aren't immediately visible
@@ -26,7 +26,8 @@ const Index = () => {
     <MainLayout>
       <HeroSection />
       <BenefitsSection />
-      <GallerySection /> {/* Directly include without Suspense */}
+      {/* Render without Suspense since it's directly imported */}
+      <GallerySection />
       <Suspense fallback={<LoadingFallback />}>
         <TestimonialsSection />
         <CoursesSection />

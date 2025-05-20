@@ -6,7 +6,7 @@ import { getAIConfig, updateAIConfig } from "@/components/admin/ai/configService
 import { toast } from "sonner";
 
 // Hook for fetching AI configuration
-const useFetchAIConfig = () => {
+export const useFetchAIConfig = () => {
   console.log("useFetchAIConfig initialized");
   
   return useQuery({
@@ -29,7 +29,7 @@ const useFetchAIConfig = () => {
 };
 
 // Hook for updating AI configuration
-const useUpdateAIConfig = (
+export const useUpdateAIConfig = (
   setIsEditDialogOpen: (value: boolean) => void,
   setSaveError: (error: string | null) => void,
   setAttemptCount: (callback: (prev: number) => number) => void

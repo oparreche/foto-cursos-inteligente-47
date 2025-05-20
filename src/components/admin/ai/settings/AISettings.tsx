@@ -1,115 +1,79 @@
-
-import { memo, useCallback } from "react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import React from 'react';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { useAISettings } from "@/hooks/useAISettings";
-import ConfigDisplay from "./ConfigDisplay";
-import ConfigDialog from "./ConfigDialog";
-import LoadingState from "./LoadingState";
-import ErrorState from "./ErrorState";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { ProviderSelector, ModelSelector, ApiKeyInput, DialogError, DialogActions } from './dialog';
+import { AIConfig } from '../types';
 
-const AISettings = memo(() => {
-  const { 
-    aiConfig, 
-    isLoading, 
-    error, 
+const AISettings: React.FC = () => {
+  const {
+    aiConfig,
+    isLoading,
+    error,
     saveError,
-    isEditDialogOpen, 
+    refetch,
+    isEditDialogOpen,
     setIsEditDialogOpen,
     handleSaveConfig,
     isUpdating,
-    refetch,
     attemptCount
   } = useAISettings();
-  
-  // Add a memoized retry handler to avoid recreating on every render
-  const handleRetry = useCallback(() => {
-    console.log("Tentando novamente carregar configurações...");
-    if (refetch) refetch();
-  }, [refetch]);
-  
-  // Use a handler function for opening the dialog to avoid inline functions
-  const openEditDialog = useCallback(() => {
-    console.log("Abrindo diálogo de edição");
-    setIsEditDialogOpen(true);
-  }, [setIsEditDialogOpen]);
-  
-  console.log("AISettings rendering with state:", { 
-    hasConfig: !!aiConfig, 
-    isLoading, 
-    hasError: !!error,
-    hasSaveError: !!saveError,
-    dialogOpen: isEditDialogOpen,
-    updateCount: attemptCount
-  });
-  
-  if (isLoading) {
-    return <LoadingState />;
-  }
-  
-  if (error) {
-    return <ErrorState onRetry={handleRetry} />;
-  }
-  
-  // Add an extra validation check
-  if (!aiConfig) {
-    return (
-      <Card data-testid="ai-settings-no-config">
-        <CardContent className="pt-6">
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              Não foi possível carregar as configurações de IA. Verifique sua conexão com o banco de dados.
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="mt-2"
-                onClick={handleRetry}
-              >
-                Tentar novamente
-              </Button>
-            </AlertDescription>
-          </Alert>
-        </CardContent>
-      </Card>
-    );
-  }
-  
+
+  const handleConfigSave = (config: AIConfig) => {
+    handleSaveConfig(config);
+  };
+
   return (
-    <Card data-testid="ai-settings">
+    <Card>
       <CardHeader>
-        <CardTitle>Configurações de IA</CardTitle>
-        <CardDescription>Configure o serviço de inteligência artificial para geração de conteúdo</CardDescription>
+        <CardTitle>Configurações da Inteligência Artificial</CardTitle>
+        <CardDescription>
+          Configure o provedor de IA, modelo e chave de API para geração de conteúdo.
+        </CardDescription>
       </CardHeader>
       <CardContent>
-        <ConfigDisplay aiConfig={aiConfig} />
-      </CardContent>
-      <CardFooter>
-        <Button onClick={openEditDialog} disabled={isUpdating}>
-          {isUpdating ? 'Salvando...' : 'Editar Configurações'}
-        </Button>
-        
-        {isUpdating && attemptCount > 1 && (
-          <p className="ml-3 text-sm text-yellow-600">
-            Aguarde, operação em andamento...
-          </p>
+        {isLoading ? (
+          <p>Carregando configurações...</p>
+        ) : error ? (
+          <DialogError message={`Erro ao carregar configurações: ${error.message}`} />
+        ) : (
+          <>
+            <ProviderSelector
+              currentProvider={aiConfig?.provider || ''}
+              onProviderChange={(provider) => {
+                if (aiConfig) {
+                  handleConfigSave({ ...aiConfig, provider });
+                }
+              }}
+            />
+            <ModelSelector
+              currentModel={aiConfig?.model || ''}
+              onModelChange={(model) => {
+                if (aiConfig) {
+                  handleConfigSave({ ...aiConfig, model });
+                }
+              }}
+            />
+            <ApiKeyInput
+              currentApiKey={aiConfig?.apiKey || ''}
+              onApiKeyChange={(apiKey) => {
+                if (aiConfig) {
+                  handleConfigSave({ ...aiConfig, apiKey });
+                }
+              }}
+            />
+            {saveError && <DialogError message={`Erro ao salvar: ${saveError}`} />}
+            <DialogActions
+              isEditDialogOpen={isEditDialogOpen}
+              setIsEditDialogOpen={setIsEditDialogOpen}
+              onSave={() => refetch()}
+              isUpdating={isUpdating}
+              attemptCount={attemptCount}
+            />
+          </>
         )}
-      </CardFooter>
-      
-      <ConfigDialog 
-        isOpen={isEditDialogOpen}
-        onOpenChange={setIsEditDialogOpen}
-        aiConfig={aiConfig}
-        onSave={handleSaveConfig}
-        isUpdating={isUpdating}
-        saveError={saveError}
-      />
+      </CardContent>
     </Card>
   );
-});
-
-AISettings.displayName = 'AISettings';
+};
 
 export default AISettings;

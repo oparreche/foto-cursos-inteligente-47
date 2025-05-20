@@ -36,6 +36,14 @@ const Admin = () => {
           toast.error("Erro ao carregar módulo IA");
         });
       
+      // Verificar carregamento de módulos adicionais
+      import("@/components/admin/tabs/TabContents")
+        .then(() => console.log("TabContents importado com sucesso"))
+        .catch(err => {
+          console.error("Erro ao importar TabContents:", err);
+          setErrorInfo("Falha ao carregar o módulo TabContents: " + err.message);
+        });
+      
       // Adicionar uma verificação de montagem bem-sucedida
       setTimeout(() => {
         if (!document.querySelector("[data-admin-rendered='true']")) {

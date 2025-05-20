@@ -1,21 +1,16 @@
 
 import React, { useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-import { toast } from "sonner";
 
-// Import directly from the file paths instead of the index
+// Import the components directly from their file paths
 import AISettings from "@/components/admin/ai/AISettings";
 import AIContentGenerator from "@/components/admin/ai/AIContentGenerator";
 
 const AIManagement = () => {
   useEffect(() => {
     console.log("AIManagement component mounted");
-    console.log("AISettings component type:", typeof AISettings);
-    console.log("AIContentGenerator component type:", typeof AIContentGenerator);
   }, []);
 
-  console.log("AIManagement rendering");
-  
   return (
     <div className="space-y-8">
       <section>

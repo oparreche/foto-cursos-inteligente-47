@@ -12,6 +12,7 @@ import AIManagement from "@/components/admin/AIManagement";
 import { Layers, BookOpen, FileText, LayoutDashboard, Users, CreditCard, BrainCircuit } from "lucide-react";
 
 const AdminTabs = () => {
+  // Log outside of JSX
   console.log("AdminTabs renderizando");
   
   useEffect(() => {

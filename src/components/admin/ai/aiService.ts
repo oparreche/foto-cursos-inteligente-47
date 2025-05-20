@@ -44,9 +44,9 @@ interface AISettingsRecord {
 // Get AI configuration from database
 export const getAIConfig = async (): Promise<AIConfig | null> => {
   try {
-    // Use a more generic approach with rpc to bypass TypeScript table checks
+    // Use the database function for getting AI settings
     const { data, error } = await supabase
-      .rpc('get_ai_settings')
+      .rpc<AISettingsRecord>('get_ai_settings')
       .single();
       
     if (error) {
@@ -54,10 +54,15 @@ export const getAIConfig = async (): Promise<AIConfig | null> => {
       return null;
     }
     
+    if (!data) {
+      console.error('No AI configuration found');
+      return null;
+    }
+    
     // Convert the returned data to our AIConfig format
     return {
-      provider: data.provider as 'openai' | 'perplexity' | null,
-      model: data.model as AIModel | null,
+      provider: data.provider,
+      model: data.model,
       apiKey: data.api_key,
       lastUpdated: data.last_updated || undefined,
       updatedBy: data.updated_by || undefined
@@ -71,7 +76,7 @@ export const getAIConfig = async (): Promise<AIConfig | null> => {
 // Update AI configuration
 export const updateAIConfig = async (config: AIConfig): Promise<boolean> => {
   try {
-    // Use a more generic approach with rpc to bypass TypeScript table checks
+    // Use the database function for updating AI settings
     const { error } = await supabase
       .rpc('update_ai_settings', {
         p_provider: config.provider,

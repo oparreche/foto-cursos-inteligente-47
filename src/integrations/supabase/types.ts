@@ -340,12 +340,27 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_ai_settings: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: number
+          provider: string
+          model: string
+          api_key: string
+          last_updated: string
+          updated_by: string
+        }[]
+      }
       has_role: {
         Args: {
           _user_id: string
           _role: Database["public"]["Enums"]["user_role"]
         }
         Returns: boolean
+      }
+      update_ai_settings: {
+        Args: { p_provider: string; p_model: string; p_api_key: string }
+        Returns: undefined
       }
     }
     Enums: {

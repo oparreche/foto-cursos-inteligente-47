@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -46,7 +45,7 @@ export const getAIConfig = async (): Promise<AIConfig | null> => {
   try {
     // Use the database function for getting AI settings
     const { data, error } = await supabase
-      .rpc<AISettingsRecord, {}>('get_ai_settings')
+      .rpc('get_ai_settings')
       .single();
       
     if (error) {

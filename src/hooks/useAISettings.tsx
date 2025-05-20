@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AIConfig } from "@/components/admin/ai/types";
 import { getAIConfig, updateAIConfig } from "@/components/admin/ai/configService";
@@ -9,10 +9,16 @@ export const useAISettings = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const queryClient = useQueryClient();
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [attemptCount, setAttemptCount] = useState(0);
 
   console.log("useAISettings hook inicializado");
   
-  // Fetch AI settings
+  useEffect(() => {
+    // Reset error state when component mounts or is refreshed
+    setSaveError(null);
+  }, []);
+  
+  // Fetch AI settings with improved error handling
   const { 
     data: aiConfig,
     isLoading,
@@ -24,14 +30,16 @@ export const useAISettings = () => {
       console.log("Buscando configurações de IA...");
       try {
         const config = await getAIConfig();
-        console.log("Configurações de IA carregadas:", config);
+        console.log("Configurações de IA carregadas:", config ? "Sucesso" : "Não encontradas");
         return config;
       } catch (err) {
         console.error("Erro ao carregar configurações de IA:", err);
         toast.error("Erro ao carregar configurações de IA");
         throw err;
       }
-    }
+    },
+    retry: 1,
+    staleTime: 1000 * 60 * 5 // 5 minutos
   });
   
   console.log("Estado atual do hook useAISettings:", { 
@@ -46,6 +54,11 @@ export const useAISettings = () => {
     mutationFn: async (config: AIConfig) => {
       console.log("Iniciando mutação para salvar config:", config);
       setSaveError(null);
+      setAttemptCount(prev => prev + 1);
+      
+      // Add artificial delay to ensure UI feedback is visible
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       const result = await updateAIConfig(config);
       if (!result) {
         throw new Error("Falha ao atualizar configurações");
@@ -60,9 +73,13 @@ export const useAISettings = () => {
     onSuccess: () => {
       console.log("Mutação bem-sucedida");
       queryClient.invalidateQueries({ queryKey: ['aiConfig'] });
-      setIsEditDialogOpen(false);
-      toast.success("Configurações de IA atualizadas com sucesso");
-      setSaveError(null);
+      
+      // Primeiro invalidar a query, depois fechar o diálogo com pequeno delay
+      setTimeout(() => {
+        setIsEditDialogOpen(false);
+        toast.success("Configurações de IA atualizadas com sucesso");
+        setSaveError(null);
+      }, 500);
     },
     onError: (error: any) => {
       console.error("Erro na atualização:", error);
@@ -74,7 +91,11 @@ export const useAISettings = () => {
   
   // Update AI settings
   const handleSaveConfig = useCallback((config: AIConfig) => {
-    console.log("Salvando configuração:", config);
+    console.log("Salvando configuração:", {
+      provider: config.provider,
+      model: config.model,
+      apiKeyLength: config.apiKey ? config.apiKey.length : 0
+    });
     
     // Validar dados antes de enviar para a mutation
     if (!config.provider || !config.model || !config.apiKey) {
@@ -104,6 +125,7 @@ export const useAISettings = () => {
     isEditDialogOpen,
     setIsEditDialogOpen: setIsEditDialogOpenHandler,
     handleSaveConfig,
-    isUpdating: updateConfigMutation.isPending
+    isUpdating: updateConfigMutation.isPending,
+    attemptCount
   };
 };

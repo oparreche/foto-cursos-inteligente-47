@@ -31,6 +31,12 @@ const ConfigDialog = ({ isOpen, onOpenChange, aiConfig, onSave, isUpdating, save
   
   useEffect(() => {
     if (isOpen && aiConfig) {
+      console.log("Configurações atuais carregadas no diálogo:", {
+        provider: aiConfig.provider,
+        model: aiConfig.model,
+        apiKeyPresent: !!aiConfig.apiKey
+      });
+      
       setEditConfig({
         provider: aiConfig.provider,
         model: aiConfig.model,
@@ -46,6 +52,27 @@ const ConfigDialog = ({ isOpen, onOpenChange, aiConfig, onSave, isUpdating, save
       setValidationError(null);
     }
   }, [isOpen, aiConfig]);
+  
+  // Não feche o modal durante atualização
+  useEffect(() => {
+    const handleBeforeClose = (open: boolean) => {
+      if (!open && isUpdating) {
+        console.log("Tentativa de fechar durante atualização bloqueada");
+        return false;
+      }
+      return true;
+    };
+    
+    // Este é um uso simulado de um event handler para prevenção
+    // Na prática, o componente Dialog do shadcn/ui não tem esta funcionalidade diretamente
+    if (isUpdating) {
+      console.log("Em atualização, bloqueando fechamento do modal");
+    }
+    
+    return () => {
+      // Cleanup logic if needed
+    };
+  }, [isUpdating]);
   
   const handleProviderChange = (provider: 'openai' | 'perplexity') => {
     // Reset model when changing provider since they have different models
@@ -94,7 +121,11 @@ const ConfigDialog = ({ isOpen, onOpenChange, aiConfig, onSave, isUpdating, save
   };
   
   const handleSubmit = () => {
-    console.log("Enviando configuração para salvar:", editConfig);
+    console.log("Enviando configuração para salvar:", {
+      provider: editConfig.provider,
+      model: editConfig.model,
+      apiKeyLength: editConfig.apiKey ? editConfig.apiKey.length : 0
+    });
     
     if (!validateConfig()) {
       toast.error("Dados inválidos. Verifique todos os campos.");
@@ -110,8 +141,18 @@ const ConfigDialog = ({ isOpen, onOpenChange, aiConfig, onSave, isUpdating, save
     }
   };
 
+  // Prevent closing dialog when updating
+  const safeOnOpenChange = (open: boolean) => {
+    if (!open && isUpdating) {
+      console.log("Prevenindo fechamento do diálogo durante atualização");
+      toast.info("Aguarde a conclusão do salvamento...");
+      return;
+    }
+    onOpenChange(open);
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={safeOnOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Configurações de IA</DialogTitle>
@@ -182,6 +223,7 @@ const ConfigDialog = ({ isOpen, onOpenChange, aiConfig, onSave, isUpdating, save
               placeholder="Insira sua chave API"
               type="password"
               className="font-mono"
+              disabled={isUpdating}
             />
             <p className="text-xs text-muted-foreground">
               {editConfig.provider === 'openai' ? 
@@ -194,7 +236,11 @@ const ConfigDialog = ({ isOpen, onOpenChange, aiConfig, onSave, isUpdating, save
         </div>
         
         <DialogFooter className="flex items-center justify-between">
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isUpdating}>
+          <Button 
+            variant="outline" 
+            onClick={() => safeOnOpenChange(false)} 
+            disabled={isUpdating}
+          >
             Cancelar
           </Button>
           <Button 

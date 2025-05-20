@@ -20,7 +20,8 @@ const AISettings = memo(() => {
     setIsEditDialogOpen,
     handleSaveConfig,
     isUpdating,
-    refetch
+    refetch,
+    attemptCount
   } = useAISettings();
   
   // Add a memoized retry handler to avoid recreating on every render
@@ -40,7 +41,8 @@ const AISettings = memo(() => {
     isLoading, 
     hasError: !!error,
     hasSaveError: !!saveError,
-    dialogOpen: isEditDialogOpen
+    dialogOpen: isEditDialogOpen,
+    updateCount: attemptCount
   });
   
   if (isLoading) {
@@ -88,6 +90,12 @@ const AISettings = memo(() => {
         <Button onClick={openEditDialog} disabled={isUpdating}>
           {isUpdating ? 'Salvando...' : 'Editar Configurações'}
         </Button>
+        
+        {isUpdating && attemptCount > 1 && (
+          <p className="ml-3 text-sm text-yellow-600">
+            Aguarde, operação em andamento...
+          </p>
+        )}
       </CardFooter>
       
       <ConfigDialog 

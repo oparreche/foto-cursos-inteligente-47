@@ -6,6 +6,7 @@ import { AIConfig } from "./types";
 // Get AI configuration from database
 export const getAIConfig = async (): Promise<AIConfig | null> => {
   try {
+    console.log('Iniciando busca de configuração de IA');
     // Use the database function for getting AI settings
     const { data, error } = await supabase
       .rpc('get_ai_settings');
@@ -22,6 +23,12 @@ export const getAIConfig = async (): Promise<AIConfig | null> => {
     
     // Convert the returned data to our AIConfig format with proper type casting
     const record = data[0];
+    console.log('Configuração de IA carregada com sucesso:', {
+      provider: record.provider,
+      model: record.model,
+      apiKeyPresent: !!record.api_key
+    });
+    
     return {
       provider: record.provider as 'openai' | 'perplexity' | null,
       model: record.model as AIConfig['model'],
@@ -68,8 +75,9 @@ export const updateAIConfig = async (config: AIConfig): Promise<boolean> => {
     toast.success('Configurações de IA atualizadas com sucesso');
     return true;
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
     console.error('Exception when updating AI configuration:', error);
-    toast.error(`Erro ao atualizar configurações de IA: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+    toast.error(`Erro ao atualizar configurações de IA: ${errorMessage}`);
     return false;
   }
 };

@@ -1,4 +1,3 @@
-
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -29,32 +28,31 @@ export const useDiscountCouponActions = () => {
     mutationFn: async (values: DiscountCouponFormValues) => {
       // Garantir que valores numéricos sejam convertidos
       const parsedValues = {
-        ...values,
+        code: values.code,
+        description: values.description,
+        discount_type: values.discount_type,
         discount_value: typeof values.discount_value === 'string' 
           ? parseFloat(values.discount_value) 
           : values.discount_value,
-        max_uses: values.max_uses && typeof values.max_uses === 'string' 
-          ? parseInt(values.max_uses) 
-          : values.max_uses,
-        minimum_purchase: values.minimum_purchase && typeof values.minimum_purchase === 'string' 
-          ? parseFloat(values.minimum_purchase) 
-          : values.minimum_purchase
+        max_uses: values.max_uses !== undefined 
+          ? (typeof values.max_uses === 'string' && values.max_uses !== '' 
+              ? parseInt(values.max_uses) 
+              : values.max_uses as number | null)
+          : null,
+        valid_from: values.valid_from,
+        valid_until: values.valid_until || null,
+        is_active: values.is_active ?? true,
+        course_id: values.course_id || null,
+        minimum_purchase: values.minimum_purchase !== undefined 
+          ? (typeof values.minimum_purchase === 'string' && values.minimum_purchase !== '' 
+              ? parseFloat(values.minimum_purchase) 
+              : values.minimum_purchase as number | null)
+          : 0
       };
 
       const { data, error } = await supabase
         .from('discount_coupons')
-        .insert({
-          code: parsedValues.code,
-          description: parsedValues.description,
-          discount_type: parsedValues.discount_type,
-          discount_value: parsedValues.discount_value,
-          max_uses: parsedValues.max_uses,
-          valid_from: parsedValues.valid_from,
-          valid_until: parsedValues.valid_until || null,
-          is_active: parsedValues.is_active ?? true,
-          course_id: parsedValues.course_id || null,
-          minimum_purchase: parsedValues.minimum_purchase || 0
-        })
+        .insert(parsedValues)
         .select()
         .single();
 
@@ -83,15 +81,23 @@ export const useDiscountCouponActions = () => {
       }
       
       if (values.max_uses !== undefined) {
-        parsedValues.max_uses = typeof values.max_uses === 'string' 
+        parsedValues.max_uses = typeof values.max_uses === 'string' && values.max_uses !== ''
           ? parseInt(values.max_uses) 
           : values.max_uses;
+        
+        if (parsedValues.max_uses === '') {
+          parsedValues.max_uses = null;
+        }
       }
       
       if (values.minimum_purchase !== undefined) {
-        parsedValues.minimum_purchase = typeof values.minimum_purchase === 'string' 
+        parsedValues.minimum_purchase = typeof values.minimum_purchase === 'string' && values.minimum_purchase !== ''
           ? parseFloat(values.minimum_purchase) 
           : values.minimum_purchase;
+          
+        if (parsedValues.minimum_purchase === '') {
+          parsedValues.minimum_purchase = null;
+        }
       }
 
       const { data, error } = await supabase
@@ -170,7 +176,7 @@ export const useDiscountCouponActions = () => {
       toast.error(`Erro ao verificar cupom: ${error.message}`);
     }
   });
-
+  
   return {
     addCoupon,
     updateCoupon,

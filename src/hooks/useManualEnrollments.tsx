@@ -1,4 +1,3 @@
-
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -55,9 +54,12 @@ export const useManualEnrollment = (id: string | undefined) => {
 
       if (error) throw new Error(error.message);
       
+      // Verificar se data.student existe antes de acessar email
+      const student_name = data.student && 'email' in data.student ? data.student.email : 'Usuário não encontrado';
+      
       return {
         ...data,
-        student_name: data.student?.email,
+        student_name,
         class_name: data.class ? `${data.class.course_name} - ${data.class.period} (${data.class.days})` : '',
         course_name: data.class?.course_name,
         coupon_code: data.coupon?.code
@@ -80,32 +82,26 @@ export const useManualEnrollmentActions = () => {
       
       // Garantir que valores numéricos sejam convertidos
       const parsedValues = {
-        ...values,
-        created_by: user.id, // Adicionar o ID do usuário como created_by
+        student_id: values.student_id,
+        class_id: values.class_id,
+        payment_status: values.payment_status,
+        coupon_id: values.coupon_id || null,
         payment_amount: typeof values.payment_amount === 'string' 
           ? parseFloat(values.payment_amount) 
           : values.payment_amount,
         original_amount: typeof values.original_amount === 'string' 
           ? parseFloat(values.original_amount) 
           : values.original_amount,
-        discount_amount: values.discount_amount && typeof values.discount_amount === 'string' 
+        discount_amount: typeof values.discount_amount === 'string' && values.discount_amount
           ? parseFloat(values.discount_amount) 
-          : values.discount_amount
+          : (values.discount_amount || 0),
+        notes: values.notes,
+        created_by: user.id
       };
 
       const { data, error } = await supabase
         .from('manual_enrollments')
-        .insert({
-          student_id: parsedValues.student_id,
-          class_id: parsedValues.class_id,
-          payment_status: parsedValues.payment_status,
-          coupon_id: parsedValues.coupon_id || null,
-          payment_amount: parsedValues.payment_amount,
-          original_amount: parsedValues.original_amount,
-          discount_amount: parsedValues.discount_amount || 0,
-          notes: parsedValues.notes,
-          created_by: parsedValues.created_by
-        })
+        .insert(parsedValues)
         .select()
         .single();
 

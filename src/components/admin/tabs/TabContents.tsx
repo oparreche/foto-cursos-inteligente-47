@@ -15,14 +15,8 @@ interface TabContentsProps {
   showDiagnostics?: boolean;
 }
 
-// Create interfaces for the component props to ensure TypeScript compatibility
-interface UserManagementProps {
-  userRole?: string;
-}
-
-interface BlogManagementProps {
-  showDiagnostics?: boolean;
-}
+// Since TypeScript is complaining about props not matching what components expect,
+// we'll pass them as direct props instead of using the spread operator and type assertions
 
 export const TabContents: React.FC<TabContentsProps> = ({ userRole = "", showDiagnostics = false }) => {
   return (
@@ -35,8 +29,8 @@ export const TabContents: React.FC<TabContentsProps> = ({ userRole = "", showDia
 
       <TabsContent value="users">
         <TabContentWrapper label="Gerenciamento de Usuários">
-          {/* Use the defined UserManagementProps type to ensure compatibility */}
-          <UserManagement {...{ userRole } as UserManagementProps} />
+          {/* Pass userRole directly to UserManagement */}
+          <UserManagement userRole={userRole} />
         </TabContentWrapper>
       </TabsContent>
 
@@ -54,8 +48,8 @@ export const TabContents: React.FC<TabContentsProps> = ({ userRole = "", showDia
 
       <TabsContent value="blog">
         <TabContentWrapper label="Gerenciamento do Blog">
-          {/* Use the defined BlogManagementProps type to ensure compatibility */}
-          <BlogManagement {...{ showDiagnostics } as BlogManagementProps} />
+          {/* Pass showDiagnostics directly to BlogManagement */}
+          <BlogManagement showDiagnostics={showDiagnostics} />
         </TabContentWrapper>
       </TabsContent>
 

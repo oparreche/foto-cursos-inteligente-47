@@ -13,7 +13,7 @@ type QuizResultProps = {
 
 const QuizResult: React.FC<QuizResultProps> = ({ score, totalQuestions, onRestart }) => {
   const percentage = Math.round((score / totalQuestions) * 100);
-  const { mutate: saveScore, isLoading } = useSaveQuizScore();
+  const { mutate: saveScore, isPending } = useSaveQuizScore();
   
   const handleSaveScore = () => {
     saveScore({ score, totalQuestions });
@@ -67,8 +67,8 @@ const QuizResult: React.FC<QuizResultProps> = ({ score, totalQuestions, onRestar
         </p>
       </CardContent>
       <CardFooter className="flex flex-col gap-2">
-        <Button onClick={handleSaveScore} disabled={isLoading} className="w-full">
-          {isLoading ? "Salvando..." : "Salvar Pontuação"}
+        <Button onClick={handleSaveScore} disabled={isPending} className="w-full">
+          {isPending ? "Salvando..." : "Salvar Pontuação"}
         </Button>
         <Button onClick={onRestart} variant="outline" className="w-full">
           Tentar Novamente

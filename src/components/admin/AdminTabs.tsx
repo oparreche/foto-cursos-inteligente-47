@@ -13,39 +13,81 @@ import { Layers, BookOpen, FileText, LayoutDashboard, Users, CreditCard, BrainCi
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 
+const TabContentWrapper = ({ children, label }: { children: React.ReactNode, label: string }) => {
+  const [hasError, setHasError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  
+  useEffect(() => {
+    console.log(`TabContent (${label}) montado`);
+  }, [label]);
+  
+  if (hasError) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          Erro ao carregar conteúdo da aba {label}: {errorMessage}
+        </AlertDescription>
+      </Alert>
+    );
+  }
+  
+  try {
+    return <>{children}</>;
+  } catch (error) {
+    console.error(`Erro ao renderizar conteúdo da aba ${label}:`, error);
+    setHasError(true);
+    setErrorMessage(error instanceof Error ? error.message : String(error));
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          Erro ao renderizar aba {label}
+        </AlertDescription>
+      </Alert>
+    );
+  }
+};
+
 const AdminTabs = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [hasError, setHasError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [isClient, setIsClient] = useState(false);
   
   // Log outside of JSX
   console.log("AdminTabs renderizando");
   
   useEffect(() => {
     try {
-      console.log("AdminTabs useEffect running");
+      console.log("AdminTabs useEffect executando");
+      setIsClient(true);
       
-      // Check if hash is set to AI tab
+      // Verificar se hash está definido para a aba AI
       if (window.location.hash === "#ai") {
-        console.log("AI tab selected by hash");
+        console.log("AI tab selecionada por hash");
         setActiveTab("ai");
       }
       
-      // Log current route for debugging
-      console.log("Current route:", window.location.pathname);
-      console.log("Current hash:", window.location.hash);
+      // Registrar rota atual para depuração
+      console.log("Rota atual:", window.location.pathname);
+      console.log("Hash atual:", window.location.hash);
     } catch (error) {
-      console.error("Error in AdminTabs useEffect:", error);
+      console.error("Erro no AdminTabs useEffect:", error);
       setHasError(true);
       setErrorMessage(error instanceof Error ? error.message : "Erro desconhecido");
     }
   }, []);
 
-  // Use useCallback to prevent unnecessary re-renders
-  const handleTabChange = useCallback((value) => {
-    console.log("Tab changed to:", value);
+  // Use useCallback para prevenir re-renderizações desnecessárias
+  const handleTabChange = useCallback((value: string) => {
+    console.log("Tab alterada para:", value);
     setActiveTab(value);
   }, []);
+
+  if (!isClient) {
+    return <div>Carregando...</div>;
+  }
 
   return (
     <>
@@ -124,25 +166,39 @@ const AdminTabs = () => {
           
           <CardContent>
             <TabsContent value="dashboard" className="mt-0">
-              <Dashboard />
+              <TabContentWrapper label="Dashboard">
+                <Dashboard />
+              </TabContentWrapper>
             </TabsContent>
             <TabsContent value="classes" className="mt-0">
-              <ClassManagement />
+              <TabContentWrapper label="Classes">
+                <ClassManagement />
+              </TabContentWrapper>
             </TabsContent>
             <TabsContent value="courses" className="mt-0">
-              <CourseManagement />
+              <TabContentWrapper label="Courses">
+                <CourseManagement />
+              </TabContentWrapper>
             </TabsContent>
             <TabsContent value="blog" className="mt-0">
-              <BlogManagement />
+              <TabContentWrapper label="Blog">
+                <BlogManagement />
+              </TabContentWrapper>
             </TabsContent>
             <TabsContent value="users" className="mt-0">
-              <UserManagement />
+              <TabContentWrapper label="Users">
+                <UserManagement />
+              </TabContentWrapper>
             </TabsContent>
             <TabsContent value="payments" className="mt-0">
-              <PaymentGateway />
+              <TabContentWrapper label="Payments">
+                <PaymentGateway />
+              </TabContentWrapper>
             </TabsContent>
             <TabsContent value="ai" className="mt-0">
-              <AIManagement />
+              <TabContentWrapper label="AI">
+                <AIManagement />
+              </TabContentWrapper>
             </TabsContent>
           </CardContent>
         </Card>

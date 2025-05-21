@@ -1,39 +1,42 @@
 
-import { UseFormRegisterReturn } from "react-hook-form";
-import { Input } from "@/components/ui/input";
+import React from 'react';
 
 interface FormFieldProps {
-  id: string;
   label: string;
-  error?: string;
-  register: UseFormRegisterReturn;
-  placeholder?: string;
+  name: string;
   type?: string;
+  placeholder?: string;
+  required?: boolean;
+  children?: React.ReactNode;
 }
 
-export const FormField = ({ 
-  id, 
-  label, 
-  error, 
-  register, 
-  placeholder, 
-  type = "text" 
-}: FormFieldProps) => {
+const FormField: React.FC<FormFieldProps> = ({
+  label,
+  name,
+  type = 'text',
+  placeholder = '',
+  required = false,
+  children,
+}) => {
   return (
-    <div>
-      <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
-        {label}
+    <div className="mb-4">
+      <label htmlFor={name} className="block text-sm font-medium text-gray-700">
+        {label} {required && <span className="text-red-500">*</span>}
       </label>
-      <Input
-        id={id}
-        type={type}
-        placeholder={placeholder}
-        className={error ? "border-red-500" : ""}
-        {...register}
-      />
-      {error && (
-        <p className="text-sm text-red-500 mt-1">{error}</p>
-      )}
+      <div className="mt-1">
+        {children || (
+          <input
+            type={type}
+            name={name}
+            id={name}
+            placeholder={placeholder}
+            required={required}
+            className="shadow-sm focus:ring-primary focus:border-primary block w-full sm:text-sm border-gray-300 rounded-md"
+          />
+        )}
+      </div>
     </div>
   );
 };
+
+export default FormField;

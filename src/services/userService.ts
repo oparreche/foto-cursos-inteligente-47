@@ -6,12 +6,12 @@ import { supabase } from '@/integrations/supabase/client';
  */
 export async function findUserByEmail(email: string): Promise<string | undefined> {
   try {
-    // Use explicit type annotation to avoid deep type inference
+    // Use type assertion to avoid deep type inference
     const { data, error } = await supabase
       .from('profiles')
       .select('id')
       .eq('email', email)
-      .maybeSingle();
+      .maybeSingle() as { data: { id: string } | null, error: Error | null };
     
     if (error) {
       console.error('Error finding user by email:', error);
@@ -53,7 +53,7 @@ export async function createUser(
     // Generate a UUID for the new profile
     const profileId = crypto.randomUUID();
     
-    // Use explicit type annotation to avoid deep type inference
+    // Use type assertion to avoid deep type inference
     const { data, error } = await supabase
       .from('profiles')
       .insert([{
@@ -72,7 +72,7 @@ export async function createUser(
         state: profileData.state,
         postal_code: profileData.postalCode
       }])
-      .select();
+      .select() as { data: any, error: Error | null };
     
     if (error) {
       console.error('Error creating user profile:', error);

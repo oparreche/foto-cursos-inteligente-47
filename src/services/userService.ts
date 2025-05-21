@@ -3,13 +3,13 @@ import { supabase } from '@/integrations/supabase/client';
 
 export async function findUserByEmail(email: string): Promise<string | undefined> {
   try {
-    // Evitar tipagem profunda usando a tipagem any para o resultado
+    // Using a simpler approach to type the response
     const { data, error } = await supabase
       .from('profiles')
       .select('id')
       .eq('email', email)
       .limit(1)
-      .single() as { data: { id: string } | null, error: any };
+      .single();
       
     if (error) throw error;
     return data?.id;

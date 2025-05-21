@@ -10,11 +10,12 @@ import { ClassItem, FormValues } from "./types";
 import { DEFAULT_FORM_VALUES } from "./classes/formConstants";
 
 // Import form section components
-import FormSectionBasicInfo from "./classes/FormSectionBasicInfo";
+import FormSectionCourseSelector from "./classes/FormSectionCourseSelector";
 import FormSectionSchedule from "./classes/FormSectionSchedule";
 import FormSectionDetails from "./classes/FormSectionDetails";
 import FormSectionCapacity from "./classes/FormSectionCapacity";
 import FormSectionDescription from "./classes/FormSectionDescription";
+import FormSectionBasicInfo from "./classes/FormSectionBasicInfo";
 
 interface ClassFormProps {
   isEditing: boolean;
@@ -40,8 +41,15 @@ const ClassForm = ({ isEditing, currentClass, onSubmit, onCancel }: ClassFormPro
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Course Selector Section */}
+            <div className="space-y-4">
+              <FormSectionCourseSelector />
+            </div>
+            
             {/* Basic Info Section */}
-            <FormSectionBasicInfo />
+            <div className="space-y-4">
+              <FormSectionBasicInfo />
+            </div>
             
             {/* Schedule Section */}
             <FormSectionSchedule />

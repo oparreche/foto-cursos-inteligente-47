@@ -1,6 +1,6 @@
 
 import React from "react";
-import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useFormContext } from "react-hook-form";
 import { FormValues } from "../types";
@@ -10,37 +10,6 @@ const FormSectionBasicInfo: React.FC = () => {
 
   return (
     <>
-      <FormField
-        control={control}
-        name="courseName"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Nome do Curso</FormLabel>
-            <FormControl>
-              <Input {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      
-      <FormField
-        control={control}
-        name="courseSlug"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Slug do Curso</FormLabel>
-            <FormControl>
-              <Input {...field} />
-            </FormControl>
-            <FormDescription>
-              Identificador único para URL (ex: fotografia-basica)
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      
       <FormField
         control={control}
         name="image"

@@ -31,13 +31,19 @@ function App() {
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/about" element={<About />} />
+          <Route path="/sobre" element={<About />} /> {/* Portuguese route alias */}
           <Route path="/courses" element={<Courses />} />
+          <Route path="/cursos" element={<Courses />} /> {/* Portuguese route alias */}
           <Route path="/courses/:slug" element={<CourseDetail />} />
+          <Route path="/cursos/:slug" element={<CourseDetail />} /> {/* Portuguese route alias */}
           <Route path="/classes" element={<Classes />} />
+          <Route path="/turmas" element={<Classes />} /> {/* Portuguese route alias */}
           <Route path="/classes/:id" element={<ClassDetail />} />
+          <Route path="/turmas/:id" element={<ClassDetail />} /> {/* Portuguese route alias */}
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/contato" element={<Contact />} /> {/* Portuguese route alias */}
           <Route path="/login" element={<Login />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/quiz" element={<Quiz />} />

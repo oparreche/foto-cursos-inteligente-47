@@ -3,16 +3,16 @@ import { supabase } from '@/integrations/supabase/client';
 
 export async function findUserByEmail(email: string): Promise<string | undefined> {
   try {
-    // Use explicit typing with a generic parameter to avoid deep type instantiation
-    const result = await supabase
+    // Evitar tipagem profunda usando a tipagem any para o resultado
+    const { data, error } = await supabase
       .from('profiles')
       .select('id')
       .eq('email', email)
       .limit(1)
-      .single();
+      .single() as { data: { id: string } | null, error: any };
       
-    if (result.error) throw result.error;
-    return result.data?.id;
+    if (error) throw error;
+    return data?.id;
   } catch (error) {
     console.error('Error finding user by email:', error);
     return undefined;

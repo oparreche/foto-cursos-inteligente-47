@@ -35,6 +35,8 @@ export const useCouponActions = () => {
           : 0
       };
 
+      console.log("Adding coupon with values:", parsedValues);
+
       const { data, error } = await supabase
         .from('discount_coupons')
         .insert(parsedValues)
@@ -49,6 +51,7 @@ export const useCouponActions = () => {
       toast.success('Cupom de desconto criado com sucesso!');
     },
     onError: (error) => {
+      console.error("Error creating coupon:", error);
       toast.error(`Erro ao criar cupom: ${error.message}`);
     }
   });
@@ -85,6 +88,13 @@ export const useCouponActions = () => {
         }
       }
 
+      // Ensure course_id is handled properly
+      if (values.course_id === '' || values.course_id === 'all_courses') {
+        parsedValues.course_id = null;
+      }
+
+      console.log("Updating coupon with values:", parsedValues);
+
       const { data, error } = await supabase
         .from('discount_coupons')
         .update(parsedValues)
@@ -100,6 +110,7 @@ export const useCouponActions = () => {
       toast.success('Cupom de desconto atualizado com sucesso!');
     },
     onError: (error) => {
+      console.error("Error updating coupon:", error);
       toast.error(`Erro ao atualizar cupom: ${error.message}`);
     }
   });
@@ -120,6 +131,7 @@ export const useCouponActions = () => {
       toast.success('Cupom de desconto excluído com sucesso!');
     },
     onError: (error) => {
+      console.error("Error deleting coupon:", error);
       toast.error(`Erro ao excluir cupom: ${error.message}`);
     }
   });

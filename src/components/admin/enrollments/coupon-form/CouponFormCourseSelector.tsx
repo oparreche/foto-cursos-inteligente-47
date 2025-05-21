@@ -13,7 +13,7 @@ interface CouponFormCourseSelectorProps {
 
 const CouponFormCourseSelector: React.FC<CouponFormCourseSelectorProps> = ({ control }) => {
   // Buscar cursos disponíveis
-  const { data: courses } = useQuery({
+  const { data: courses, isLoading } = useQuery({
     queryKey: ['courses'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -21,8 +21,11 @@ const CouponFormCourseSelector: React.FC<CouponFormCourseSelectorProps> = ({ con
         .select('id, name')
         .eq('is_active', true);
       
-      if (error) throw new Error(error.message);
-      return data;
+      if (error) {
+        console.error("Error loading courses:", error);
+        throw new Error(error.message);
+      }
+      return data || [];
     }
   });
 
@@ -36,9 +39,10 @@ const CouponFormCourseSelector: React.FC<CouponFormCourseSelectorProps> = ({ con
           <Select
             onValueChange={(value) => {
               // Converte "all_courses" para null (aplicável a todos os cursos)
-              field.onChange(value === "all_courses" ? null : value);
+              field.onChange(value);
             }}
             value={field.value || "all_courses"}
+            disabled={isLoading}
           >
             <FormControl>
               <SelectTrigger>

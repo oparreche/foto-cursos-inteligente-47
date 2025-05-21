@@ -40,10 +40,10 @@ export const usePaymentProcessing = () => {
       console.log('Processing checkout with values:', values);
       
       // 1. Verify if the user exists or register a new one
-      let userId;
+      let userId: string | undefined;
       
-      // Check if the user already exists by email
-      const { data: existingUsers, error: existingUserError } = await supabase
+      // Check if the user already exists by email - using maybeSingle instead of single
+      const { data: existingUser, error: existingUserError } = await supabase
         .from('profiles')
         .select('id')
         .eq('email', values.email)
@@ -53,8 +53,8 @@ export const usePaymentProcessing = () => {
         console.error('Error checking for existing user:', existingUserError);
       }
       
-      if (existingUsers) {
-        userId = existingUsers.id;
+      if (existingUser) {
+        userId = existingUser.id;
         console.log('Existing user found:', userId);
       } else {
         // Create new user account
@@ -109,7 +109,7 @@ export const usePaymentProcessing = () => {
           .from('discount_coupons')
           .select('*')
           .eq('code', values.couponCode)
-          .single();
+          .maybeSingle();
           
         if (couponError) {
           console.error('Error fetching coupon:', couponError);
@@ -126,9 +126,10 @@ export const usePaymentProcessing = () => {
         .from('classes')
         .select('price')
         .eq('id', values.classId)
-        .single();
+        .maybeSingle();
         
       if (classError) throw new Error(`Error fetching class data: ${classError.message}`);
+      if (!classData) throw new Error(`Class not found with ID: ${values.classId}`);
       
       const amount = parseFloat(classData.price);
       

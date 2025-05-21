@@ -55,8 +55,9 @@ export const useManualEnrollment = (id: string | undefined) => {
 
       if (error) throw new Error(error.message);
       
-      // Verificar se data.student existe antes de acessar email
-      const student_name = data.student && data.student.email ? data.student.email : 'Usuário não encontrado';
+      // Tratamento seguro para acessar student.email com verificação de tipos
+      const studentData = data.student as { email?: string } | null;
+      const student_name = studentData && studentData.email ? studentData.email : 'Usuário não encontrado';
       
       return {
         ...data,
@@ -93,9 +94,11 @@ export const useManualEnrollmentActions = () => {
         original_amount: typeof values.original_amount === 'string' 
           ? parseFloat(values.original_amount) 
           : values.original_amount,
-        discount_amount: typeof values.discount_amount === 'string' && values.discount_amount
-          ? parseFloat(values.discount_amount) 
-          : (typeof values.discount_amount === 'number' ? values.discount_amount : 0),
+        discount_amount: values.discount_amount === undefined ? 0 : (
+          typeof values.discount_amount === 'string' && values.discount_amount !== '' 
+            ? parseFloat(values.discount_amount) 
+            : (typeof values.discount_amount === 'number' ? values.discount_amount : 0)
+        ),
         notes: values.notes || '',
         created_by: user.id
       };

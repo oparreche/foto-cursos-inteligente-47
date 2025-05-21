@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 
 export async function findUserByEmail(email: string): Promise<string | undefined> {
   try {
+    // Use explicit type annotation and maybeSingle() instead of generic response type
     const { data, error } = await supabase
       .from('profiles')
       .select('id')

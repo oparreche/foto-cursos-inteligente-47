@@ -41,7 +41,7 @@ const CouponFormCourseSelector: React.FC<CouponFormCourseSelectorProps> = ({ con
               console.log("Selected course value:", value);
               field.onChange(value === "all_courses" ? null : value);
             }}
-            value={field.value === null ? "all_courses" : field.value}
+            value={field.value === null || field.value === undefined ? "all_courses" : field.value}
             disabled={isLoading}
           >
             <FormControl>

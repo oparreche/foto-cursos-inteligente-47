@@ -3,13 +3,13 @@ import { supabase } from '@/integrations/supabase/client';
 
 export async function findUserByEmail(email: string): Promise<string | undefined> {
   try {
-    // Use a more direct approach with explicit type handling
+    // Use maybeSingle instead of single to avoid type complexity
     const { data, error } = await supabase
       .from('profiles')
       .select('id')
       .eq('email', email)
       .limit(1)
-      .single();
+      .maybeSingle();
       
     if (error) throw error;
     
@@ -46,7 +46,7 @@ export async function createUser(
     const profileId = crypto.randomUUID();
     
     // Use explicit any typing for the response to avoid deep type analysis
-    const result: any = await supabase
+    const { error } = await supabase
       .from('profiles')
       .insert({
         id: profileId,
@@ -65,7 +65,7 @@ export async function createUser(
         postal_code: profileData.postalCode
       });
     
-    if (result.error) throw result.error;
+    if (error) throw error;
     
     return profileId;
   } catch (error) {

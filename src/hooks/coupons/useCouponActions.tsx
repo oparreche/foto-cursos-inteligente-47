@@ -30,7 +30,7 @@ export const useCouponActions = () => {
           valid_from: values.valid_from,
           valid_until: values.valid_until || null,
           is_active: values.is_active ?? true,
-          course_id: (values.course_id === 'all_courses' || !values.course_id || values.course_id === '') 
+          course_id: values.course_id === null || values.course_id === undefined || values.course_id === '' 
             ? null 
             : values.course_id,
           minimum_purchase: values.minimum_purchase !== undefined && values.minimum_purchase !== '' 
@@ -106,7 +106,7 @@ export const useCouponActions = () => {
         }
 
         // Ensure course_id is handled properly
-        if (values.course_id === '' || values.course_id === 'all_courses') {
+        if (values.course_id === null || values.course_id === undefined || values.course_id === '') {
           parsedValues.course_id = null;
         }
 

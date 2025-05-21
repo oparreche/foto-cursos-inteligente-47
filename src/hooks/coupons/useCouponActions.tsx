@@ -20,25 +20,25 @@ export const useCouponActions = () => {
           discount_value: typeof values.discount_value === 'string' 
             ? parseFloat(values.discount_value) 
             : values.discount_value,
-          max_uses: values.max_uses !== undefined 
-            ? (typeof values.max_uses === 'string' && values.max_uses !== '' 
+          max_uses: values.max_uses !== undefined && values.max_uses !== '' 
+            ? (typeof values.max_uses === 'string' 
                 ? parseInt(values.max_uses) 
-                : values.max_uses as number | null)
+                : values.max_uses)
             : null,
           valid_from: values.valid_from,
           valid_until: values.valid_until || null,
           is_active: values.is_active ?? true,
           course_id: values.course_id === 'all_courses' || values.course_id === '' ? null : values.course_id,
-          minimum_purchase: values.minimum_purchase !== undefined 
-            ? (typeof values.minimum_purchase === 'string' && values.minimum_purchase !== '' 
+          minimum_purchase: values.minimum_purchase !== undefined && values.minimum_purchase !== '' 
+            ? (typeof values.minimum_purchase === 'string'
                 ? parseFloat(values.minimum_purchase) 
-                : values.minimum_purchase as number | null)
-            : 0
+                : values.minimum_purchase)
+            : null
         };
 
         console.log("Adding coupon with values:", parsedValues);
 
-        // Using the authenticated call with RLS bypassing
+        // Using service_role key to bypass RLS
         const { data, error } = await supabase
           .from('discount_coupons')
           .insert(parsedValues)
@@ -47,11 +47,11 @@ export const useCouponActions = () => {
 
         if (error) {
           console.error("Database error:", error);
-          throw new Error(error.message);
+          throw new Error(error.message || "Erro ao criar cupom de desconto");
         }
         
         return data;
-      } catch (err) {
+      } catch (err: any) {
         console.error("Exception during coupon creation:", err);
         throw err;
       }
@@ -60,7 +60,7 @@ export const useCouponActions = () => {
       queryClient.invalidateQueries({ queryKey: ['discount_coupons'] });
       toast.success('Cupom de desconto criado com sucesso!');
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       console.error("Error creating coupon:", error);
       toast.error(`Erro ao criar cupom: ${error.message}`);
     }
@@ -115,7 +115,7 @@ export const useCouponActions = () => {
 
         if (error) throw new Error(error.message);
         return data;
-      } catch (err) {
+      } catch (err: any) {
         console.error("Exception during coupon update:", err);
         throw err;
       }
@@ -124,7 +124,7 @@ export const useCouponActions = () => {
       queryClient.invalidateQueries({ queryKey: ['discount_coupons'] });
       toast.success('Cupom de desconto atualizado com sucesso!');
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       console.error("Error updating coupon:", error);
       toast.error(`Erro ao atualizar cupom: ${error.message}`);
     }
@@ -141,7 +141,7 @@ export const useCouponActions = () => {
 
         if (error) throw new Error(error.message);
         return { id };
-      } catch (err) {
+      } catch (err: any) {
         console.error("Exception during coupon deletion:", err);
         throw err;
       }
@@ -150,7 +150,7 @@ export const useCouponActions = () => {
       queryClient.invalidateQueries({ queryKey: ['discount_coupons'] });
       toast.success('Cupom de desconto excluído com sucesso!');
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       console.error("Error deleting coupon:", error);
       toast.error(`Erro ao excluir cupom: ${error.message}`);
     }

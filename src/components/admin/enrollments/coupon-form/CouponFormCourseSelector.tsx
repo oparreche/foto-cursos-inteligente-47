@@ -43,7 +43,7 @@ const CouponFormCourseSelector: React.FC<CouponFormCourseSelectorProps> = ({ con
               </SelectTrigger>
             </FormControl>
             <SelectContent>
-              <SelectItem value="">Todos os cursos</SelectItem>
+              <SelectItem value="all_courses">Todos os cursos</SelectItem>
               {courses?.map((course: any) => (
                 <SelectItem key={course.id} value={course.id}>
                   {course.name}

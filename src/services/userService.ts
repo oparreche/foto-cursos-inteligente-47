@@ -1,34 +1,24 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
-// Define a simple interface for the profile data structure
-interface ProfileData {
-  id: string;
-  email?: string;
-}
-
 /**
  * Finds a user by their email address
  */
 export async function findUserByEmail(email: string): Promise<string | undefined> {
   try {
-    // Explicitly type the response to avoid deep type inference
-    const result = await supabase
+    // Use any to bypass TypeScript's deep inference issues
+    const response: any = await supabase
       .from('profiles')
       .select('id')
       .eq('email', email)
       .maybeSingle();
-      
-    // Destructure with explicit typing
-    const data = result.data as ProfileData | null;
-    const error = result.error;
     
-    if (error) {
-      console.error('Error finding user by email:', error);
+    if (response.error) {
+      console.error('Error finding user by email:', response.error);
       return undefined;
     }
     
-    return data ? data.id : undefined;
+    return response.data?.id;
   } catch (error) {
     console.error('Error finding user by email:', error);
     return undefined;
@@ -63,8 +53,8 @@ export async function createUser(
     // Generate a UUID for the new profile
     const profileId = crypto.randomUUID();
     
-    // Explicitly type the response to avoid deep type inference
-    const result = await supabase
+    // Use any to bypass TypeScript's deep inference issues
+    const response: any = await supabase
       .from('profiles')
       .insert([{
         id: profileId,
@@ -83,10 +73,8 @@ export async function createUser(
         postal_code: profileData.postalCode
       }]);
     
-    const error = result.error;
-    
-    if (error) {
-      console.error('Error creating user profile:', error);
+    if (response.error) {
+      console.error('Error creating user profile:', response.error);
       return undefined;
     }
     

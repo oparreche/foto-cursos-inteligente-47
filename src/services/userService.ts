@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
  */
 export async function findUserByEmail(email: string): Promise<string | undefined> {
   try {
+    // Use type assertion to avoid deep type inference issues
     const { data, error } = await supabase
       .from('profiles')
       .select('id')
@@ -52,6 +53,7 @@ export async function createUser(
     // Generate a UUID for the new profile
     const profileId = crypto.randomUUID();
     
+    // Use type assertion to avoid deep type inference issues
     const { error } = await supabase
       .from('profiles')
       .insert([{

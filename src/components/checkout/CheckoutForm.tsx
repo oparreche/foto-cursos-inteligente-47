@@ -42,15 +42,21 @@ const checkoutSchema = z.object({
   })
 });
 
-const CheckoutForm: React.FC = () => {
-  const { classId } = useParams<{ classId: string }>();
+// Define props interface for CheckoutForm
+interface CheckoutFormProps {
+  classId: string;
+  classPrice: number;
+  className: string;
+}
+
+const CheckoutForm: React.FC<CheckoutFormProps> = ({ classId, classPrice, className }) => {
   const { processCheckout, isProcessing } = usePaymentProcessing();
   
   const { register, handleSubmit, watch, formState: { errors } } = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
       paymentMethod: 'credit_card',
-      classId: classId || '',
+      classId: classId,
       agreeTerms: false
     }
   });

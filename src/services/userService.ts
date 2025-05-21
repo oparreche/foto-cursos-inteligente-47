@@ -23,7 +23,7 @@ export async function findUserByEmail(email: string): Promise<string | undefined
 }
 
 // Define a type for additional user data
-type UserAdditionalData = {
+export type UserAdditionalData = {
   cpf: string;
   birthDate: string;
   phone: string;

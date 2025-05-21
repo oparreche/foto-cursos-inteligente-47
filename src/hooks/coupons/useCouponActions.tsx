@@ -12,10 +12,12 @@ export const useCouponActions = () => {
   const addCoupon = useMutation({
     mutationFn: async (values: DiscountCouponFormValues) => {
       try {
+        console.log("Original values:", values);
+        
         // Ensure numeric values are properly parsed
         const parsedValues = {
           code: values.code,
-          description: values.description,
+          description: values.description || null,
           discount_type: values.discount_type,
           discount_value: typeof values.discount_value === 'string' 
             ? parseFloat(values.discount_value) 
@@ -28,7 +30,9 @@ export const useCouponActions = () => {
           valid_from: values.valid_from,
           valid_until: values.valid_until || null,
           is_active: values.is_active ?? true,
-          course_id: values.course_id === 'all_courses' || values.course_id === '' ? null : values.course_id,
+          course_id: (values.course_id === 'all_courses' || !values.course_id || values.course_id === '') 
+            ? null 
+            : values.course_id,
           minimum_purchase: values.minimum_purchase !== undefined && values.minimum_purchase !== '' 
             ? (typeof values.minimum_purchase === 'string'
                 ? parseFloat(values.minimum_purchase) 
@@ -36,9 +40,9 @@ export const useCouponActions = () => {
             : null
         };
 
-        console.log("Adding coupon with values:", parsedValues);
+        console.log("Sending coupon data to server:", parsedValues);
 
-        // Using service_role key to bypass RLS
+        // Create the coupon
         const { data, error } = await supabase
           .from('discount_coupons')
           .insert(parsedValues)
@@ -50,13 +54,15 @@ export const useCouponActions = () => {
           throw new Error(error.message || "Erro ao criar cupom de desconto");
         }
         
+        console.log("Coupon created successfully:", data);
         return data;
       } catch (err: any) {
         console.error("Exception during coupon creation:", err);
         throw err;
       }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("Coupon creation success:", data);
       queryClient.invalidateQueries({ queryKey: ['discount_coupons'] });
       toast.success('Cupom de desconto criado com sucesso!');
     },

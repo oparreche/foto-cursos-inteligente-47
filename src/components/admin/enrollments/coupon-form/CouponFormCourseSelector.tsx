@@ -40,7 +40,7 @@ const CouponFormCourseSelector: React.FC<CouponFormCourseSelectorProps> = ({ con
             onValueChange={(value) => {
               console.log("Selected course value:", value);
               // Converte "all_courses" para null (aplicável a todos os cursos)
-              field.onChange(value);
+              field.onChange(value === "all_courses" ? null : value);
             }}
             value={field.value || "all_courses"}
             disabled={isLoading}

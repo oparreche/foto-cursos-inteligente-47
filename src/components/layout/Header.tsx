@@ -39,7 +39,7 @@ const Header = () => {
           : "bg-transparent"
       }`}
     >
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 w-full">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
@@ -113,7 +113,7 @@ const Header = () => {
 
       {/* Mobile menu */}
       {isMenuOpen && (
-        <div className="md:hidden bg-background animate-fade-in border-t">
+        <div className="md:hidden bg-background w-full animate-fade-in border-t">
           <nav className="container mx-auto px-4 py-4 flex flex-col space-y-4">
             <Link
               to="/"

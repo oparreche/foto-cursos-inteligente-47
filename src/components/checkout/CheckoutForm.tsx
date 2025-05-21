@@ -1,604 +1,353 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import { z } from 'zod';
+import { usePaymentProcessing } from '@/hooks/payments/usePaymentProcessing';
+import type { CheckoutFormValues } from '@/types/checkout';
 import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CheckoutFormValues, usePaymentProcessing } from '@/hooks/payments/usePaymentProcessing';
-import { DiscountCoupon } from '@/types/enrollment';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { useParams } from 'react-router-dom';
 
-// Brazilian states
-const brStates = [
-  { value: 'AC', label: 'Acre' },
-  { value: 'AL', label: 'Alagoas' },
-  { value: 'AP', label: 'Amapá' },
-  { value: 'AM', label: 'Amazonas' },
-  { value: 'BA', label: 'Bahia' },
-  { value: 'CE', label: 'Ceará' },
-  { value: 'DF', label: 'Distrito Federal' },
-  { value: 'ES', label: 'Espírito Santo' },
-  { value: 'GO', label: 'Goiás' },
-  { value: 'MA', label: 'Maranhão' },
-  { value: 'MT', label: 'Mato Grosso' },
-  { value: 'MS', label: 'Mato Grosso do Sul' },
-  { value: 'MG', label: 'Minas Gerais' },
-  { value: 'PA', label: 'Pará' },
-  { value: 'PB', label: 'Paraíba' },
-  { value: 'PR', label: 'Paraná' },
-  { value: 'PE', label: 'Pernambuco' },
-  { value: 'PI', label: 'Piauí' },
-  { value: 'RJ', label: 'Rio de Janeiro' },
-  { value: 'RN', label: 'Rio Grande do Norte' },
-  { value: 'RS', label: 'Rio Grande do Sul' },
-  { value: 'RO', label: 'Rondônia' },
-  { value: 'RR', label: 'Roraima' },
-  { value: 'SC', label: 'Santa Catarina' },
-  { value: 'SP', label: 'São Paulo' },
-  { value: 'SE', label: 'Sergipe' },
-  { value: 'TO', label: 'Tocantins' },
-];
-
-// Form schema
+// Form validation schema
 const checkoutSchema = z.object({
-  firstName: z.string().min(2, { message: 'Nome é obrigatório' }),
-  lastName: z.string().min(2, { message: 'Sobrenome é obrigatório' }),
-  email: z.string().email({ message: 'Email inválido' }),
-  cpf: z.string().min(11, { message: 'CPF inválido' }),
-  phone: z.string().min(10, { message: 'Telefone inválido' }),
-  birthDate: z.string().min(1, { message: 'Data de nascimento é obrigatória' }),
-  address: z.string().min(5, { message: 'Endereço é obrigatório' }),
-  addressNumber: z.string().min(1, { message: 'Número é obrigatório' }),
+  firstName: z.string().min(2, { message: "Nome é obrigatório" }),
+  lastName: z.string().min(2, { message: "Sobrenome é obrigatório" }),
+  email: z.string().email({ message: "E-mail inválido" }),
+  cpf: z.string().min(11, { message: "CPF inválido" }),
+  phone: z.string().min(10, { message: "Telefone inválido" }),
+  birthDate: z.string().min(1, { message: "Data de nascimento é obrigatória" }),
+  address: z.string().min(3, { message: "Endereço é obrigatório" }),
+  addressNumber: z.string().min(1, { message: "Número é obrigatório" }),
   addressComplement: z.string().optional(),
-  neighborhood: z.string().min(2, { message: 'Bairro é obrigatório' }),
-  city: z.string().min(2, { message: 'Cidade é obrigatória' }),
-  state: z.string().min(2, { message: 'Estado é obrigatório' }),
-  postalCode: z.string().min(8, { message: 'CEP inválido' }),
+  neighborhood: z.string().min(2, { message: "Bairro é obrigatório" }),
+  city: z.string().min(2, { message: "Cidade é obrigatória" }),
+  state: z.string().min(2, { message: "Estado é obrigatório" }),
+  postalCode: z.string().min(8, { message: "CEP inválido" }),
   paymentMethod: z.enum(['credit_card', 'pix', 'bank_slip']),
   cardNumber: z.string().optional(),
   cardHolderName: z.string().optional(),
   expiryDate: z.string().optional(),
   cvv: z.string().optional(),
   installments: z.number().optional(),
-  classId: z.string().uuid(),
+  classId: z.string(),
   couponCode: z.string().optional(),
   agreeTerms: z.boolean().refine(val => val === true, {
-    message: 'Você deve concordar com os termos para continuar',
-  }),
+    message: "Você precisa concordar com os termos e condições"
+  })
 });
 
-interface CheckoutFormProps {
-  classId: string;
-  classPrice: number;
-  className: string;
-}
-
-const CheckoutForm: React.FC<CheckoutFormProps> = ({ 
-  classId, 
-  classPrice, 
-  className 
-}) => {
+const CheckoutForm: React.FC = () => {
+  const { classId } = useParams<{ classId: string }>();
   const { processCheckout, isProcessing } = usePaymentProcessing();
   
-  const form = useForm<CheckoutFormValues>({
+  const { register, handleSubmit, watch, formState: { errors } } = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
-      firstName: '',
-      lastName: '',
-      email: '',
-      cpf: '',
-      phone: '',
-      birthDate: '',
-      address: '',
-      addressNumber: '',
-      addressComplement: '',
-      neighborhood: '',
-      city: '',
-      state: '',
-      postalCode: '',
       paymentMethod: 'credit_card',
-      cardNumber: '',
-      cardHolderName: '',
-      expiryDate: '',
-      cvv: '',
-      installments: 1,
-      classId,
-      couponCode: '',
-      agreeTerms: false,
-    },
-  });
-  
-  const paymentMethod = form.watch('paymentMethod');
-  
-  // Fetch available coupons
-  const { data: coupons = [] } = useQuery({
-    queryKey: ['available_coupons', classId],
-    queryFn: async () => {
-      const today = new Date().toISOString();
-      
-      const { data, error } = await supabase
-        .from('discount_coupons')
-        .select('*')
-        .eq('is_active', true)
-        .lte('valid_from', today)
-        .gt('valid_until', today)
-        .or(`course_id.is.null,course_id.eq.${classId}`);
-        
-      if (error) {
-        console.error('Error fetching coupons:', error);
-        return [];
-      }
-      
-      return data as DiscountCoupon[];
+      classId: classId || '',
+      agreeTerms: false
     }
   });
-  
-  // Handle form submission
-  const onSubmit = (data: CheckoutFormValues) => {
-    console.log('Form data:', data);
-    processCheckout(data);
+
+  const paymentMethod = watch('paymentMethod');
+
+  const onSubmit = (values: CheckoutFormValues) => {
+    processCheckout(values);
   };
-  
+
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Informações Pessoais</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="firstName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nome*</FormLabel>
-                    <FormControl>
-                      <Input placeholder="João" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+      <Card>
+        <CardHeader>
+          <CardTitle>Informações Pessoais</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="firstName">Nome</Label>
+              <Input
+                id="firstName"
+                {...register("firstName")}
+                className={errors.firstName ? "border-red-500" : ""}
               />
-              <FormField
-                control={form.control}
-                name="lastName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Sobrenome*</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Silva" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+              {errors.firstName && (
+                <p className="text-sm text-red-500 mt-1">{errors.firstName.message}</p>
+              )}
+            </div>
+            <div>
+              <Label htmlFor="lastName">Sobrenome</Label>
+              <Input
+                id="lastName"
+                {...register("lastName")}
+                className={errors.lastName ? "border-red-500" : ""}
+              />
+              {errors.lastName && (
+                <p className="text-sm text-red-500 mt-1">{errors.lastName.message}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="email">E-mail</Label>
+              <Input
+                id="email"
+                type="email"
+                {...register("email")}
+                className={errors.email ? "border-red-500" : ""}
+              />
+              {errors.email && (
+                <p className="text-sm text-red-500 mt-1">{errors.email.message}</p>
+              )}
+            </div>
+            <div>
+              <Label htmlFor="phone">Telefone</Label>
+              <Input
+                id="phone"
+                {...register("phone")}
+                className={errors.phone ? "border-red-500" : ""}
+              />
+              {errors.phone && (
+                <p className="text-sm text-red-500 mt-1">{errors.phone.message}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="cpf">CPF</Label>
+              <Input
+                id="cpf"
+                {...register("cpf")}
+                className={errors.cpf ? "border-red-500" : ""}
+              />
+              {errors.cpf && (
+                <p className="text-sm text-red-500 mt-1">{errors.cpf.message}</p>
+              )}
+            </div>
+            <div>
+              <Label htmlFor="birthDate">Data de Nascimento</Label>
+              <Input
+                id="birthDate"
+                type="date"
+                {...register("birthDate")}
+                className={errors.birthDate ? "border-red-500" : ""}
+              />
+              {errors.birthDate && (
+                <p className="text-sm text-red-500 mt-1">{errors.birthDate.message}</p>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Endereço</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label htmlFor="address">Endereço</Label>
+            <Input
+              id="address"
+              {...register("address")}
+              className={errors.address ? "border-red-500" : ""}
+            />
+            {errors.address && (
+              <p className="text-sm text-red-500 mt-1">{errors.address.message}</p>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <Label htmlFor="addressNumber">Número</Label>
+              <Input
+                id="addressNumber"
+                {...register("addressNumber")}
+                className={errors.addressNumber ? "border-red-500" : ""}
+              />
+              {errors.addressNumber && (
+                <p className="text-sm text-red-500 mt-1">{errors.addressNumber.message}</p>
+              )}
+            </div>
+            <div className="md:col-span-2">
+              <Label htmlFor="addressComplement">Complemento</Label>
+              <Input
+                id="addressComplement"
+                {...register("addressComplement")}
               />
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email*</FormLabel>
-                    <FormControl>
-                      <Input type="email" placeholder="exemplo@email.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="neighborhood">Bairro</Label>
+              <Input
+                id="neighborhood"
+                {...register("neighborhood")}
+                className={errors.neighborhood ? "border-red-500" : ""}
               />
-              <FormField
-                control={form.control}
-                name="cpf"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>CPF*</FormLabel>
-                    <FormControl>
-                      <Input placeholder="000.000.000-00" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {errors.neighborhood && (
+                <p className="text-sm text-red-500 mt-1">{errors.neighborhood.message}</p>
+              )}
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Telefone*</FormLabel>
-                    <FormControl>
-                      <Input placeholder="(00) 00000-0000" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+            <div>
+              <Label htmlFor="postalCode">CEP</Label>
+              <Input
+                id="postalCode"
+                {...register("postalCode")}
+                className={errors.postalCode ? "border-red-500" : ""}
               />
-              <FormField
-                control={form.control}
-                name="birthDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Data de Nascimento*</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {errors.postalCode && (
+                <p className="text-sm text-red-500 mt-1">{errors.postalCode.message}</p>
+              )}
             </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Endereço</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 gap-4">
-              <FormField
-                control={form.control}
-                name="postalCode"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>CEP*</FormLabel>
-                    <FormControl>
-                      <Input placeholder="00000-000" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="city">Cidade</Label>
+              <Input
+                id="city"
+                {...register("city")}
+                className={errors.city ? "border-red-500" : ""}
               />
+              {errors.city && (
+                <p className="text-sm text-red-500 mt-1">{errors.city.message}</p>
+              )}
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="md:col-span-2">
-                <FormField
-                  control={form.control}
-                  name="address"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Logradouro*</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Rua, Avenida, etc" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <FormField
-                control={form.control}
-                name="addressNumber"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Número*</FormLabel>
-                    <FormControl>
-                      <Input placeholder="123" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+            <div>
+              <Label htmlFor="state">Estado</Label>
+              <Input
+                id="state"
+                {...register("state")}
+                className={errors.state ? "border-red-500" : ""}
               />
+              {errors.state && (
+                <p className="text-sm text-red-500 mt-1">{errors.state.message}</p>
+              )}
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="addressComplement"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Complemento</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Apto, Bloco, etc" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="neighborhood"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Bairro*</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Centro" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="city"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Cidade*</FormLabel>
-                    <FormControl>
-                      <Input placeholder="São Paulo" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="state"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Estado*</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione um estado" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {brStates.map((state) => (
-                          <SelectItem key={state.value} value={state.value}>
-                            {state.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Forma de Pagamento</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Tabs
-              defaultValue="credit_card"
-              onValueChange={(value) => form.setValue('paymentMethod', value as any)}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Pagamento</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label>Método de Pagamento</Label>
+            <RadioGroup 
+              defaultValue="credit_card" 
+              className="grid grid-cols-3 gap-4 mt-2"
+              {...register("paymentMethod")}
             >
-              <TabsList className="grid grid-cols-3 mb-4">
-                <TabsTrigger value="credit_card">Cartão de Crédito</TabsTrigger>
-                <TabsTrigger value="pix">PIX</TabsTrigger>
-                <TabsTrigger value="bank_slip">Boleto</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="credit_card" className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="cardNumber"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Número do Cartão</FormLabel>
-                      <FormControl>
-                        <Input placeholder="0000 0000 0000 0000" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="credit_card" id="credit_card" />
+                <Label htmlFor="credit_card">Cartão de Crédito</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="pix" id="pix" />
+                <Label htmlFor="pix">PIX</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="bank_slip" id="bank_slip" />
+                <Label htmlFor="bank_slip">Boleto</Label>
+              </div>
+            </RadioGroup>
+          </div>
+
+          {paymentMethod === 'credit_card' && (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="cardNumber">Número do Cartão</Label>
+                <Input
+                  id="cardNumber"
+                  placeholder="0000 0000 0000 0000"
+                  {...register("cardNumber")}
                 />
-                
-                <FormField
-                  control={form.control}
-                  name="cardHolderName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nome Impresso no Cartão</FormLabel>
-                      <FormControl>
-                        <Input placeholder="JOAO C SILVA" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+              </div>
+              <div>
+                <Label htmlFor="cardHolderName">Nome no Cartão</Label>
+                <Input
+                  id="cardHolderName"
+                  placeholder="Nome como está no cartão"
+                  {...register("cardHolderName")}
                 />
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="expiryDate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Data de Validade</FormLabel>
-                        <FormControl>
-                          <Input placeholder="MM/AA" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="cvv"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>CVV</FormLabel>
-                        <FormControl>
-                          <Input placeholder="123" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="expiryDate">Data de Validade</Label>
+                  <Input
+                    id="expiryDate"
+                    placeholder="MM/AA"
+                    {...register("expiryDate")}
                   />
                 </div>
-                
-                <FormField
-                  control={form.control}
-                  name="installments"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Parcelas</FormLabel>
-                      <Select
-                        onValueChange={(value) => field.onChange(parseInt(value))}
-                        defaultValue={String(field.value)}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione o número de parcelas" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {[1, 2, 3, 4, 5, 6, 12].map((installment) => (
-                            <SelectItem key={installment} value={String(installment)}>
-                              {installment}x {installment === 1 ? 'à vista' : `de R$ ${(classPrice / installment).toFixed(2)}`}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </TabsContent>
-              
-              <TabsContent value="pix">
-                <div className="p-6 text-center">
-                  <div className="mb-4 text-lg font-medium">Pagamento com PIX</div>
-                  <div className="mx-auto w-48 h-48 bg-gray-200 flex items-center justify-center mb-4">
-                    QR Code do PIX
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Após finalizar a compra, você receberá o QR Code para pagamento.
-                  </p>
+                <div>
+                  <Label htmlFor="cvv">CVV</Label>
+                  <Input
+                    id="cvv"
+                    placeholder="123"
+                    {...register("cvv")}
+                  />
                 </div>
-              </TabsContent>
-              
-              <TabsContent value="bank_slip">
-                <div className="p-6 text-center">
-                  <div className="mb-4 text-lg font-medium">Pagamento com Boleto</div>
-                  <p className="mb-4">
-                    O boleto será gerado após a finalização da compra e enviado para o seu email.
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    O prazo para pagamento é de até 3 dias úteis. Sua matrícula será confirmada após a compensação.
-                  </p>
-                </div>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Resumo do Pedido</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span>Curso:</span>
-                <span className="font-medium">{className}</span>
               </div>
-              
-              <Separator />
-              
-              <div className="flex justify-between">
-                <span>Valor:</span>
-                <span className="font-medium">R$ {classPrice.toFixed(2)}</span>
-              </div>
-              
-              <div className="pt-4">
-                <FormField
-                  control={form.control}
-                  name="couponCode"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Cupom de Desconto</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione um cupom" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="">Sem cupom</SelectItem>
-                          {coupons.map((coupon) => (
-                            <SelectItem key={coupon.id} value={coupon.code}>
-                              {coupon.code} - {coupon.discount_type === 'percentage' 
-                                ? `${coupon.discount_value}% off` 
-                                : `R$ ${coupon.discount_value} off`}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              
-              <Separator className="my-4" />
-              
-              <div className="flex justify-between text-lg font-bold">
-                <span>Total:</span>
-                <span>R$ {classPrice.toFixed(2)}</span>
+              <div>
+                <Label htmlFor="installments">Parcelas</Label>
+                <select
+                  id="installments"
+                  className="w-full p-2 border rounded"
+                  {...register("installments", { valueAsNumber: true })}
+                >
+                  <option value={1}>1x sem juros</option>
+                  <option value={2}>2x sem juros</option>
+                  <option value={3}>3x sem juros</option>
+                  <option value={4}>4x sem juros</option>
+                  <option value={5}>5x sem juros</option>
+                  <option value={6}>6x sem juros</option>
+                </select>
               </div>
             </div>
-          </CardContent>
-        </Card>
-        
-        <FormField
-          control={form.control}
-          name="agreeTerms"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-              <FormControl>
-                <Checkbox 
-                  checked={field.value} 
-                  onCheckedChange={field.onChange} 
-                />
-              </FormControl>
-              <div className="space-y-1 leading-none">
-                <FormLabel>
-                  Concordo com os termos de uso e políticas de privacidade
-                </FormLabel>
-                <FormMessage />
-              </div>
-            </FormItem>
           )}
+
+          <div>
+            <Label htmlFor="couponCode">Cupom de Desconto</Label>
+            <Input
+              id="couponCode"
+              placeholder="Se você tem um cupom, digite aqui"
+              {...register("couponCode")}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="flex items-center space-x-2">
+        <Checkbox 
+          id="agreeTerms" 
+          {...register("agreeTerms")}
         />
-        
-        <Button 
-          type="submit" 
-          className="w-full" 
-          size="lg"
-          disabled={isProcessing}
-        >
-          {isProcessing ? 'Processando...' : 'Finalizar Compra'}
-        </Button>
-      </form>
-    </Form>
+        <Label htmlFor="agreeTerms">
+          Concordo com os termos e condições
+        </Label>
+      </div>
+      {errors.agreeTerms && (
+        <p className="text-sm text-red-500">{errors.agreeTerms.message}</p>
+      )}
+
+      <input type="hidden" {...register("classId")} value={classId} />
+
+      <Button type="submit" className="w-full" disabled={isProcessing}>
+        {isProcessing ? "Processando..." : "Finalizar Compra"}
+      </Button>
+    </form>
   );
 };
 

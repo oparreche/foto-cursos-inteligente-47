@@ -22,22 +22,25 @@ export async function findUserByEmail(email: string): Promise<string | undefined
   }
 }
 
+// Define a type for additional user data
+type UserAdditionalData = {
+  cpf: string;
+  birthDate: string;
+  phone: string;
+  address: string;
+  addressNumber: string;
+  addressComplement?: string;
+  neighborhood: string;
+  city: string;
+  state: string;
+  postalCode: string;
+};
+
 export async function createUser(
   email: string, 
   firstName: string, 
   lastName: string, 
-  additionalData: {
-    cpf: string;
-    birthDate: string;
-    phone: string;
-    address: string;
-    addressNumber: string;
-    addressComplement?: string;
-    neighborhood: string;
-    city: string;
-    state: string;
-    postalCode: string;
-  }
+  additionalData: UserAdditionalData
 ): Promise<string | undefined> {
   try {
     // Create new user account with auth

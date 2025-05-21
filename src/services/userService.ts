@@ -6,8 +6,8 @@ import { supabase } from '@/integrations/supabase/client';
  */
 export async function findUserByEmail(email: string): Promise<string | undefined> {
   try {
-    // Execute the query and store the result with basic typing
-    const result = await supabase
+    // Use explicit type annotation for the result to avoid deep type inference
+    const result: any = await supabase
       .from('profiles')
       .select('id')
       .eq('email', email)
@@ -55,8 +55,8 @@ export async function createUser(
     // Generate a UUID for the new profile
     const profileId = crypto.randomUUID();
     
-    // Execute the query and handle the result with basic typing
-    const result = await supabase
+    // Use explicit type annotation for the result to avoid deep type inference
+    const result: any = await supabase
       .from('profiles')
       .insert([{
         id: profileId,

@@ -22,13 +22,18 @@ export const useManualEnrollments = () => {
       if (error) throw new Error(error.message);
       
       // Formatar os dados para a interface EnrollmentWithDetails
-      const formattedData = data.map((item: any) => ({
-        ...item,
-        student_name: item.student?.email || 'Usuário não encontrado',
-        class_name: item.class ? `${item.class.course_name} - ${item.class.period} (${item.class.days})` : 'Turma não encontrada',
-        course_name: item.class?.course_name || 'Curso não encontrado',
-        coupon_code: item.coupon?.code || ''
-      }));
+      const formattedData = data.map((item: any) => {
+        // Tratamento seguro para acessar student.email
+        const studentEmail = item.student && 'email' in item.student ? item.student.email : null;
+        
+        return {
+          ...item,
+          student_name: studentEmail || 'Usuário não encontrado',
+          class_name: item.class ? `${item.class.course_name} - ${item.class.period} (${item.class.days})` : 'Turma não encontrada',
+          course_name: item.class?.course_name || 'Curso não encontrado',
+          coupon_code: item.coupon?.code || ''
+        };
+      });
       
       return formattedData as EnrollmentWithDetails[];
     },
@@ -57,7 +62,7 @@ export const useManualEnrollment = (id: string | undefined) => {
       
       // Tratamento seguro para acessar student.email com verificação de tipos
       const studentData = data.student as { email?: string } | null;
-      const student_name = studentData && studentData.email ? studentData.email : 'Usuário não encontrado';
+      const student_name = studentData && 'email' in studentData ? studentData.email : 'Usuário não encontrado';
       
       return {
         ...data,
@@ -94,11 +99,10 @@ export const useManualEnrollmentActions = () => {
         original_amount: typeof values.original_amount === 'string' 
           ? parseFloat(values.original_amount) 
           : values.original_amount,
-        discount_amount: values.discount_amount === undefined ? 0 : (
-          typeof values.discount_amount === 'string' && values.discount_amount !== '' 
+        discount_amount: values.discount_amount === undefined ? 0 : 
+          (typeof values.discount_amount === 'string' && values.discount_amount !== '') 
             ? parseFloat(values.discount_amount) 
-            : (typeof values.discount_amount === 'number' ? values.discount_amount : 0)
-        ),
+            : (typeof values.discount_amount === 'number' ? values.discount_amount : 0),
         notes: values.notes || '',
         created_by: user.id
       };

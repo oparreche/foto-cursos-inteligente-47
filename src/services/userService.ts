@@ -3,8 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 
 export async function findUserByEmail(email: string): Promise<string | undefined> {
   try {
-    // Using a simpler approach to type the response
-    const { data, error } = await supabase
+    // Use explicit any type to avoid TypeScript recursion issues
+    const { data, error }: { data: any, error: any } = await supabase
       .from('profiles')
       .select('id')
       .eq('email', email)

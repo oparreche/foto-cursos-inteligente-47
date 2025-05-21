@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -9,7 +8,7 @@ import CouponsTable from "./enrollments/CouponsTable";
 import EnrollmentForm from "./enrollments/EnrollmentForm";
 import EnrollmentsTable from "./enrollments/EnrollmentsTable";
 import { useDiscountCoupons, useDiscountCouponActions } from "@/hooks/useDiscountCoupons";
-import { useManualEnrollments, useManualEnrollmentActions } from "@/hooks/useManualEnrollments";
+import { useEnrollmentsList, useEnrollmentActions } from "@/hooks/enrollments";
 
 const EnrollmentManagement = () => {
   const [activeTab, setActiveTab] = useState("enrollments");
@@ -21,8 +20,8 @@ const EnrollmentManagement = () => {
   const { addCoupon } = useDiscountCouponActions();
 
   // Matrículas manuais
-  const { data: enrollments = [], isLoading: isLoadingEnrollments } = useManualEnrollments();
-  const { addEnrollment } = useManualEnrollmentActions();
+  const { data: enrollments = [], isLoading: isLoadingEnrollments } = useEnrollmentsList();
+  const { addEnrollment } = useEnrollmentActions();
 
   return (
     <div className="space-y-6">

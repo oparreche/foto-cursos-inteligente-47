@@ -3,16 +3,18 @@ import { supabase } from '@/integrations/supabase/client';
 
 export async function findUserByEmail(email: string): Promise<string | undefined> {
   try {
-    // Using a simpler approach with type assertions to prevent deep type instantiation
-    const { data, error } = await supabase
+    // Using explicit type definition to avoid deep type instantiation
+    type ProfileQueryResult = { data: { id: string } | null, error: any };
+    
+    const result = await supabase
       .from('profiles')
       .select('id')
       .eq('email', email)
       .limit(1)
-      .single();
+      .single() as ProfileQueryResult;
       
-    if (error) throw error;
-    return data?.id;
+    if (result.error) throw result.error;
+    return result.data?.id;
   } catch (error) {
     console.error('Error finding user by email:', error);
     return undefined;

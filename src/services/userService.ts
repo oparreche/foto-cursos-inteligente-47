@@ -9,19 +9,17 @@ interface ProfileResponse {
 
 export async function findUserByEmail(email: string): Promise<string | undefined> {
   try {
-    // Use explicit type casting to avoid deep type inference
-    const response = await supabase
+    // Explicitly cast the response to any to bypass complex type inference
+    const response: any = await supabase
       .from('profiles')
       .select('id')
       .eq('email', email)
       .limit(1)
       .single();
       
-    // Type cast response to our simplified interface
-    const typedResponse = response as ProfileResponse;
-    
-    if (typedResponse.error) throw typedResponse.error;
-    return typedResponse.data?.id;
+    // Now we can safely access properties without deep type inference
+    if (response.error) throw response.error;
+    return response.data?.id;
   } catch (error) {
     console.error('Error finding user by email:', error);
     return undefined;

@@ -19,7 +19,7 @@ export const useCouponActions = () => {
           code: values.code,
           description: values.description || null,
           discount_type: values.discount_type,
-          discount_value: typeof values.discount_value === 'string' 
+          discount_value: typeof values.discount_value === 'string' && values.discount_value !== '' 
             ? parseFloat(values.discount_value) 
             : values.discount_value,
           max_uses: values.max_uses !== undefined && values.max_uses !== '' 
@@ -30,6 +30,7 @@ export const useCouponActions = () => {
           valid_from: values.valid_from,
           valid_until: values.valid_until || null,
           is_active: values.is_active ?? true,
+          // Explicitly set course_id to null if empty or undefined
           course_id: values.course_id === null || values.course_id === undefined || values.course_id === '' 
             ? null 
             : values.course_id,
@@ -80,7 +81,7 @@ export const useCouponActions = () => {
         const parsedValues: any = { ...values };
         
         if (values.discount_value !== undefined) {
-          parsedValues.discount_value = typeof values.discount_value === 'string' 
+          parsedValues.discount_value = typeof values.discount_value === 'string' && values.discount_value !== ''
             ? parseFloat(values.discount_value) 
             : values.discount_value;
         }

@@ -39,9 +39,11 @@ const CouponFormCourseSelector: React.FC<CouponFormCourseSelectorProps> = ({ con
           <Select
             onValueChange={(value) => {
               console.log("Selected course value:", value);
+              // Convert "all_courses" to null for the database
               field.onChange(value === "all_courses" ? null : value);
             }}
-            value={field.value === null || field.value === undefined ? "all_courses" : field.value}
+            // Make sure we convert null/undefined values to "all_courses" for the UI
+            value={field.value === null || field.value === undefined || field.value === "" ? "all_courses" : field.value}
             disabled={isLoading}
           >
             <FormControl>

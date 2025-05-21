@@ -1,20 +1,25 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
-// Explicitly define the return type to avoid deep type inference
-type ProfileResult = {
+// Define simplified response types to avoid deep type inference
+interface ProfileData {
   id: string;
+}
+
+interface SupabaseResponse {
+  data: ProfileData | null;
+  error: any;
 }
 
 export async function findUserByEmail(email: string): Promise<string | undefined> {
   try {
-    // Use explicit type casting to avoid complex type inference
+    // Use type assertion to avoid complex type inference
     const { data, error } = await supabase
       .from('profiles')
       .select('id')
       .eq('email', email)
       .limit(1)
-      .single();
+      .single() as SupabaseResponse;
       
     if (error) throw error;
     return data?.id;

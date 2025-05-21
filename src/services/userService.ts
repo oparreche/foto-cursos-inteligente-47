@@ -7,7 +7,8 @@ export async function findUserByEmail(email: string): Promise<string | undefined
       .from('profiles')
       .select('id')
       .eq('email', email)
-      .maybeSingle();
+      .limit(1)
+      .single();
       
     if (error) throw error;
     return data?.id;
@@ -60,7 +61,8 @@ export async function createUser(
         postal_code: profileData.postalCode
       })
       .select('id')
-      .maybeSingle();
+      .limit(1)
+      .single();
     
     if (error) throw error;
     return data?.id;

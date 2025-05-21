@@ -42,15 +42,12 @@ export const usePaymentProcessing = () => {
       // 1. Verify if the user exists or register a new one
       let userId: string | undefined;
       
-      // Check if the user already exists by email - using maybeSingle to avoid possible infinite type error
-      const existingUserQuery = await supabase
+      // Check if the user already exists by email
+      const { data: existingUser, error: existingUserError } = await supabase
         .from('profiles')
         .select('id')
         .eq('email', values.email)
         .maybeSingle();
-      
-      const existingUserError = existingUserQuery.error;
-      const existingUser = existingUserQuery.data;
       
       if (existingUserError) {
         console.error('Error checking for existing user:', existingUserError);
@@ -61,7 +58,7 @@ export const usePaymentProcessing = () => {
         console.log('Existing user found:', userId);
       } else {
         // Create new user account
-        const authResult = await supabase.auth.signUp({
+        const { data: authData, error: authError } = await supabase.auth.signUp({
           email: values.email,
           password: Math.random().toString(36).slice(2, 10) + 'X1!', // Random secure password
           options: {
@@ -72,9 +69,6 @@ export const usePaymentProcessing = () => {
           }
         });
         
-        const authError = authResult.error;
-        const authData = authResult.data;
-        
         if (authError) throw new Error(`Authentication error: ${authError.message}`);
         
         userId = authData.user?.id;
@@ -82,7 +76,7 @@ export const usePaymentProcessing = () => {
         if (!userId) throw new Error('Failed to create user account');
         
         // Update complete profile information
-        const profileResult = await supabase
+        const { error: profileError } = await supabase
           .from('profiles')
           .update({
             first_name: values.firstName,
@@ -100,7 +94,6 @@ export const usePaymentProcessing = () => {
           })
           .eq('id', userId);
           
-        const profileError = profileResult.error;
         if (profileError) throw new Error(`Profile update error: ${profileError.message}`);
       }
       
@@ -112,15 +105,12 @@ export const usePaymentProcessing = () => {
       let couponId = null;
       
       if (values.couponCode) {
-        const couponResult = await supabase
+        const { data: coupon, error: couponError } = await supabase
           .from('discount_coupons')
           .select('*')
           .eq('code', values.couponCode)
           .maybeSingle();
           
-        const couponError = couponResult.error;
-        const coupon = couponResult.data;
-        
         if (couponError) {
           console.error('Error fetching coupon:', couponError);
         } else if (coupon) {
@@ -132,22 +122,19 @@ export const usePaymentProcessing = () => {
       }
       
       // Get class information
-      const classResult = await supabase
+      const { data: classData, error: classError } = await supabase
         .from('classes')
         .select('price')
         .eq('id', values.classId)
         .maybeSingle();
         
-      const classError = classResult.error;
-      const classData = classResult.data;
-      
       if (classError) throw new Error(`Error fetching class data: ${classError.message}`);
       if (!classData) throw new Error(`Class not found with ID: ${values.classId}`);
       
       const amount = parseFloat(classData.price);
       
       // Create transaction record
-      const transactionResult = await supabase
+      const { data: transaction, error: transactionError } = await supabase
         .from('payment_transactions')
         .insert({
           user_id: userId,
@@ -163,15 +150,12 @@ export const usePaymentProcessing = () => {
         .select()
         .single();
         
-      const transactionError = transactionResult.error;
-      const transaction = transactionResult.data;
-      
       if (transactionError) throw new Error(`Transaction error: ${transactionError.message}`);
       
       console.log('Transaction created:', transaction);
       
       // Create enrollment record after successful payment
-      const enrollmentResult = await supabase
+      const { error: enrollmentError } = await supabase
         .from('manual_enrollments')
         .insert({
           student_id: userId,
@@ -184,7 +168,6 @@ export const usePaymentProcessing = () => {
           created_by: userId // In this case, the student is creating their own enrollment
         });
         
-      const enrollmentError = enrollmentResult.error;
       if (enrollmentError) throw new Error(`Enrollment error: ${enrollmentError.message}`);
       
       toast.success('Matrícula realizada com sucesso!');

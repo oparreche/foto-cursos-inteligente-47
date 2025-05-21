@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { enrollmentSchema, EnrollmentFormData } from "@/types/enrollment";
-import { FormField } from "./FormField";
+import FormField from "./FormField";
 
 interface WaitlistFormProps {
   isWaitlist: boolean;

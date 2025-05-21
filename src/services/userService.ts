@@ -16,3 +16,54 @@ export async function findUserByEmail(email: string): Promise<string | undefined
     return undefined;
   }
 }
+
+// Add the createUser function
+export async function createUser(
+  email: string,
+  firstName: string,
+  lastName: string,
+  profileData: {
+    cpf?: string;
+    birthDate?: string;
+    phone?: string;
+    address?: string;
+    addressNumber?: string;
+    addressComplement?: string;
+    neighborhood?: string;
+    city?: string;
+    state?: string;
+    postalCode?: string;
+  }
+): Promise<string | undefined> {
+  try {
+    // First check if user already exists
+    const existingUserId = await findUserByEmail(email);
+    if (existingUserId) return existingUserId;
+    
+    // Create profile entry
+    const { data, error } = await supabase
+      .from('profiles')
+      .insert({
+        first_name: firstName,
+        last_name: lastName,
+        cpf: profileData.cpf,
+        birth_date: profileData.birthDate,
+        phone: profileData.phone,
+        address: profileData.address,
+        address_number: profileData.addressNumber,
+        address_complement: profileData.addressComplement,
+        neighborhood: profileData.neighborhood,
+        city: profileData.city,
+        state: profileData.state,
+        postal_code: profileData.postalCode
+      })
+      .select('id')
+      .single();
+    
+    if (error) throw error;
+    return data.id;
+  } catch (error) {
+    console.error('Error creating user:', error);
+    return undefined;
+  }
+}

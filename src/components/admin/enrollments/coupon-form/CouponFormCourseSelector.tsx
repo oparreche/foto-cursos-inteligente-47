@@ -34,8 +34,11 @@ const CouponFormCourseSelector: React.FC<CouponFormCourseSelectorProps> = ({ con
         <FormItem>
           <FormLabel>Curso Específico (opcional)</FormLabel>
           <Select
-            onValueChange={field.onChange}
-            defaultValue={field.value}
+            onValueChange={(value) => {
+              // Converte "all_courses" para null (aplicável a todos os cursos)
+              field.onChange(value === "all_courses" ? null : value);
+            }}
+            value={field.value || "all_courses"}
           >
             <FormControl>
               <SelectTrigger>

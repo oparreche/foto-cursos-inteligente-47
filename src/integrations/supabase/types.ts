@@ -399,6 +399,66 @@ export type Database = {
           },
         ]
       }
+      payment_transactions: {
+        Row: {
+          amount: number
+          card_brand: string | null
+          class_id: string | null
+          coupon_id: string | null
+          created_at: string | null
+          id: string
+          installments: number | null
+          last_four: string | null
+          payment_method: string
+          status: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          card_brand?: string | null
+          class_id?: string | null
+          coupon_id?: string | null
+          created_at?: string | null
+          id?: string
+          installments?: number | null
+          last_four?: string | null
+          payment_method: string
+          status: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          card_brand?: string | null
+          class_id?: string | null
+          coupon_id?: string | null
+          created_at?: string | null
+          id?: string
+          installments?: number | null
+          last_four?: string | null
+          payment_method?: string
+          status?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_transactions_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_transactions_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "discount_coupons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       photography_answers: {
         Row: {
           answer_text: string
@@ -457,33 +517,60 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address: string | null
+          address_complement: string | null
+          address_number: string | null
           avatar_url: string | null
+          birth_date: string | null
+          city: string | null
+          cpf: string | null
           created_at: string | null
           first_name: string | null
           id: string
           is_active: boolean | null
           last_name: string | null
+          neighborhood: string | null
           phone: string | null
+          postal_code: string | null
+          state: string | null
           updated_at: string | null
         }
         Insert: {
+          address?: string | null
+          address_complement?: string | null
+          address_number?: string | null
           avatar_url?: string | null
+          birth_date?: string | null
+          city?: string | null
+          cpf?: string | null
           created_at?: string | null
           first_name?: string | null
           id: string
           is_active?: boolean | null
           last_name?: string | null
+          neighborhood?: string | null
           phone?: string | null
+          postal_code?: string | null
+          state?: string | null
           updated_at?: string | null
         }
         Update: {
+          address?: string | null
+          address_complement?: string | null
+          address_number?: string | null
           avatar_url?: string | null
+          birth_date?: string | null
+          city?: string | null
+          cpf?: string | null
           created_at?: string | null
           first_name?: string | null
           id?: string
           is_active?: boolean | null
           last_name?: string | null
+          neighborhood?: string | null
           phone?: string | null
+          postal_code?: string | null
+          state?: string | null
           updated_at?: string | null
         }
         Relationships: []

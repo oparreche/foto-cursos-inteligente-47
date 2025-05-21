@@ -1,116 +1,160 @@
 
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Calendar, Clock, MapPin, Users, CheckCircle } from "lucide-react";
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { CalendarCheck, MapPin, Clock, Users, Calendar } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 interface ClassDetailsProps {
-  classData: {
-    startDate: string;
-    endDate: string;
-    days: string;
-    time: string;
-    location: string;
-    spotsAvailable: number;
-    totalSpots: number;
-    instructor: string;
-    price: string;
-    benefits: string[];
-    paymentMethods: string[];
-  };
+  id: string;
+  courseName: string;
+  courseSlug: string;
+  period: string;
+  days: string;
+  time: string;
+  location: string;
+  startDate: string;
+  endDate: string;
+  spotsAvailable: number;
+  price: string;
+  description?: string;
+  image?: string;
 }
 
-const ClassDetails = ({ classData }: ClassDetailsProps) => {
+const ClassDetails: React.FC<ClassDetailsProps> = ({
+  id,
+  courseName,
+  courseSlug,
+  period,
+  days,
+  time,
+  location,
+  startDate,
+  endDate,
+  spotsAvailable,
+  price,
+  description,
+  image,
+}) => {
+  const navigate = useNavigate();
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR');
+  };
+
+  // Handle enrollment - Navigate to checkout
+  const handleEnroll = () => {
+    navigate(`/checkout/${id}`);
+  };
+
   return (
-    <div className="lg:col-span-2">
-      <h2 className="text-2xl font-bold mb-6">Detalhes da turma</h2>
-      
-      <div className="bg-white rounded-xl shadow-sm border mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-purple" />
-              <div>
-                <p className="text-sm text-gray-500">Data de início</p>
-                <p className="font-medium">{classData.startDate}</p>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="md:col-span-2">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex justify-between items-start mb-4">
+              <h1 className="text-3xl font-bold">{courseName}</h1>
+              <Badge variant={spotsAvailable > 0 ? "default" : "destructive"}>
+                {spotsAvailable > 0 ? `${spotsAvailable} vagas` : 'Esgotado'}
+              </Badge>
+            </div>
+            
+            {image && (
+              <div className="mb-6">
+                <img 
+                  src={image} 
+                  alt={courseName} 
+                  className="w-full h-64 object-cover rounded-md" 
+                />
+              </div>
+            )}
+            
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold mb-2">Detalhes da Turma</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex items-center">
+                  <Calendar className="mr-2 h-5 w-5 text-muted-foreground" />
+                  <span>{period}</span>
+                </div>
+                <div className="flex items-center">
+                  <CalendarCheck className="mr-2 h-5 w-5 text-muted-foreground" />
+                  <span>{days}</span>
+                </div>
+                <div className="flex items-center">
+                  <Clock className="mr-2 h-5 w-5 text-muted-foreground" />
+                  <span>{time}</span>
+                </div>
+                <div className="flex items-center">
+                  <MapPin className="mr-2 h-5 w-5 text-muted-foreground" />
+                  <span>{location}</span>
+                </div>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-purple" />
-              <div>
-                <p className="text-sm text-gray-500">Data de término</p>
-                <p className="font-medium">{classData.endDate}</p>
+            
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold mb-2">Datas</h2>
+              <p>
+                <strong>Início:</strong> {formatDate(startDate)}
+              </p>
+              <p>
+                <strong>Término:</strong> {formatDate(endDate)}
+              </p>
+            </div>
+            
+            {description && (
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold mb-2">Descrição</h2>
+                <p className="text-gray-700">{description}</p>
               </div>
+            )}
+            
+            <div className="flex flex-col sm:flex-row gap-4 mt-6">
+              <Button asChild>
+                <Link to={`/courses/${courseSlug}`}>Ver Detalhes do Curso</Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link to="/classes">Ver Outras Turmas</Link>
+              </Button>
             </div>
-            <div className="flex items-center gap-2">
-              <Clock className="w-5 h-5 text-purple" />
-              <div>
-                <p className="text-sm text-gray-500">Horário</p>
-                <p className="font-medium">{classData.days}, {classData.time}</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-purple" />
-              <div>
-                <p className="text-sm text-gray-500">Local</p>
-                <p className="font-medium">{classData.location}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Users className="w-5 h-5 text-purple" />
-              <div>
-                <p className="text-sm text-gray-500">Vagas</p>
-                <p className="font-medium">
-                  {classData.spotsAvailable} disponíveis de {classData.totalSpots}
-                </p>
-              </div>
-            </div>
-            <div className="mt-1">
-              <Progress value={(classData.totalSpots - classData.spotsAvailable) / classData.totalSpots * 100} className="h-2" />
-            </div>
-          </div>
-        </div>
-        
-        <div className="border-t p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500">Professor(a)</p>
-              <p className="font-medium">{classData.instructor}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-sm text-gray-500">Investimento</p>
-              <p className="text-xl font-bold text-purple">{classData.price}</p>
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
       
-      {/* Benefits */}
-      <div className="mb-8">
-        <h3 className="text-xl font-bold mb-4">O curso inclui</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {classData.benefits.map((benefit: string, index: number) => (
-            <div key={index} className="flex items-start gap-2">
-              <CheckCircle className="h-5 w-5 text-purple mt-0.5" />
-              <span>{benefit}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-      
-      {/* Payment Methods */}
       <div>
-        <h3 className="text-xl font-bold mb-4">Formas de pagamento</h3>
-        <ul className="space-y-2">
-          {classData.paymentMethods.map((method: string, index: number) => (
-            <li key={index} className="flex items-start gap-2">
-              <CheckCircle className="h-5 w-5 text-purple mt-0.5" />
-              <span>{method}</span>
-            </li>
-          ))}
-        </ul>
+        <Card>
+          <CardContent className="p-6">
+            <h2 className="text-xl font-semibold mb-4">Inscrição</h2>
+            
+            <div className="mb-6">
+              <p className="text-2xl font-bold">R$ {price}</p>
+              <p className="text-sm text-muted-foreground">Investimento total</p>
+            </div>
+            
+            <div className="mb-6">
+              <div className="flex items-center mb-2">
+                <Users className="mr-2 h-5 w-5 text-muted-foreground" />
+                <span>
+                  <strong>{spotsAvailable}</strong> vagas disponíveis
+                </span>
+              </div>
+            </div>
+            
+            <Button 
+              className="w-full" 
+              size="lg" 
+              disabled={spotsAvailable <= 0}
+              onClick={handleEnroll}
+            >
+              {spotsAvailable > 0 ? 'Matricular-se' : 'Turma Esgotada'}
+            </Button>
+            
+            <div className="mt-4 text-sm text-muted-foreground">
+              <p>Ao se matricular, você concorda com os nossos termos e condições.</p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

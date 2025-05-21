@@ -2,13 +2,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { CheckoutFormValues } from '@/types/checkout';
 import { findUserByEmail, createUser } from '@/services/userService';
 import { validateCoupon } from '@/services/couponService';
 import { getClassDetails } from '@/services/classService';
 import { createTransaction, createEnrollment } from '@/services/paymentService';
-
-export { CheckoutFormValues } from '@/types/checkout';
+import type { CheckoutFormValues } from '@/types/checkout';
 
 export const usePaymentProcessing = () => {
   const [isProcessing, setIsProcessing] = useState(false);

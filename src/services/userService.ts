@@ -1,28 +1,18 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
-// Define simplified response types to avoid deep type inference
-interface ProfileData {
-  id: string;
-}
-
-interface SupabaseResponse {
-  data: ProfileData | null;
-  error: any;
-}
-
 export async function findUserByEmail(email: string): Promise<string | undefined> {
   try {
-    // Use type assertion to avoid complex type inference
-    const { data, error } = await supabase
+    // Use any type to bypass complex type inference
+    const response: any = await supabase
       .from('profiles')
       .select('id')
       .eq('email', email)
       .limit(1)
-      .single() as SupabaseResponse;
+      .single();
       
-    if (error) throw error;
-    return data?.id;
+    if (response.error) throw response.error;
+    return response.data?.id;
   } catch (error) {
     console.error('Error finding user by email:', error);
     return undefined;

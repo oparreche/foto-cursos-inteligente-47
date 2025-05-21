@@ -1,4 +1,3 @@
-
 import { User } from "@/components/admin/types";
 
 export type DiscountType = 'percentage' | 'fixed_amount';
@@ -65,3 +64,14 @@ export interface EnrollmentWithDetails extends ManualEnrollment {
   course_name?: string;
   coupon_code?: string;
 }
+
+import { z } from "zod";
+
+// Form validation schema
+export const enrollmentSchema = z.object({
+  name: z.string().min(3, { message: "Nome deve ter pelo menos 3 caracteres" }),
+  email: z.string().email({ message: "E-mail inválido" }),
+  phone: z.string().min(10, { message: "Telefone inválido" }),
+});
+
+export type EnrollmentFormData = z.infer<typeof enrollmentSchema>;

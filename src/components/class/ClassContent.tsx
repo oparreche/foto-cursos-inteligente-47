@@ -1,7 +1,7 @@
 
 import React from 'react';
 import ClassDetails from "@/components/class/ClassDetails";
-import EnrollmentForm from "@/components/class/EnrollmentForm";
+import EnrollmentForm from "@/components/class/enrollment/EnrollmentForm";
 
 interface ClassContentProps {
   classData: any;

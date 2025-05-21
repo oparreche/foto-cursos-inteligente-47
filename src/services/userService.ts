@@ -3,16 +3,16 @@ import { supabase } from '@/integrations/supabase/client';
 
 export async function findUserByEmail(email: string): Promise<string | undefined> {
   try {
-    // Use any to bypass the complex type inference
-    const response: any = await supabase
+    // Using a simpler approach with type assertions to prevent deep type instantiation
+    const { data, error } = await supabase
       .from('profiles')
       .select('id')
       .eq('email', email)
       .limit(1)
       .single();
       
-    if (response.error) throw response.error;
-    return response.data?.id;
+    if (error) throw error;
+    return data?.id;
   } catch (error) {
     console.error('Error finding user by email:', error);
     return undefined;

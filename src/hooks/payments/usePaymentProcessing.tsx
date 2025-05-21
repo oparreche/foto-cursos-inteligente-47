@@ -43,11 +43,15 @@ export const usePaymentProcessing = () => {
       let userId;
       
       // Check if the user already exists by email
-      const { data: existingUsers } = await supabase
+      const { data: existingUsers, error: existingUserError } = await supabase
         .from('profiles')
         .select('id')
         .eq('email', values.email)
-        .single();
+        .maybeSingle();
+      
+      if (existingUserError) {
+        console.error('Error checking for existing user:', existingUserError);
+      }
       
       if (existingUsers) {
         userId = existingUsers.id;
@@ -68,6 +72,8 @@ export const usePaymentProcessing = () => {
         if (authError) throw new Error(`Authentication error: ${authError.message}`);
         
         userId = authData.user?.id;
+        
+        if (!userId) throw new Error('Failed to create user account');
         
         // Update complete profile information
         const { error: profileError } = await supabase
@@ -168,7 +174,7 @@ export const usePaymentProcessing = () => {
       // Redirect to success page
       navigate('/checkout/success');
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Checkout error:', error);
       toast.error(`Erro no processo de pagamento: ${error.message}`);
     } finally {

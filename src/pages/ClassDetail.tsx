@@ -1,3 +1,4 @@
+
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import MainLayout from "@/components/layout/MainLayout";
@@ -293,7 +294,23 @@ const ClassDetail = () => {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             {/* Class Details */}
-            <ClassDetails classData={classData} />
+            <div className="lg:col-span-2">
+              <ClassDetails 
+                id={classData.id.toString()}
+                courseName={classData.courseName}
+                courseSlug={classData.courseSlug}
+                period={classData.period}
+                days={classData.days}
+                time={classData.time}
+                location={classData.location}
+                startDate={classData.startDate}
+                endDate={classData.endDate}
+                spotsAvailable={classData.spotsAvailable}
+                price={classData.price.replace('R$ ', '')}
+                description={classData.description}
+                image={classData.image}
+              />
+            </div>
             
             {/* Enrollment Form */}
             <div className="lg:col-span-1">

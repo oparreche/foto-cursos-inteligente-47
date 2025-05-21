@@ -20,6 +20,7 @@ interface ClassDetailsProps {
   price: string;
   description?: string;
   image?: string;
+  classData?: any; // Add classData as an optional prop
 }
 
 const ClassDetails: React.FC<ClassDetailsProps> = ({
@@ -36,6 +37,7 @@ const ClassDetails: React.FC<ClassDetailsProps> = ({
   price,
   description,
   image,
+  classData, // Add classData to destructuring
 }) => {
   const navigate = useNavigate();
 

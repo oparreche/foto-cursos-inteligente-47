@@ -43,6 +43,7 @@ function App() {
           <Route path="/quiz" element={<Quiz />} />
           <Route path="/finance" element={<Finance />} />
           <Route path="/student-area" element={<StudentArea />} />
+          <Route path="/area-do-aluno" element={<StudentArea />} />
           <Route path="/checkout/:classId" element={<Checkout />} />
           <Route path="/checkout/success" element={<CheckoutSuccess />} />
           <Route path="/nfse-test" element={<NFSeTest />} />

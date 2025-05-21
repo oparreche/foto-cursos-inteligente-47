@@ -56,7 +56,7 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/area-do-aluno" className="text-gray-300 hover:text-purple transition-colors">
+                <Link to="/student-area" className="text-gray-300 hover:text-purple transition-colors">
                   Área do Aluno
                 </Link>
               </li>

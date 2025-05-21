@@ -81,7 +81,7 @@ const Header = () => {
               Sobre
             </Link>
             <Link
-              to="/area-do-aluno"
+              to="/student-area"
               className="text-foreground/90 hover:text-foreground font-medium transition-colors"
             >
               <Button variant="outline" size="sm" className="flex items-center gap-1">
@@ -151,7 +151,7 @@ const Header = () => {
               Sobre
             </Link>
             <Link
-              to="/area-do-aluno"
+              to="/student-area"
               onClick={closeMenu}
               className="px-4 py-2 flex items-center space-x-2 bg-muted text-foreground rounded-md"
             >

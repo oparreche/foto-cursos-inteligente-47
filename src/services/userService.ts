@@ -43,7 +43,8 @@ export async function createUser(
     // Create profile entry
     const { data, error } = await supabase
       .from('profiles')
-      .insert({
+      .insert([{
+        email: email,
         first_name: firstName,
         last_name: lastName,
         cpf: profileData.cpf,
@@ -56,12 +57,12 @@ export async function createUser(
         city: profileData.city,
         state: profileData.state,
         postal_code: profileData.postalCode
-      })
+      }])
       .select('id')
-      .single();
+      .maybeSingle();
     
     if (error) throw error;
-    return data.id;
+    return data?.id;
   } catch (error) {
     console.error('Error creating user:', error);
     return undefined;

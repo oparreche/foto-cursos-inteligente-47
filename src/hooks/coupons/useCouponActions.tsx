@@ -19,9 +19,11 @@ export const useCouponActions = () => {
           code: values.code,
           description: values.description || null,
           discount_type: values.discount_type,
+          // Ensure discount_value is always a number
           discount_value: typeof values.discount_value === 'string' && values.discount_value !== '' 
             ? parseFloat(values.discount_value) 
-            : values.discount_value,
+            : (typeof values.discount_value === 'number' ? values.discount_value : 0),
+          // Handle max_uses
           max_uses: values.max_uses !== undefined && values.max_uses !== '' 
             ? (typeof values.max_uses === 'string' 
                 ? parseInt(values.max_uses) 
@@ -34,6 +36,7 @@ export const useCouponActions = () => {
           course_id: values.course_id === null || values.course_id === undefined || values.course_id === '' 
             ? null 
             : values.course_id,
+          // Handle minimum_purchase
           minimum_purchase: values.minimum_purchase !== undefined && values.minimum_purchase !== '' 
             ? (typeof values.minimum_purchase === 'string'
                 ? parseFloat(values.minimum_purchase) 
@@ -83,7 +86,7 @@ export const useCouponActions = () => {
         if (values.discount_value !== undefined) {
           parsedValues.discount_value = typeof values.discount_value === 'string' && values.discount_value !== ''
             ? parseFloat(values.discount_value) 
-            : values.discount_value;
+            : (typeof values.discount_value === 'number' ? values.discount_value : 0);
         }
         
         if (values.max_uses !== undefined) {

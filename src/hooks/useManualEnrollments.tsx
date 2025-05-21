@@ -24,7 +24,7 @@ export const useManualEnrollments = () => {
       // Formatar os dados para a interface EnrollmentWithDetails
       const formattedData = data.map((item: any) => {
         // Tratamento seguro para acessar student.email
-        const studentEmail = item.student && 'email' in item.student ? item.student.email : null;
+        const studentEmail = item.student && typeof item.student === 'object' && 'email' in item.student ? item.student.email : null;
         
         return {
           ...item,
@@ -62,7 +62,7 @@ export const useManualEnrollment = (id: string | undefined) => {
       
       // Tratamento seguro para acessar student.email com verificação de tipos
       const studentData = data.student as { email?: string } | null;
-      const student_name = studentData && 'email' in studentData ? studentData.email : 'Usuário não encontrado';
+      const student_name = studentData && typeof studentData === 'object' && 'email' in studentData ? studentData.email : 'Usuário não encontrado';
       
       return {
         ...data,
@@ -99,7 +99,7 @@ export const useManualEnrollmentActions = () => {
         original_amount: typeof values.original_amount === 'string' 
           ? parseFloat(values.original_amount) 
           : values.original_amount,
-        discount_amount: values.discount_amount === undefined ? 0 : 
+        discount_amount: typeof values.discount_amount === 'undefined' ? 0 : 
           (typeof values.discount_amount === 'string' && values.discount_amount !== '') 
             ? parseFloat(values.discount_amount) 
             : (typeof values.discount_amount === 'number' ? values.discount_amount : 0),

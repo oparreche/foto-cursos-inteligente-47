@@ -1,6 +1,6 @@
 
 import React, { useEffect } from "react";
-import { Tabs } from "@/components/ui/tabs";
+import { Tabs, TabsList } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { useAdminTabs } from "./tabs/useAdminTabs";
 import { TabTriggers } from "./tabs/TabTriggers";
@@ -56,7 +56,9 @@ const AdminTabs: React.FC<AdminTabsProps> = ({ userRole = "", showDiagnostics = 
         defaultValue={activeTab}
         className="w-full"
       >
-        <TabTriggers userRole={userRole} />
+        <TabsList className="mb-4 w-full flex flex-wrap gap-1">
+          <TabTriggers userRole={userRole} />
+        </TabsList>
         
         <Card>
           <TabHeaders />

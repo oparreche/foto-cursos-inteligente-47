@@ -10,6 +10,7 @@ import {
   DollarSign,
   GraduationCap
 } from "lucide-react";
+import React from "react";
 
 interface TabTriggersProps {
   userRole: string;

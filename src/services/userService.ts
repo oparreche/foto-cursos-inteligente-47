@@ -6,19 +6,18 @@ import { supabase } from '@/integrations/supabase/client';
  */
 export async function findUserByEmail(email: string): Promise<string | undefined> {
   try {
-    // Use any to break type inference chain
-    const result: any = await supabase
+    const { data, error } = await supabase
       .from('profiles')
       .select('id')
       .eq('email', email)
       .maybeSingle();
     
-    if (result.error) {
-      console.error('Error finding user by email:', result.error);
+    if (error) {
+      console.error('Error finding user by email:', error);
       return undefined;
     }
     
-    return result.data?.id;
+    return data?.id;
   } catch (error) {
     console.error('Error finding user by email:', error);
     return undefined;
@@ -53,8 +52,7 @@ export async function createUser(
     // Generate a UUID for the new profile
     const profileId = crypto.randomUUID();
     
-    // Use any to break type inference chain
-    const result: any = await supabase
+    const { error } = await supabase
       .from('profiles')
       .insert([{
         id: profileId,
@@ -71,11 +69,10 @@ export async function createUser(
         city: profileData.city,
         state: profileData.state,
         postal_code: profileData.postalCode
-      }])
-      .select();
+      }]);
     
-    if (result.error) {
-      console.error('Error creating user profile:', result.error);
+    if (error) {
+      console.error('Error creating user profile:', error);
       return undefined;
     }
     

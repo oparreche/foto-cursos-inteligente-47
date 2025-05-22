@@ -1,6 +1,16 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
+// Define a type for newsletter subscriber to avoid TypeScript errors
+type NewsletterSubscriber = {
+  id?: string;
+  email: string;
+  subscribed_at?: string;
+  unsubscribed_at?: string | null;
+  active?: boolean;
+  source?: string | null;
+}
+
 /**
  * Subscribe a user to the newsletter
  */
@@ -22,13 +32,15 @@ export async function subscribeToNewsletter(email: string): Promise<boolean> {
     if (existing) return true;
     
     // Otherwise create new subscription
+    const subscriber: NewsletterSubscriber = {
+      email,
+      subscribed_at: new Date().toISOString(),
+      active: true
+    };
+    
     const { error } = await supabase
       .from('newsletter_subscribers')
-      .insert([{
-        email,
-        subscribed_at: new Date().toISOString(),
-        active: true
-      }]);
+      .insert([subscriber]);
     
     if (error) {
       console.error('Error subscribing to newsletter:', error);
@@ -47,9 +59,14 @@ export async function subscribeToNewsletter(email: string): Promise<boolean> {
  */
 export async function unsubscribeFromNewsletter(email: string): Promise<boolean> {
   try {
+    const updates = {
+      active: false,
+      unsubscribed_at: new Date().toISOString()
+    };
+    
     const { error } = await supabase
       .from('newsletter_subscribers')
-      .update({ active: false, unsubscribed_at: new Date().toISOString() })
+      .update(updates)
       .eq('email', email);
     
     if (error) {

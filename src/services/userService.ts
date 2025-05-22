@@ -6,22 +6,21 @@ import { supabase } from '@/integrations/supabase/client';
  */
 export async function findUserByEmail(email: string): Promise<string | undefined> {
   try {
-    // Add explicit typing and avoid deeply nested type inference
-    const { data, error } = await supabase
+    // Perform the query without type inference
+    const queryResult = await supabase
       .from('profiles')
       .select('id')
       .eq('email', email)
-      .maybeSingle() as unknown as { 
-        data: { id: string } | null; 
-        error: any | null;
-      };
+      .maybeSingle();
     
-    if (error) {
-      console.error('Error finding user by email:', error);
+    // Manually handle the result
+    if (queryResult.error) {
+      console.error('Error finding user by email:', queryResult.error);
       return undefined;
     }
     
-    return data?.id;
+    // Return the ID if found
+    return queryResult.data?.id;
   } catch (error) {
     console.error('Error finding user by email:', error);
     return undefined;
@@ -56,8 +55,8 @@ export async function createUser(
     // Generate a UUID for the new profile
     const profileId = crypto.randomUUID();
     
-    // Add explicit typing to avoid deep type inference
-    const { error } = await supabase
+    // Perform the insert without type inference
+    const insertResult = await supabase
       .from('profiles')
       .insert([{
         id: profileId,
@@ -75,13 +74,10 @@ export async function createUser(
         state: profileData.state,
         postal_code: profileData.postalCode
       }])
-      .select() as unknown as {
-        data: any | null;
-        error: any | null;
-      };
+      .select();
     
-    if (error) {
-      console.error('Error creating user profile:', error);
+    if (insertResult.error) {
+      console.error('Error creating user profile:', insertResult.error);
       return undefined;
     }
     

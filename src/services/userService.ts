@@ -82,3 +82,130 @@ export async function createUser(
     return undefined;
   }
 }
+
+/**
+ * Retrieves a user profile by ID
+ */
+export async function getUserProfile(userId: string) {
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (error) {
+      console.error('Error fetching user profile:', error);
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    return null;
+  }
+}
+
+/**
+ * Updates a user profile
+ */
+export async function updateUserProfile(
+  userId: string,
+  profileData: {
+    firstName?: string;
+    lastName?: string;
+    cpf?: string;
+    birthDate?: string;
+    phone?: string;
+    address?: string;
+    addressNumber?: string;
+    addressComplement?: string;
+    neighborhood?: string;
+    city?: string;
+    state?: string;
+    postalCode?: string;
+  }
+) {
+  try {
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        first_name: profileData.firstName,
+        last_name: profileData.lastName,
+        cpf: profileData.cpf,
+        birth_date: profileData.birthDate,
+        phone: profileData.phone,
+        address: profileData.address,
+        address_number: profileData.addressNumber,
+        address_complement: profileData.addressComplement,
+        neighborhood: profileData.neighborhood,
+        city: profileData.city,
+        state: profileData.state,
+        postal_code: profileData.postalCode,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', userId);
+
+    if (error) {
+      console.error('Error updating user profile:', error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error updating user profile:', error);
+    return false;
+  }
+}
+
+/**
+ * Checks if a user has a specific role
+ */
+export async function checkUserRole(userId: string, role: string): Promise<boolean> {
+  try {
+    const { data, error } = await supabase
+      .from('user_roles')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('role', role)
+      .maybeSingle();
+      
+    if (error) {
+      console.error('Error checking user role:', error);
+      return false;
+    }
+    
+    return !!data;
+  } catch (error) {
+    console.error('Error checking user role:', error);
+    return false;
+  }
+}
+
+/**
+ * Assigns a role to a user
+ */
+export async function assignUserRole(userId: string, role: string): Promise<boolean> {
+  try {
+    // Check if the user already has this role
+    const hasRole = await checkUserRole(userId, role);
+    if (hasRole) return true;
+    
+    const { error } = await supabase
+      .from('user_roles')
+      .insert([{
+        user_id: userId,
+        role
+      }]);
+      
+    if (error) {
+      console.error('Error assigning role to user:', error);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error assigning role to user:', error);
+    return false;
+  }
+}

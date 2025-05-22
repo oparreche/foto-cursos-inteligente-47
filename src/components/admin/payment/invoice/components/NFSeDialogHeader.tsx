@@ -8,9 +8,14 @@ import { NFSeData } from "../types";
 interface NFSeDialogHeaderProps {
   nfseData: NFSeData;
   protocol?: string;
+  transactionId?: string;
 }
 
-export const NFSeDialogHeader: React.FC<NFSeDialogHeaderProps> = ({ nfseData, protocol }) => {
+export const NFSeDialogHeader: React.FC<NFSeDialogHeaderProps> = ({ 
+  nfseData, 
+  protocol,
+  transactionId
+}) => {
   return (
     <DialogHeader>
       <DialogTitle className="flex items-center gap-2">
@@ -20,8 +25,13 @@ export const NFSeDialogHeader: React.FC<NFSeDialogHeaderProps> = ({ nfseData, pr
       </DialogTitle>
       
       <div className="flex items-center justify-between mt-2">
-        <div>
+        <div className="space-y-1">
           <p className="text-sm font-medium">NFS-e #{nfseData.numeroLote}</p>
+          {transactionId && (
+            <p className="text-xs text-muted-foreground">
+              Transação ID: {transactionId}
+            </p>
+          )}
         </div>
         <TransactionStatusIndicator status={nfseData.status || 'completed'} type="nfse" />
       </div>

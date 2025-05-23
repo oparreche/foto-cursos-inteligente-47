@@ -1,6 +1,11 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
+import { Database } from '@/integrations/supabase/types';
+
+type Profile = Database['public']['Tables']['profiles']['Row'];
+type ProfileInsert = Database['public']['Tables']['profiles']['Insert'];
+type ProfileUpdate = Database['public']['Tables']['profiles']['Update'];
 
 /**
  * Finds a user by their email address
@@ -11,7 +16,7 @@ export async function findUserByEmail(email: string): Promise<string | undefined
       .from('profiles')
       .select('id')
       .eq('email', email)
-      .maybeSingle();
+      .maybeSingle<{ id: string }>();
     
     if (error) {
       console.error('Error finding user by email:', error);
@@ -54,7 +59,7 @@ export async function createUser(
     const profileId = crypto.randomUUID();
     
     // Define the profile data with explicit typing
-    const profileInsertData = {
+    const profileInsertData: ProfileInsert = {
       id: profileId,
       email,
       first_name: firstName,
@@ -96,7 +101,7 @@ export async function getUserProfile(userId: string) {
       .from('profiles')
       .select('*')
       .eq('id', userId)
-      .single();
+      .single<Profile>();
 
     if (error) {
       console.error('Error fetching user profile:', error);
@@ -132,7 +137,7 @@ export async function updateUserProfile(
 ) {
   try {
     // Define update data with explicit typing to avoid complex type inference
-    const updateData = {
+    const updateData: ProfileUpdate = {
       first_name: profileData.firstName,
       last_name: profileData.lastName,
       cpf: profileData.cpf,

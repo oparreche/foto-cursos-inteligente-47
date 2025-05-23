@@ -1,35 +1,56 @@
 
-import { useReceivables } from './useReceivables';
-import { usePayables } from './usePayables';
-import { useTransactions } from './useTransactions';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import { FinancialStats } from '@/types/finance';
 
-// Hook for financial calculations
+// Hook for fetching financial statistics
 export const useFinancialStats = () => {
-  const { data: receivables = [], isLoading: isLoadingReceivables } = useReceivables();
-  const { data: payables = [], isLoading: isLoadingPayables } = usePayables();
-  const { data: transactions = [], isLoading: isLoadingTransactions } = useTransactions();
-  
-  const isLoading = isLoadingReceivables || isLoadingPayables || isLoadingTransactions;
-  
-  // Calculate financial statistics
-  const stats: FinancialStats = {
-    totalReceivables: receivables.reduce((sum, item) => sum + parseFloat(String(item.amount)), 0),
-    totalPayables: payables.reduce((sum, item) => sum + parseFloat(String(item.amount)), 0),
-    pendingReceivables: receivables
-      .filter(item => item.status === 'pending')
-      .reduce((sum, item) => sum + parseFloat(String(item.amount)), 0),
-    pendingPayables: payables
-      .filter(item => item.status === 'pending')
-      .reduce((sum, item) => sum + parseFloat(String(item.amount)), 0),
-    currentBalance: transactions.reduce((sum, item) => {
-      const amount = parseFloat(String(item.amount));
-      if (item.type === 'income') return sum + amount;
-      if (item.type === 'expense') return sum - amount;
-      if (item.type === 'refund') return sum - amount; // Refund is also negative
-      return sum;
-    }, 0)
+  const fetchStats = async (): Promise<FinancialStats> => {
+    try {
+      // Get total receivables
+      const { data: receivables, error: receivablesError } = await supabase
+        .from('receivables')
+        .select('amount, status');
+      
+      if (receivablesError) throw receivablesError;
+      
+      // Get total payables
+      const { data: payables, error: payablesError } = await supabase
+        .from('payables')
+        .select('amount, status');
+      
+      if (payablesError) throw payablesError;
+
+      // Calculate statistics
+      const totalReceivables = receivables?.reduce((sum, item) => sum + parseFloat(item.amount.toString()), 0) || 0;
+      const totalPayables = payables?.reduce((sum, item) => sum + parseFloat(item.amount.toString()), 0) || 0;
+      const currentBalance = totalReceivables - totalPayables;
+      
+      const pendingReceivables = receivables
+        ?.filter(item => item.status === 'pending')
+        .reduce((sum, item) => sum + parseFloat(item.amount.toString()), 0) || 0;
+      
+      const pendingPayables = payables
+        ?.filter(item => item.status === 'pending')
+        .reduce((sum, item) => sum + parseFloat(item.amount.toString()), 0) || 0;
+
+      return {
+        totalReceivables,
+        totalPayables,
+        currentBalance,
+        pendingReceivables,
+        pendingPayables
+      };
+    } catch (error: any) {
+      console.error('Erro ao buscar estatísticas financeiras:', error);
+      toast.error('Erro ao carregar estatísticas financeiras');
+      throw error;
+    }
   };
   
-  return { stats, isLoading };
+  return useQuery({
+    queryKey: ['financialStats'],
+    queryFn: fetchStats,
+  });
 };

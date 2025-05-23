@@ -1,8 +1,20 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ClassItem, FormValues, convertFormToSupabase, convertSupabaseToClassItem } from "../types";
+import { ClassItem, FormValues, convertSupabaseToClassItem } from "../types";
 import { toast } from "sonner";
+
+interface ClassForSupabase {
+  course_id?: string;
+  course_name: string;
+  days: string;
+  period: string;
+  total_spots: number;
+  spots_available: number;
+  price: number;
+  is_active?: boolean;
+  id?: string;
+}
 
 export const useClassManagement = () => {
   const [classes, setClasses] = useState<ClassItem[]>([]);
@@ -26,7 +38,7 @@ export const useClassManagement = () => {
       const filtered = classes.filter(
         (cls) =>
           cls.courseName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          cls.instructor.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          cls.instructor?.toLowerCase().includes(searchTerm.toLowerCase()) ||
           cls.period.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredClasses(filtered);
@@ -58,6 +70,19 @@ export const useClassManagement = () => {
     }
   };
 
+  const convertFormToSupabase = (values: FormValues): ClassForSupabase => {
+    return {
+      course_id: values.courseId,
+      course_name: values.courseName,
+      days: values.days,
+      period: values.period,
+      total_spots: parseInt(values.totalSpots.toString(), 10),
+      spots_available: parseInt(values.availableSpots.toString(), 10),
+      price: parseFloat(values.price.toString()),
+      is_active: values.isActive
+    };
+  };
+
   const handleNewClass = () => {
     setCurrentClass(null);
     setIsEditing(false);
@@ -79,7 +104,7 @@ export const useClassManagement = () => {
         const { error } = await supabase
           .from("classes")
           .update(classData)
-          .eq("id", currentClass.id.toString());
+          .eq("id", currentClass.id);
 
         if (error) {
           throw error;
@@ -90,7 +115,7 @@ export const useClassManagement = () => {
         // Create new class
         const { error } = await supabase
           .from("classes")
-          .insert(classData);
+          .insert([classData]);
 
         if (error) {
           throw error;
@@ -107,13 +132,13 @@ export const useClassManagement = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm("Tem certeza que deseja excluir esta turma?")) {
       try {
         const { error } = await supabase
           .from("classes")
           .delete()
-          .eq("id", id.toString());
+          .eq("id", id);
 
         if (error) {
           throw error;

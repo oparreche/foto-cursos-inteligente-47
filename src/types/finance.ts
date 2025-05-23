@@ -14,7 +14,7 @@ export type ReceivableFormValues = {
   amount: number | string;
   customer: string;
   due_date: string;
-  status: 'pending' | 'paid' | 'overdue' | 'canceled';
+  status: 'pending' | 'received' | 'cancelled';
   category_id?: string;
   payment_date?: string | null;
 };
@@ -24,7 +24,7 @@ export type PayableFormValues = {
   amount: number | string;
   supplier: string;
   due_date: string;
-  status: 'pending' | 'paid' | 'overdue' | 'canceled';
+  status: 'pending' | 'paid' | 'cancelled';
   category_id?: string;
   payment_date?: string | null;
 };
@@ -40,7 +40,7 @@ export type TransactionFormValues = {
 };
 
 // Payment status
-export type PaymentStatus = 'pending' | 'paid' | 'overdue' | 'canceled';
+export type PaymentStatus = 'pending' | 'paid' | 'received' | 'cancelled' | 'overdue';
 
 // Transaction type
 export type TransactionType = 'income' | 'expense' | 'transfer' | 'refund';

@@ -21,7 +21,7 @@ export const useTransactionActions = () => {
       
       const { data, error } = await supabase
         .from('transactions')
-        .insert(parsedValues)
+        .insert([parsedValues])
         .select()
         .single();
       

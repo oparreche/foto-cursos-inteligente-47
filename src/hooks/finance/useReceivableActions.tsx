@@ -2,31 +2,27 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Receivable, ReceivableFormValues } from '@/types/finance';
+import { ReceivableFormValues } from '@/types/finance';
 
 // Hook for managing receivables
 export const useReceivableActions = () => {
   const queryClient = useQueryClient();
-  
+
   // Add receivable
   const addReceivable = useMutation({
     mutationFn: async (values: ReceivableFormValues) => {
-      // Ensure payment_date is null for pending accounts
-      const dataToInsert = values.status === 'paid' 
-        ? { ...values } 
-        : { ...values, payment_date: null };
-      
       // Ensure amount is a number
       const parsedValues = {
-        ...dataToInsert,
-        amount: typeof dataToInsert.amount === 'string' 
-          ? parseFloat(dataToInsert.amount) 
-          : dataToInsert.amount
+        ...values,
+        amount: typeof values.amount === 'string' 
+          ? parseFloat(values.amount) 
+          : values.amount,
+        payer: values.customer // Map customer to payer for database
       };
       
       const { data, error } = await supabase
         .from('receivables')
-        .insert(parsedValues)
+        .insert([parsedValues])
         .select()
         .single();
       
@@ -42,20 +38,17 @@ export const useReceivableActions = () => {
     }
   });
 
-  // Update receivable
-  const updateReceivable = useMutation({
-    mutationFn: async ({ id, values }: { id: string, values: Partial<Receivable> }) => {
-      // Ensure amount is a number if it's present in the values
-      const parsedValues = values.amount !== undefined ? {
-        ...values,
-        amount: typeof values.amount === 'string' 
-          ? parseFloat(values.amount) 
-          : values.amount
-      } : values;
+  // Update receivable status
+  const updateReceivableStatus = useMutation({
+    mutationFn: async ({ id, status, paymentDate }: { id: string, status: string, paymentDate?: string }) => {
+      const updateData: Record<string, any> = { status };
+      if (paymentDate) {
+        updateData.payment_date = paymentDate;
+      }
       
       const { data, error } = await supabase
         .from('receivables')
-        .update(parsedValues)
+        .update(updateData)
         .eq('id', id)
         .select()
         .single();
@@ -65,62 +58,10 @@ export const useReceivableActions = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['receivables'] });
-      toast.success('Conta a receber atualizada com sucesso!');
+      toast.success('Status da conta a receber atualizado com sucesso!');
     },
     onError: (error) => {
-      toast.error(`Erro ao atualizar conta a receber: ${error.message}`);
-    }
-  });
-
-  // Mark as paid
-  const markAsPaid = useMutation({
-    mutationFn: async ({ id, paymentDate = new Date() }: { id: string, paymentDate?: Date }) => {
-      const formattedDate = paymentDate.toISOString().split('T')[0];
-      
-      const { data: receivable, error: fetchError } = await supabase
-        .from('receivables')
-        .select('amount, description')
-        .eq('id', id)
-        .single();
-      
-      if (fetchError) throw new Error(fetchError.message);
-      
-      // Update status to paid
-      const { error: updateError } = await supabase
-        .from('receivables')
-        .update({ 
-          status: 'paid', 
-          payment_date: formattedDate 
-        })
-        .eq('id', id);
-      
-      if (updateError) throw new Error(updateError.message);
-      
-      // Record transaction
-      if (receivable) {
-        const { error: transactionError } = await supabase
-          .from('transactions')
-          .insert({
-            description: `Recebimento: ${receivable.description}`,
-            type: 'income',
-            amount: receivable.amount,
-            transaction_date: formattedDate,
-            reference_id: id,
-            reference_type: 'receivable'
-          });
-        
-        if (transactionError) throw new Error(transactionError.message);
-      }
-      
-      return { success: true };
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['receivables'] });
-      queryClient.invalidateQueries({ queryKey: ['transactions'] });
-      toast.success('Pagamento registrado com sucesso!');
-    },
-    onError: (error) => {
-      toast.error(`Erro ao registrar pagamento: ${error.message}`);
+      toast.error(`Erro ao atualizar status: ${error.message}`);
     }
   });
 
@@ -146,8 +87,7 @@ export const useReceivableActions = () => {
   
   return {
     addReceivable,
-    updateReceivable,
-    markAsPaid,
+    updateReceivableStatus,
     deleteReceivable
   };
 };

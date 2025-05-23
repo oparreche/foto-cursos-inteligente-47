@@ -8,15 +8,6 @@ export const getAIConfig = async (): Promise<AIConfig | null> => {
   try {
     console.log('Iniciando busca de configuração de IA');
     
-    type AISettingsResponse = {
-      id: string;
-      provider: string | null;
-      model: string | null;
-      api_key: string | null;
-      last_updated: string | null;
-      updated_by: string | null;
-    };
-    
     const { data, error } = await supabase.rpc('get_ai_settings');
       
     if (error) {
@@ -29,8 +20,8 @@ export const getAIConfig = async (): Promise<AIConfig | null> => {
       return null;
     }
     
-    // Convert the returned data to our AIConfig format with proper type casting
-    const record = data[0] as AISettingsResponse;
+    // Convert the returned data to our AIConfig format
+    const record = data[0];
     
     console.log('Configuração de IA carregada com sucesso:', {
       provider: record.provider,
@@ -40,7 +31,7 @@ export const getAIConfig = async (): Promise<AIConfig | null> => {
     
     return {
       provider: record.provider as 'openai' | 'perplexity' | null,
-      model: record.model as AIConfig['model'],
+      model: record.model as string,
       apiKey: record.api_key || '',
       lastUpdated: record.last_updated || undefined,
       updatedBy: record.updated_by || undefined
@@ -67,7 +58,7 @@ export const updateAIConfig = async (config: AIConfig): Promise<boolean> => {
     }
     
     // Use the database function for updating AI settings
-    const { error, data } = await supabase.rpc('update_ai_settings', {
+    const { error } = await supabase.rpc('update_ai_settings', {
       p_provider: config.provider,
       p_model: config.model,
       p_api_key: config.apiKey
@@ -79,7 +70,7 @@ export const updateAIConfig = async (config: AIConfig): Promise<boolean> => {
       return false;
     }
     
-    console.log('Configuração de IA atualizada com sucesso:', data);
+    console.log('Configuração de IA atualizada com sucesso');
     toast.success('Configurações de IA atualizadas com sucesso');
     return true;
   } catch (error) {

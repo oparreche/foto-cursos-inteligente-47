@@ -1,84 +1,127 @@
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
 
-// Define a type for newsletter subscriber
-type NewsletterSubscriber = {
-  id: string;
-  email: string;
-  subscribed_at: string;
-  unsubscribed_at: string | null;
-  active: boolean;
-  source: string | null;
-}
+import { supabase } from "@/integrations/supabase/client";
 
-/**
- * Subscribe a user to the newsletter
- */
-export async function subscribeToNewsletter(email: string): Promise<boolean> {
+// Function to subscribe a user to the newsletter
+export const subscribeToNewsletter = async (email: string, source: string = 'website') => {
   try {
-    // First check if already subscribed
-    const { data: existing, error: checkError } = await supabase
+    // Check if email already exists but is unsubscribed
+    const { data: existingSubscription } = await supabase
       .from('newsletter_subscribers')
-      .select('id')
+      .select('*')
+      .eq('email', email)
+      .single();
+
+    if (existingSubscription) {
+      if (existingSubscription.active) {
+        return {
+          success: true,
+          message: 'Este email já está inscrito na newsletter.',
+          alreadySubscribed: true
+        };
+      } else {
+        // Reactivate the subscription
+        const { error: updateError } = await supabase
+          .from('newsletter_subscribers')
+          .update({
+            active: true,
+            unsubscribed_at: null,
+            subscribed_at: new Date().toISOString()
+          })
+          .eq('id', existingSubscription.id);
+
+        if (updateError) {
+          throw updateError;
+        }
+
+        return {
+          success: true,
+          message: 'Inscrição na newsletter reativada com sucesso!',
+          reactivated: true
+        };
+      }
+    }
+
+    // Create a new subscription
+    const { error: insertError } = await supabase
+      .from('newsletter_subscribers')
+      .insert({
+        email,
+        source,
+        active: true
+      });
+
+    if (insertError) {
+      throw insertError;
+    }
+
+    return {
+      success: true,
+      message: 'Inscrição na newsletter realizada com sucesso!',
+      newSubscription: true
+    };
+  } catch (error: any) {
+    console.error('Error subscribing to newsletter:', error);
+    return {
+      success: false,
+      message: error.message || 'Ocorreu um erro ao processar sua inscrição.',
+      error
+    };
+  }
+};
+
+// Function to unsubscribe a user from the newsletter
+export const unsubscribeFromNewsletter = async (email: string) => {
+  try {
+    const { error } = await supabase
+      .from('newsletter_subscribers')
+      .update({
+        active: false,
+        unsubscribed_at: new Date().toISOString()
+      })
+      .eq('email', email);
+
+    if (error) {
+      throw error;
+    }
+
+    return {
+      success: true,
+      message: 'Inscrição na newsletter cancelada com sucesso!'
+    };
+  } catch (error: any) {
+    console.error('Error unsubscribing from newsletter:', error);
+    return {
+      success: false,
+      message: error.message || 'Ocorreu um erro ao cancelar sua inscrição.',
+      error
+    };
+  }
+};
+
+// Function to check if an email is subscribed to the newsletter
+export const checkSubscription = async (email: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('newsletter_subscribers')
+      .select('active')
       .eq('email', email)
       .maybeSingle();
-    
-    if (checkError) {
-      console.error('Error checking newsletter subscription:', checkError);
-      return false;
-    }
-    
-    // If already subscribed, return success
-    if (existing) return true;
-    
-    // Otherwise create new subscription
-    const subscriber: Omit<NewsletterSubscriber, 'id'> = {
-      email,
-      subscribed_at: new Date().toISOString(),
-      unsubscribed_at: null,
-      active: true,
-      source: 'Website'
-    };
-    
-    const { error } = await supabase
-      .from('newsletter_subscribers')
-      .insert([subscriber]);
-    
-    if (error) {
-      console.error('Error subscribing to newsletter:', error);
-      return false;
-    }
-    
-    return true;
-  } catch (error) {
-    console.error('Error subscribing to newsletter:', error);
-    return false;
-  }
-}
 
-/**
- * Unsubscribe a user from the newsletter
- */
-export async function unsubscribeFromNewsletter(email: string): Promise<boolean> {
-  try {
-    const updates = {
-      active: false,
-      unsubscribed_at: new Date().toISOString()
-    };
-    
-    const { error } = await supabase
-      .from('newsletter_subscribers')
-      .update(updates)
-      .eq('email', email);
-    
     if (error) {
-      console.error('Error unsubscribing from newsletter:', error);
-      return false;
+      throw error;
     }
-    
-    return true;
-  } catch (error) {
-    console.error('Error unsubscribing from newsletter:', error);
-    return false;
+
+    return {
+      success: true,
+      isSubscribed: data?.active === true,
+      subscription: data
+    };
+  } catch (error: any) {
+    console.error('Error checking newsletter subscription:', error);
+    return {
+      success: false,
+      message: error.message,
+      error
+    };
   }
-}
+};

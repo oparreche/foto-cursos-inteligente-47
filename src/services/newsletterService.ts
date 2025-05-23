@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -18,7 +19,7 @@ export async function subscribeToNewsletter(email: string): Promise<boolean> {
   try {
     // First check if already subscribed
     const { data: existing, error: checkError } = await supabase
-      .from('newsletter_subscribers')
+      .from('newsletter_subscribers' as any)
       .select('id')
       .eq('email', email)
       .maybeSingle();
@@ -39,8 +40,8 @@ export async function subscribeToNewsletter(email: string): Promise<boolean> {
     };
     
     const { error } = await supabase
-      .from('newsletter_subscribers')
-      .insert([subscriber]);
+      .from('newsletter_subscribers' as any)
+      .insert([subscriber as any]);
     
     if (error) {
       console.error('Error subscribing to newsletter:', error);
@@ -65,8 +66,8 @@ export async function unsubscribeFromNewsletter(email: string): Promise<boolean>
     };
     
     const { error } = await supabase
-      .from('newsletter_subscribers')
-      .update(updates)
+      .from('newsletter_subscribers' as any)
+      .update(updates as any)
       .eq('email', email);
     
     if (error) {

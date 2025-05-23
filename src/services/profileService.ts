@@ -61,7 +61,6 @@ export async function createUser(
     // Define the profile data with explicit typing
     const profileInsertData: ProfileInsert = {
       id: profileId,
-      email,
       first_name: firstName,
       last_name: lastName,
       cpf: profileData.cpf,

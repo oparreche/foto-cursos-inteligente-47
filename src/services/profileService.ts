@@ -17,7 +17,7 @@ export async function findUserByEmail(email: string): Promise<string | undefined
       .from('profiles')
       .select('id')
       .eq('email', email)
-      .single();
+      .single() as { data: { id: string } | null, error: any };
     
     if (error) {
       console.error('Error finding user by email:', error);

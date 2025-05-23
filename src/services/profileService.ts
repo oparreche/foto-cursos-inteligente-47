@@ -11,26 +11,26 @@ type ProfileUpdate = Database['public']['Tables']['profiles']['Update'];
  * Finds a user by their email address
  */
 export async function findUserByEmail(email: string): Promise<string | undefined> {
-  try {
+ // try {
     // Use explicit typing for the query response to avoid deep type instantiation
-    type QueryResponse = { id: string };
+ //   type QueryResponse = { id: string };
     
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('email', email)
-      .maybeSingle();
+ //   const { data, error } = await supabase
+ //     .from('profiles')
+ //     .select('id')
+ //     .eq('email', email)
+ //     .maybeSingle();
     
-    if (error) {
-      console.error('Error finding user by email:', error);
-      return undefined;
-    }
+ //   if (error) {
+ //     console.error('Error finding user by email:', error);
+ //     return undefined;
+ //   }
     
-    return data?.id;
-  } catch (error) {
-    console.error('Error finding user by email:', error);
-    return undefined;
-  }
+  //  return data?.id;
+ // } catch (error) {
+  //  console.error('Error finding user by email:', error);
+  //  return undefined;
+ // }
 }
 
 /**

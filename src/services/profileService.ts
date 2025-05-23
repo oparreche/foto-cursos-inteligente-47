@@ -1,5 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { User } from '@supabase/supabase-js';
 
 /**
  * Finds a user by their email address
@@ -52,24 +53,27 @@ export async function createUser(
     // Generate a UUID for the new profile
     const profileId = crypto.randomUUID();
     
+    // Define the profile data with explicit typing
+    const profileInsertData = {
+      id: profileId,
+      email,
+      first_name: firstName,
+      last_name: lastName,
+      cpf: profileData.cpf,
+      birth_date: profileData.birthDate,
+      phone: profileData.phone,
+      address: profileData.address,
+      address_number: profileData.addressNumber,
+      address_complement: profileData.addressComplement,
+      neighborhood: profileData.neighborhood,
+      city: profileData.city,
+      state: profileData.state,
+      postal_code: profileData.postalCode
+    };
+    
     const { error } = await supabase
       .from('profiles')
-      .insert([{
-        id: profileId,
-        email,
-        first_name: firstName,
-        last_name: lastName,
-        cpf: profileData.cpf,
-        birth_date: profileData.birthDate,
-        phone: profileData.phone,
-        address: profileData.address,
-        address_number: profileData.addressNumber,
-        address_complement: profileData.addressComplement,
-        neighborhood: profileData.neighborhood,
-        city: profileData.city,
-        state: profileData.state,
-        postal_code: profileData.postalCode
-      }]);
+      .insert([profileInsertData]);
     
     if (error) {
       console.error('Error creating user profile:', error);
@@ -127,23 +131,26 @@ export async function updateUserProfile(
   }
 ) {
   try {
+    // Define update data with explicit typing to avoid complex type inference
+    const updateData = {
+      first_name: profileData.firstName,
+      last_name: profileData.lastName,
+      cpf: profileData.cpf,
+      birth_date: profileData.birthDate,
+      phone: profileData.phone,
+      address: profileData.address,
+      address_number: profileData.addressNumber,
+      address_complement: profileData.addressComplement,
+      neighborhood: profileData.neighborhood,
+      city: profileData.city,
+      state: profileData.state,
+      postal_code: profileData.postalCode,
+      updated_at: new Date().toISOString()
+    };
+
     const { error } = await supabase
       .from('profiles')
-      .update({
-        first_name: profileData.firstName,
-        last_name: profileData.lastName,
-        cpf: profileData.cpf,
-        birth_date: profileData.birthDate,
-        phone: profileData.phone,
-        address: profileData.address,
-        address_number: profileData.addressNumber,
-        address_complement: profileData.addressComplement,
-        neighborhood: profileData.neighborhood,
-        city: profileData.city,
-        state: profileData.state,
-        postal_code: profileData.postalCode,
-        updated_at: new Date().toISOString()
-      })
+      .update(updateData)
       .eq('id', userId);
 
     if (error) {

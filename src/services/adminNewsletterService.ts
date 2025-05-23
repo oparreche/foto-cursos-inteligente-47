@@ -1,7 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
-type NewsletterSubscriber = {
+export type NewsletterSubscriber = {
   id: string;
   email: string;
   subscribed_at: string;
@@ -16,7 +16,7 @@ type NewsletterSubscriber = {
 export async function getNewsletterSubscribers(): Promise<NewsletterSubscriber[]> {
   try {
     const { data, error } = await supabase
-      .from('newsletter_subscribers' as any)
+      .from('newsletter_subscribers')
       .select('*')
       .order('subscribed_at', { ascending: false });
     
@@ -25,7 +25,7 @@ export async function getNewsletterSubscribers(): Promise<NewsletterSubscriber[]
       return [];
     }
     
-    return data as NewsletterSubscriber[];
+    return data || [];
   } catch (error) {
     console.error('Error fetching newsletter subscribers:', error);
     return [];
@@ -58,7 +58,7 @@ export function exportSubscribersToCSV(subscribers: NewsletterSubscriber[]): str
 export async function deleteNewsletterSubscriber(id: string): Promise<boolean> {
   try {
     const { error } = await supabase
-      .from('newsletter_subscribers' as any)
+      .from('newsletter_subscribers')
       .delete()
       .eq('id', id);
     

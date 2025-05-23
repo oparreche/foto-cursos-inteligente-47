@@ -1,15 +1,14 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-// Define a type for newsletter subscriber to avoid TypeScript errors
+// Define a type for newsletter subscriber
 type NewsletterSubscriber = {
-  id?: string;
+  id: string;
   email: string;
-  subscribed_at?: string;
-  unsubscribed_at?: string | null;
-  active?: boolean;
-  source?: string | null;
+  subscribed_at: string;
+  unsubscribed_at: string | null;
+  active: boolean;
+  source: string | null;
 }
 
 /**
@@ -19,7 +18,7 @@ export async function subscribeToNewsletter(email: string): Promise<boolean> {
   try {
     // First check if already subscribed
     const { data: existing, error: checkError } = await supabase
-      .from('newsletter_subscribers' as any)
+      .from('newsletter_subscribers')
       .select('id')
       .eq('email', email)
       .maybeSingle();
@@ -33,15 +32,17 @@ export async function subscribeToNewsletter(email: string): Promise<boolean> {
     if (existing) return true;
     
     // Otherwise create new subscription
-    const subscriber: NewsletterSubscriber = {
+    const subscriber: Omit<NewsletterSubscriber, 'id'> = {
       email,
       subscribed_at: new Date().toISOString(),
-      active: true
+      unsubscribed_at: null,
+      active: true,
+      source: 'Website'
     };
     
     const { error } = await supabase
-      .from('newsletter_subscribers' as any)
-      .insert([subscriber as any]);
+      .from('newsletter_subscribers')
+      .insert([subscriber]);
     
     if (error) {
       console.error('Error subscribing to newsletter:', error);
@@ -66,8 +67,8 @@ export async function unsubscribeFromNewsletter(email: string): Promise<boolean>
     };
     
     const { error } = await supabase
-      .from('newsletter_subscribers' as any)
-      .update(updates as any)
+      .from('newsletter_subscribers')
+      .update(updates)
       .eq('email', email);
     
     if (error) {

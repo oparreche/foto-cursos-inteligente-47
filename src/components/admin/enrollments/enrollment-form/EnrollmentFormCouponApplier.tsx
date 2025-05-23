@@ -1,134 +1,166 @@
 
 import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useQuery } from '@tanstack/react-query';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { useDiscountCouponActions } from '@/hooks/useDiscountCoupons';
 import { ManualEnrollmentFormValues } from '@/types/enrollment';
 
-const EnrollmentFormCouponApplier: React.FC = () => {
-  const [couponCode, setCouponCode] = useState("");
-  const form = useFormContext<ManualEnrollmentFormValues>();
-  
-  // Buscar cupons de desconto disponíveis
-  const { data: coupons } = useQuery({
-    queryKey: ['active_coupons'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('discount_coupons')
-        .select('*')
-        .eq('is_active', true)
-        .lte('valid_from', new Date().toISOString())
-        .or(`valid_until.is.null,valid_until.gte.${new Date().toISOString()}`)
-        .order('code');
-      
-      if (error) throw new Error(error.message);
-      return data;
-    }
-  });
+interface Coupon {
+  id: string;
+  code: string;
+  discount_type: string;
+  discount_value: number;
+  course_id: string | null;
+}
 
-  // Usar a mutation de verificação de cupom
-  const { verifyCoupon } = useDiscountCouponActions();
+interface Class {
+  id: string;
+  course_id: string;
+  course_name: string;
+}
+
+const EnrollmentFormCouponApplier = () => {
+  const [couponCode, setCouponCode] = useState('');
+  const [verifying, setVerifying] = useState(false);
+  const { watch, setValue, getValues } = useFormContext<ManualEnrollmentFormValues>();
   
-  // Função para calcular o desconto baseado no cupom
-  const calculateDiscount = (originalAmount: number, coupon: any) => {
-    let discountValue = 0;
-    
-    if (coupon.discount_type === 'percentage') {
-      discountValue = (originalAmount * coupon.discount_value) / 100;
-    } else {
-      discountValue = coupon.discount_value;
+  const classId = watch('class_id');
+  const originalAmount = watch('original_amount');
+  
+  const verifyCoupon = async () => {
+    if (!couponCode.trim()) {
+      toast.error('Insira um cupom para verificar');
+      return;
     }
     
-    // Garantir que o desconto não seja maior que o valor original
-    discountValue = Math.min(discountValue, originalAmount);
+    if (!classId) {
+      toast.error('Selecione uma turma primeiro');
+      return;
+    }
     
-    form.setValue('discount_amount', discountValue);
-    form.setValue('payment_amount', originalAmount - discountValue);
-    form.setValue('coupon_id', coupon.id);
-  };
-
-  // Função para verificar e aplicar um cupom
-  const handleApplyCoupon = async () => {
-    if (!couponCode.trim()) return;
+    setVerifying(true);
     
     try {
-      const originalAmount = parseFloat(form.getValues('original_amount')?.toString() || '0');
-      const selectedClassId = form.getValues('class_id');
+      // Primeiro, buscar o cupom
+      const { data: couponData, error: couponError } = await supabase
+        .from('discount_coupons')
+        .select('*')
+        .eq('code', couponCode)
+        .eq('is_active', true)
+        .single();
       
-      if (!originalAmount || !selectedClassId) {
-        alert('Selecione uma turma antes de aplicar um cupom');
+      if (couponError || !couponData) {
+        toast.error('Cupom não encontrado ou inválido');
         return;
       }
       
-      // Encontrar o curso associado à turma
-      let courseId = '';
-      if (selectedClassId) {
-        const { data, error } = await supabase
+      // Tipagem segura para o cupom
+      const coupon = couponData as unknown as Coupon;
+      
+      // Verificar validade do cupom
+      const now = new Date();
+      const validFrom = new Date(couponData.valid_from);
+      const validUntil = couponData.valid_until ? new Date(couponData.valid_until) : null;
+      
+      if (now < validFrom || (validUntil && now > validUntil)) {
+        toast.error('Cupom fora do período de validade');
+        return;
+      }
+      
+      // Se o cupom for específico para um curso, verificar se é aplicável
+      if (coupon.course_id) {
+        // Buscar a turma para verificar o curso
+        const { data: classData, error: classError } = await supabase
           .from('classes')
-          .select('course_name')
-          .eq('id', selectedClassId)
+          .select('course_id, course_name')
+          .eq('id', classId)
           .single();
-          
-        if (!error && data) {
-          // Precisamos buscar o course_id baseado no nome do curso
-          const { data: courseData, error: courseError } = await supabase
-            .from('courses')
-            .select('id')
-            .eq('name', data.course_name)
-            .single();
-          
-          if (!courseError && courseData) {
-            courseId = courseData.id;
-          }
+        
+        if (classError || !classData) {
+          toast.error('Erro ao verificar a turma');
+          return;
+        }
+        
+        // Tipagem segura para a classe
+        const classInfo = classData as unknown as Class;
+        
+        if (classInfo.course_id !== coupon.course_id) {
+          toast.error(`Este cupom é válido apenas para o curso: ${classData.course_name}`);
+          return;
         }
       }
       
-      // Verificar o cupom
-      const couponResult = await verifyCoupon.mutateAsync({
-        code: couponCode,
-        courseId: courseId || undefined,
-        amount: originalAmount
-      });
-      
-      // Aplicar o desconto
-      if (couponResult) {
-        calculateDiscount(originalAmount, couponResult);
+      // Calcular o valor do desconto
+      let discountAmount = 0;
+      if (coupon.discount_type === 'percentage') {
+        discountAmount = (parseFloat(String(originalAmount)) * parseFloat(String(coupon.discount_value))) / 100;
+      } else {
+        discountAmount = parseFloat(String(coupon.discount_value));
       }
-    } catch (error: any) {
-      alert(error.message || 'Erro ao aplicar o cupom');
+      
+      // Atualizar o formulário
+      setValue('coupon_id', coupon.id);
+      setValue('discount_amount', discountAmount);
+      setValue('payment_amount', parseFloat(String(originalAmount)) - discountAmount);
+      
+      toast.success('Cupom aplicado com sucesso!');
+    } catch (error) {
+      console.error('Erro ao verificar cupom:', error);
+      toast.error('Erro ao verificar o cupom');
+    } finally {
+      setVerifying(false);
     }
   };
 
-  return (
-    <div className="border p-4 rounded-md">
-      <h3 className="font-medium mb-3">Aplicar Cupom de Desconto</h3>
-      
-      <div className="flex gap-2 mb-4">
-        <Input
-          placeholder="Código do cupom"
-          value={couponCode}
-          onChange={(e) => setCouponCode(e.target.value)}
-          disabled={!form.watch('class_id') || !form.watch('original_amount')}
-        />
-        <Button 
-          type="button" 
-          onClick={handleApplyCoupon}
-          variant="secondary"
-          disabled={!couponCode.trim() || !form.watch('class_id') || !form.watch('original_amount')}
-        >
-          Aplicar
-        </Button>
-      </div>
+  const removeCoupon = () => {
+    setValue('coupon_id', undefined);
+    setValue('discount_amount', 0);
+    setValue('payment_amount', parseFloat(String(originalAmount)));
+    setCouponCode('');
+    toast.success('Cupom removido');
+  };
 
-      {/* Exibir cupom aplicado */}
-      {form.watch('coupon_id') && (
-        <div className="text-sm">
-          <p className="font-medium">Cupom aplicado: {coupons?.find(c => c.id === form.watch('coupon_id'))?.code}</p>
+  const appliedCouponId = watch('coupon_id');
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+        <div className="space-y-2 md:col-span-2">
+          <Label htmlFor="coupon">Cupom de Desconto</Label>
+          <Input
+            id="coupon"
+            value={couponCode}
+            onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+            placeholder="Insira o código do cupom"
+            disabled={!!appliedCouponId || verifying}
+            className="uppercase"
+          />
         </div>
-      )}
+        <div>
+          {!appliedCouponId ? (
+            <Button 
+              type="button" 
+              onClick={verifyCoupon}
+              disabled={verifying || !couponCode.trim() || !classId} 
+              className="w-full"
+            >
+              {verifying ? 'Verificando...' : 'Verificar Cupom'}
+            </Button>
+          ) : (
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={removeCoupon}
+              className="w-full"
+            >
+              Remover Cupom
+            </Button>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

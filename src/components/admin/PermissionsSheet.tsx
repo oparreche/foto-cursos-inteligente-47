@@ -23,17 +23,35 @@ const PermissionsSheet = ({ userRole }: PermissionsSheetProps) => {
 
   const fetchPermissions = async () => {
     try {
-      // First convert to unknown, then to Permission[] to satisfy TypeScript
+      // Use tipo explícito para corrigir erros de tipagem
+      type RolePermission = {
+        role: string;
+        module: string;
+        can_view: boolean;
+        can_create: boolean;
+        can_edit: boolean;
+        can_delete: boolean;
+      };
+      
       const { data, error } = await supabase
-        .from('role_permissions' as any)
+        .from('role_permissions')
         .select('*')
         .order('role', { ascending: true })
         .order('module', { ascending: true });
 
       if (error) throw error;
       
-      // Properly assert the type by first casting to unknown
-      setPermissions((data as unknown) as Permission[] || []);
+      // Conversão segura de tipos
+      const typedData: Permission[] = (data || []).map(item => ({
+        role: (item as RolePermission).role,
+        module: (item as RolePermission).module,
+        can_view: (item as RolePermission).can_view,
+        can_create: (item as RolePermission).can_create,
+        can_edit: (item as RolePermission).can_edit,
+        can_delete: (item as RolePermission).can_delete
+      }));
+      
+      setPermissions(typedData);
     } catch (err: any) {
       console.error("Erro ao carregar permissões:", err);
       toast.error("Erro ao carregar permissões");
@@ -44,15 +62,14 @@ const PermissionsSheet = ({ userRole }: PermissionsSheetProps) => {
 
   const updatePermission = async (permission: Permission) => {
     try {
-      // Use type assertion to bypass TypeScript's type checking
       const { error } = await supabase
-        .from('role_permissions' as any)
+        .from('role_permissions')
         .update({
           can_view: permission.can_view,
           can_create: permission.can_create,
           can_edit: permission.can_edit,
           can_delete: permission.can_delete
-        } as any)
+        })
         .eq('role', permission.role)
         .eq('module', permission.module);
 

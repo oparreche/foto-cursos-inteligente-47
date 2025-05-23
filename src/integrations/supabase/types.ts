@@ -9,13 +9,417 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      ai_settings: {
+        Row: {
+          api_key: string | null
+          id: string
+          last_updated: string | null
+          model: string | null
+          provider: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          api_key?: string | null
+          id?: string
+          last_updated?: string | null
+          model?: string | null
+          provider?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          api_key?: string | null
+          id?: string
+          last_updated?: string | null
+          model?: string | null
+          provider?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      blog_posts: {
+        Row: {
+          author_id: string | null
+          categories: string[] | null
+          content: string | null
+          created_at: string | null
+          excerpt: string | null
+          featured_image: string | null
+          id: string
+          published_at: string | null
+          slug: string
+          status: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          author_id?: string | null
+          categories?: string[] | null
+          content?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          featured_image?: string | null
+          id?: string
+          published_at?: string | null
+          slug: string
+          status?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          author_id?: string | null
+          categories?: string[] | null
+          content?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          featured_image?: string | null
+          id?: string
+          published_at?: string | null
+          slug?: string
+          status?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      classes: {
+        Row: {
+          course_id: string | null
+          course_name: string
+          days: string
+          id: string
+          is_active: boolean | null
+          period: string
+          price: number
+          spots_available: number
+          total_spots: number
+        }
+        Insert: {
+          course_id?: string | null
+          course_name: string
+          days: string
+          id?: string
+          is_active?: boolean | null
+          period: string
+          price?: number
+          spots_available?: number
+          total_spots?: number
+        }
+        Update: {
+          course_id?: string | null
+          course_name?: string
+          days?: string
+          id?: string
+          is_active?: boolean | null
+          period?: string
+          price?: number
+          spots_available?: number
+          total_spots?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "classes_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      courses: {
+        Row: {
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          price: number | null
+          slug: string
+        }
+        Insert: {
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          price?: number | null
+          slug: string
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          price?: number | null
+          slug?: string
+        }
+        Relationships: []
+      }
+      discount_coupons: {
+        Row: {
+          code: string
+          course_id: string | null
+          created_at: string | null
+          created_by: string | null
+          current_uses: number | null
+          description: string | null
+          discount_type: string
+          discount_value: number
+          id: string
+          is_active: boolean | null
+          max_uses: number | null
+          valid_from: string
+          valid_until: string | null
+        }
+        Insert: {
+          code: string
+          course_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          current_uses?: number | null
+          description?: string | null
+          discount_type: string
+          discount_value: number
+          id?: string
+          is_active?: boolean | null
+          max_uses?: number | null
+          valid_from: string
+          valid_until?: string | null
+        }
+        Update: {
+          code?: string
+          course_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          current_uses?: number | null
+          description?: string | null
+          discount_type?: string
+          discount_value?: number
+          id?: string
+          is_active?: boolean | null
+          max_uses?: number | null
+          valid_from?: string
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discount_coupons_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      manual_enrollments: {
+        Row: {
+          class_id: string
+          coupon_id: string | null
+          created_by: string | null
+          discount_amount: number | null
+          enrollment_date: string | null
+          id: string
+          notes: string | null
+          original_amount: number
+          payment_amount: number
+          payment_status: string
+          student_id: string
+        }
+        Insert: {
+          class_id: string
+          coupon_id?: string | null
+          created_by?: string | null
+          discount_amount?: number | null
+          enrollment_date?: string | null
+          id?: string
+          notes?: string | null
+          original_amount: number
+          payment_amount: number
+          payment_status?: string
+          student_id: string
+        }
+        Update: {
+          class_id?: string
+          coupon_id?: string | null
+          created_by?: string | null
+          discount_amount?: number | null
+          enrollment_date?: string | null
+          id?: string
+          notes?: string | null
+          original_amount?: number
+          payment_amount?: number
+          payment_status?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manual_enrollments_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manual_enrollments_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "discount_coupons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          address: string | null
+          address_complement: string | null
+          address_number: string | null
+          birth_date: string | null
+          city: string | null
+          cpf: string | null
+          created_at: string | null
+          email: string | null
+          first_name: string | null
+          id: string
+          last_name: string | null
+          neighborhood: string | null
+          phone: string | null
+          postal_code: string | null
+          state: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          address_complement?: string | null
+          address_number?: string | null
+          birth_date?: string | null
+          city?: string | null
+          cpf?: string | null
+          created_at?: string | null
+          email?: string | null
+          first_name?: string | null
+          id: string
+          last_name?: string | null
+          neighborhood?: string | null
+          phone?: string | null
+          postal_code?: string | null
+          state?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          address_complement?: string | null
+          address_number?: string | null
+          birth_date?: string | null
+          city?: string | null
+          cpf?: string | null
+          created_at?: string | null
+          email?: string | null
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          neighborhood?: string | null
+          phone?: string | null
+          postal_code?: string | null
+          state?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      role_permissions: {
+        Row: {
+          can_create: boolean
+          can_delete: boolean
+          can_edit: boolean
+          can_view: boolean
+          module: string
+          role: string
+        }
+        Insert: {
+          can_create?: boolean
+          can_delete?: boolean
+          can_edit?: boolean
+          can_view?: boolean
+          module: string
+          role: string
+        }
+        Update: {
+          can_create?: boolean
+          can_delete?: boolean
+          can_edit?: boolean
+          can_view?: boolean
+          module?: string
+          role?: string
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          amount: number
+          created_at: string | null
+          description: string
+          id: string
+          reference_id: string | null
+          reference_type: string | null
+          transaction_date: string
+          type: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          description: string
+          id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          transaction_date: string
+          type: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          description?: string
+          id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          transaction_date?: string
+          type?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          role: string
+          user_id: string
+        }
+        Insert: {
+          role?: string
+          user_id: string
+        }
+        Update: {
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_ai_settings: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          provider: string
+          model: string
+          api_key: string
+          last_updated: string
+          updated_by: string
+        }[]
+      }
+      update_ai_settings: {
+        Args: { p_provider: string; p_model: string; p_api_key: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

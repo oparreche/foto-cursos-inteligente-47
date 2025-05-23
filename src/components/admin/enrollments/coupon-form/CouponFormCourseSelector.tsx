@@ -11,6 +11,11 @@ interface CouponFormCourseSelectorProps {
   control: Control<DiscountCouponFormValues>;
 }
 
+interface Course {
+  id: string;
+  name: string;
+}
+
 const CouponFormCourseSelector: React.FC<CouponFormCourseSelectorProps> = ({ control }) => {
   // Buscar cursos disponíveis
   const { data: courses, isLoading } = useQuery({
@@ -25,7 +30,9 @@ const CouponFormCourseSelector: React.FC<CouponFormCourseSelectorProps> = ({ con
         console.error("Error loading courses:", error);
         throw new Error(error.message);
       }
-      return data || [];
+      
+      // Tipagem explícita
+      return (data || []) as Course[];
     }
   });
 
@@ -53,7 +60,7 @@ const CouponFormCourseSelector: React.FC<CouponFormCourseSelectorProps> = ({ con
             </FormControl>
             <SelectContent>
               <SelectItem value="all_courses">Todos os cursos</SelectItem>
-              {courses?.map((course: any) => (
+              {(courses || []).map((course: Course) => (
                 <SelectItem key={course.id} value={course.id}>
                   {course.name}
                 </SelectItem>

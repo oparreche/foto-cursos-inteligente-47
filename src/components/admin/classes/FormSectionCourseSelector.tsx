@@ -14,13 +14,16 @@ interface Course {
 
 const FormSectionCourseSelector: React.FC = () => {
   const { control, setValue, watch } = useFormContext<FormValues>();
-  const { data: courses, isLoading } = useCoursesList();
+  const { data: coursesData, isLoading } = useCoursesList();
   const selectedCourseName = watch("courseName");
+  
+  // Garantir que courses seja um array tipado
+  const courses = Array.isArray(coursesData) ? coursesData as Course[] : [];
   
   // When course name changes, update course slug
   useEffect(() => {
     if (courses && selectedCourseName) {
-      const selectedCourse = courses.find((course: Course) => course.name === selectedCourseName);
+      const selectedCourse = courses.find(course => course.name === selectedCourseName);
       if (selectedCourse) {
         setValue("courseSlug", selectedCourse.slug);
       }

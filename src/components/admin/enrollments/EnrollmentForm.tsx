@@ -47,6 +47,12 @@ const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
     if (selectedClassId) {
       // Buscar detalhes da turma selecionada
       const fetchClassDetails = async () => {
+        type ClassData = {
+          id: string;
+          price: number;
+          course_name: string;
+        };
+        
         const { data, error } = await supabase
           .from('classes')
           .select('price')
@@ -54,7 +60,8 @@ const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
           .single();
           
         if (!error && data) {
-          const originalAmount = parseFloat(data.price);
+          const typedData = data as unknown as ClassData;
+          const originalAmount = parseFloat(String(typedData.price));
           form.setValue('original_amount', originalAmount);
           form.setValue('payment_amount', originalAmount);
           form.setValue('discount_amount', 0);

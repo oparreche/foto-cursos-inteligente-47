@@ -12,11 +12,14 @@ type ProfileUpdate = Database['public']['Tables']['profiles']['Update'];
  */
 export async function findUserByEmail(email: string): Promise<string | undefined> {
   try {
+    // Use explicit typing for the query response to avoid deep type instantiation
+    type QueryResponse = { id: string };
+    
     const { data, error } = await supabase
       .from('profiles')
       .select('id')
       .eq('email', email)
-      .maybeSingle<{ id: string }>();
+      .maybeSingle();
     
     if (error) {
       console.error('Error finding user by email:', error);

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
@@ -11,7 +12,11 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Camera, ChevronLeft, ChevronRight, Save } from 'lucide-react';
-import { useQuizQuestions, useQuizCategories, useQuizState } from '@/hooks/useQuiz';
+import { 
+  useQuizQuestions, 
+  useQuizCategories, 
+  useQuizState 
+} from '@/hooks/quiz';
 import { QuizDifficulty, QuizCategory } from '@/types/quiz';
 import QuizCard from '@/components/quiz/QuizCard';
 import QuizResult from '@/components/quiz/QuizResult';

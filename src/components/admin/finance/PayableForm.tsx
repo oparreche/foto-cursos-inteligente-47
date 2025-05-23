@@ -1,68 +1,102 @@
-
-import React from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { usePayableActions, useCategories } from "@/hooks/finance";
-import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import { usePayableActions } from '@/hooks/finance/usePayableActions';
+import { PayableFormValues } from '@/types/finance';
+import { useCategories } from '@/hooks/finance';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-const formSchema = z.object({
-  description: z.string().min(3, "Descrição deve ter no mínimo 3 caracteres"),
-  amount: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
-    message: "Valor deve ser maior que zero",
+const payableSchema = z.object({
+  description: z.string().min(3, {
+    message: "Descrição deve ter pelo menos 3 caracteres.",
   }),
-  supplier: z.string().min(3, "Nome do fornecedor é obrigatório"),
-  due_date: z.string().min(1, "Data de vencimento é obrigatória"),
+  amount: z.string().refine((value) => {
+    try {
+      // Attempt to parse the value as a number
+      const parsedAmount = parseFloat(value);
+      return !isNaN(parsedAmount) && parsedAmount > 0;
+    } catch (error) {
+      return false;
+    }
+  }, {
+    message: "Valor deve ser um número válido maior que zero.",
+  }),
+  supplier: z.string().min(3, {
+    message: "Fornecedor deve ter pelo menos 3 caracteres.",
+  }),
+  due_date: z.string(),
+  status: z.enum(['pending', 'paid', 'cancelled']),
   category_id: z.string().optional(),
-  status: z.enum(["pending", "paid", "overdue", "canceled"]).default("pending"),
+  payment_date: z.string().nullable(),
 });
 
-interface PayableFormProps {
-  onSuccess?: () => void;
-}
+const getCurrentDate = (): string => {
+  const today = new Date();
+  return format(today, "yyyy-MM-dd");
+};
 
-const PayableForm: React.FC<PayableFormProps> = ({ onSuccess }) => {
-  const { data: categories = [], isLoading: isCategoriesLoading } = useCategories();
+const PayableForm = ({ onSuccess }: { onSuccess: () => void }) => {
   const { addPayable } = usePayableActions();
-  
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const { data: categories = [] } = useCategories();
+  const expenseCategories = categories.filter(cat => cat.type === 'expense');
+
+  const form = useForm<PayableFormValues>({
     defaultValues: {
-      description: "",
-      amount: "",
-      supplier: "",
-      due_date: new Date().toISOString().split('T')[0],
-      status: "pending",
+      description: '',
+      amount: '',
+      supplier: '',
+      due_date: getCurrentDate(),
+      status: 'pending',
+      category_id: undefined,
+      payment_date: null,
     },
+    resolver: zodResolver(payableSchema),
   });
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    try {
-      await addPayable.mutateAsync({
-        description: values.description,
-        amount: parseFloat(values.amount),
-        supplier: values.supplier,
-        due_date: values.due_date,
-        status: values.status,
-        category_id: values.category_id,
-        payment_date: null
-      });
-      
-      form.reset();
-      onSuccess?.();
-    } catch (error) {
-      console.error("Erro ao adicionar conta a pagar:", error);
-    }
+  const handleSubmit = async (values: PayableFormValues) => {
+    addPayable.mutate(values, {
+      onSuccess: () => {
+        form.reset();
+        if (onSuccess) onSuccess();
+      },
+    });
   };
 
-  const expenseCategories = categories.filter(cat => cat.type === "expense");
+  const statusOptions = [
+    { value: 'pending', label: 'Pendente' },
+    { value: 'paid', label: 'Pago' },
+    { value: 'cancelled', label: 'Cancelado' },
+  ];
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
         <FormField
           control={form.control}
           name="description"
@@ -70,27 +104,25 @@ const PayableForm: React.FC<PayableFormProps> = ({ onSuccess }) => {
             <FormItem>
               <FormLabel>Descrição</FormLabel>
               <FormControl>
-                <Input placeholder="Ex: Aluguel do estúdio" {...field} />
+                <Input placeholder="Descrição da conta" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        
         <FormField
           control={form.control}
           name="amount"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Valor (R$)</FormLabel>
+              <FormLabel>Valor</FormLabel>
               <FormControl>
-                <Input type="number" step="0.01" min="0.01" placeholder="0,00" {...field} />
+                <Input placeholder="Valor da conta" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        
         <FormField
           control={form.control}
           name="supplier"
@@ -104,21 +136,69 @@ const PayableForm: React.FC<PayableFormProps> = ({ onSuccess }) => {
             </FormItem>
           )}
         />
-        
         <FormField
           control={form.control}
           name="due_date"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="flex flex-col">
               <FormLabel>Data de Vencimento</FormLabel>
-              <FormControl>
-                <Input type="date" {...field} />
-              </FormControl>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-[240px] pl-3 text-left font-normal",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      {field.value ? (
+                        format(new Date(field.value), "PPP")
+                      ) : (
+                        <span>Selecione a data</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value ? new Date(field.value) : undefined}
+                    onSelect={(date) => field.onChange(date?.toISOString())}
+                    disabled={(date) =>
+                      date > new Date()
+                    }
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
               <FormMessage />
             </FormItem>
           )}
         />
-        
+        <FormField
+          control={form.control}
+          name="status"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Status</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um status" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {statusOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name="category_id"
@@ -132,53 +212,16 @@ const PayableForm: React.FC<PayableFormProps> = ({ onSuccess }) => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {isCategoriesLoading ? (
-                    <SelectItem value="loading" disabled>Carregando categorias...</SelectItem>
-                  ) : expenseCategories.length > 0 ? (
-                    expenseCategories.map((category) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name}
-                      </SelectItem>
-                    ))
-                  ) : (
-                    <SelectItem value="none" disabled>Nenhuma categoria disponível</SelectItem>
-                  )}
+                  {expenseCategories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <FormMessage />
             </FormItem>
           )}
         />
-        
-        <FormField
-          control={form.control}
-          name="status"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Status</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o status" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="pending">Pendente</SelectItem>
-                  <SelectItem value="paid">Pago</SelectItem>
-                  <SelectItem value="overdue">Atrasado</SelectItem>
-                  <SelectItem value="canceled">Cancelado</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <div className="flex justify-end gap-2 pt-4">
-          <Button type="submit" disabled={addPayable.isPending}>
-            {addPayable.isPending ? "Salvando..." : "Salvar"}
-          </Button>
-        </div>
+        <Button type="submit">Adicionar Conta</Button>
       </form>
     </Form>
   );

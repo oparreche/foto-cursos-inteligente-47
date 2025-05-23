@@ -19,41 +19,42 @@ export const useQuizQuestions = (
   limit: number = 10
 ) => {
   const fetchQuestions = async (): Promise<QuestionWithAnswers[]> => {
-    // Primeiro buscar as questões de acordo com os filtros
-    let query = supabase
-      .from('photography_questions')
-      .select('*');
-    
-    // Aplicar filtros, se não for 'all'
-    if (difficulty !== 'all') {
-      query = query.eq('difficulty', difficulty);
-    }
-    
-    if (category !== 'all') {
-      query = query.eq('category', category);
-    }
-    
-    // Executar a consulta e capturar os resultados
-    const { data: questions, error: questionsError } = await query
-      .order('created_at', { ascending: false })
-      .limit(limit);
-    
-    if (questionsError) {
-      console.error('Erro ao buscar questões:', questionsError);
-      toast.error('Erro ao carregar perguntas do quiz');
-      throw questionsError;
-    }
-    
-    if (!questions || questions.length === 0) {
-      return [];
-    }
-    
-    // Para cada questão, buscar suas respostas
-    const questionsWithAnswers = await Promise.all(
-      questions.map(async (question) => {
+    try {
+      // Primeiro buscar as questões de acordo com os filtros
+      let query = supabase.from('photography_questions');
+      
+      // Aplicar filtros, se não for 'all'
+      if (difficulty !== 'all') {
+        query = query.eq('difficulty', difficulty);
+      }
+      
+      if (category !== 'all') {
+        query = query.eq('category', category);
+      }
+      
+      // Executar a consulta e capturar os resultados
+      const { data: questions, error: questionsError } = await query
+        .select()
+        .order('created_at', { ascending: false })
+        .limit(limit);
+      
+      if (questionsError) {
+        console.error('Erro ao buscar questões:', questionsError);
+        toast.error('Erro ao carregar perguntas do quiz');
+        throw questionsError;
+      }
+      
+      if (!questions || questions.length === 0) {
+        return [];
+      }
+      
+      // Para cada questão, buscar suas respostas
+      const questionsWithAnswers: QuestionWithAnswers[] = [];
+      
+      for (const question of questions) {
         const { data: answers, error: answersError } = await supabase
           .from('photography_answers')
-          .select('*')
+          .select()
           .eq('question_id', question.id);
         
         if (answersError) {
@@ -62,14 +63,17 @@ export const useQuizQuestions = (
           throw answersError;
         }
         
-        return {
-          ...question,
-          answers: answers || []
-        };
-      })
-    );
-    
-    return questionsWithAnswers;
+        questionsWithAnswers.push({
+          ...question as PhotographyQuestion,
+          answers: answers as PhotographyAnswer[] || []
+        });
+      }
+      
+      return questionsWithAnswers;
+    } catch (error) {
+      console.error('Error fetching quiz questions:', error);
+      throw error;
+    }
   };
   
   return useQuery({
@@ -81,19 +85,28 @@ export const useQuizQuestions = (
 // Hook para buscar todas as categorias de questões
 export const useQuizCategories = () => {
   const fetchCategories = async (): Promise<string[]> => {
-    const { data, error } = await supabase
-      .from('photography_questions')
-      .select('category');
-    
-    if (error) {
-      console.error('Erro ao buscar categorias:', error);
-      toast.error('Erro ao carregar categorias do quiz');
+    try {
+      const { data, error } = await supabase
+        .from('photography_questions')
+        .select('category');
+      
+      if (error) {
+        console.error('Erro ao buscar categorias:', error);
+        toast.error('Erro ao carregar categorias do quiz');
+        throw error;
+      }
+      
+      if (!data || data.length === 0) {
+        return [];
+      }
+      
+      // Extrair e remover duplicatas
+      const categories = [...new Set(data.map(item => item.category))];
+      return categories;
+    } catch (error) {
+      console.error('Error fetching quiz categories:', error);
       throw error;
     }
-    
-    // Extrair e remover duplicatas
-    const categories = [...new Set(data.map(item => item.category))];
-    return categories;
   };
   
   return useQuery({
@@ -240,7 +253,7 @@ export const useSaveQuizScore = () => {
       queryClient.invalidateQueries({ queryKey: ['quizScores'] });
       toast.success('Pontuação salva com sucesso!');
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       if (error.message !== 'Usuário não autenticado') {
         toast.error(`Erro ao salvar pontuação: ${error.message}`);
       }
@@ -251,27 +264,32 @@ export const useSaveQuizScore = () => {
 // Hook para buscar histórico de pontuações do usuário
 export const useQuizScores = () => {
   const fetchScores = async (): Promise<QuizScore[]> => {
-    const { data: session } = await supabase.auth.getSession();
-    
-    if (!session.session?.user) {
-      return [];
-    }
-    
-    const userId = session.session.user.id;
-    
-    const { data, error } = await supabase
-      .from('quiz_scores')
-      .select('*')
-      .eq('user_id', userId)
-      .order('date_played', { ascending: false });
-    
-    if (error) {
-      console.error('Erro ao buscar pontuações:', error);
-      toast.error('Erro ao carregar histórico de pontuações');
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      
+      if (!session.session?.user) {
+        return [];
+      }
+      
+      const userId = session.session.user.id;
+      
+      const { data, error } = await supabase
+        .from('quiz_scores')
+        .select()
+        .eq('user_id', userId)
+        .order('date_played', { ascending: false });
+      
+      if (error) {
+        console.error('Erro ao buscar pontuações:', error);
+        toast.error('Erro ao carregar histórico de pontuações');
+        throw error;
+      }
+      
+      return data as QuizScore[] || [];
+    } catch (error) {
+      console.error('Error fetching quiz scores:', error);
       throw error;
     }
-    
-    return data || [];
   };
   
   return useQuery({

@@ -1,68 +1,96 @@
-
-import React from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { useReceivableActions, useCategories } from "@/hooks/finance";
-import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { CalendarIcon } from "@radix-ui/react-icons";
+import { useReceivableActions } from '@/hooks/finance/useReceivableActions';
+import { ReceivableFormValues } from '@/types/finance';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useCategories } from '@/hooks/finance/useCategories';
 
-const formSchema = z.object({
-  description: z.string().min(3, "Descrição deve ter no mínimo 3 caracteres"),
-  amount: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
-    message: "Valor deve ser maior que zero",
+const receivableSchema = z.object({
+  description: z.string().min(3, {
+    message: "Descrição deve ter pelo menos 3 caracteres.",
   }),
-  customer: z.string().min(3, "Nome do cliente é obrigatório"),
-  due_date: z.string().min(1, "Data de vencimento é obrigatória"),
+  amount: z.string().refine((value) => {
+    try {
+      // Attempt to parse the value as a number
+      const parsed = parseFloat(value);
+      return !isNaN(parsed) && parsed > 0;
+    } catch (e) {
+      return false;
+    }
+  }, {
+    message: "Valor deve ser um número válido maior que zero.",
+  }),
+  customer: z.string().min(3, {
+    message: "Cliente deve ter pelo menos 3 caracteres.",
+  }),
+  due_date: z.string(),
+  status: z.enum(['pending', 'received', 'cancelled']),
   category_id: z.string().optional(),
-  status: z.enum(["pending", "paid", "overdue", "canceled"]).default("pending"),
+  payment_date: z.string().nullable().optional(),
 });
 
-interface ReceivableFormProps {
-  onSuccess?: () => void;
-}
+const getCurrentDate = (): string => {
+  const today = new Date();
+  return format(today, "yyyy-MM-dd");
+};
 
-const ReceivableForm: React.FC<ReceivableFormProps> = ({ onSuccess }) => {
-  const { data: categories = [], isLoading: isCategoriesLoading } = useCategories();
+const ReceivableForm = ({ onSuccess }: { onSuccess: () => void }) => {
   const { addReceivable } = useReceivableActions();
-  
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const { data: categories = [] } = useCategories();
+  const incomeCategories = categories.filter(cat => cat.type === 'income');
+
+  const form = useForm<ReceivableFormValues>({
     defaultValues: {
-      description: "",
-      amount: "",
-      customer: "",
-      due_date: new Date().toISOString().split('T')[0],
-      status: "pending",
+      description: '',
+      amount: '',
+      customer: '',
+      due_date: getCurrentDate(),
+      status: 'pending',
+      category_id: undefined,
+      payment_date: null,
     },
+    resolver: zodResolver(receivableSchema),
   });
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    try {
-      await addReceivable.mutateAsync({
-        description: values.description,
-        amount: parseFloat(values.amount),
-        customer: values.customer,
-        due_date: values.due_date,
-        status: values.status,
-        category_id: values.category_id,
-        payment_date: null
-      });
-      
-      form.reset();
-      onSuccess?.();
-    } catch (error) {
-      console.error("Erro ao adicionar conta a receber:", error);
-    }
+  const handleSubmit = async (values: ReceivableFormValues) => {
+    addReceivable.mutate(values, {
+      onSuccess: () => {
+        form.reset();
+        if (onSuccess) onSuccess();
+      },
+    });
   };
 
-  const incomeCategories = categories.filter(cat => cat.type === "income");
+  const statusOptions = [
+    { value: 'pending', label: 'Pendente' },
+    { value: 'received', label: 'Recebido' },
+    { value: 'cancelled', label: 'Cancelado' },
+  ];
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
         <FormField
           control={form.control}
           name="description"
@@ -70,27 +98,25 @@ const ReceivableForm: React.FC<ReceivableFormProps> = ({ onSuccess }) => {
             <FormItem>
               <FormLabel>Descrição</FormLabel>
               <FormControl>
-                <Input placeholder="Ex: Mensalidade curso de fotografia" {...field} />
+                <Input placeholder="Ex: Mensalidade de Dezembro" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        
         <FormField
           control={form.control}
           name="amount"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Valor (R$)</FormLabel>
+              <FormLabel>Valor</FormLabel>
               <FormControl>
-                <Input type="number" step="0.01" min="0.01" placeholder="0,00" {...field} />
+                <Input placeholder="Ex: 150.00" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        
         <FormField
           control={form.control}
           name="customer"
@@ -104,52 +130,47 @@ const ReceivableForm: React.FC<ReceivableFormProps> = ({ onSuccess }) => {
             </FormItem>
           )}
         />
-        
         <FormField
           control={form.control}
           name="due_date"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="flex flex-col">
               <FormLabel>Data de Vencimento</FormLabel>
-              <FormControl>
-                <Input type="date" {...field} />
-              </FormControl>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-[240px] pl-3 text-left font-normal",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      {field.value ? (
+                        format(new Date(field.value), "PPP")
+                      ) : (
+                        <span>Selecione a data</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value ? new Date(field.value) : undefined}
+                    onSelect={(date) => field.onChange(date?.toISOString())}
+                    disabled={(date) =>
+                      date > new Date()
+                    }
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
               <FormMessage />
             </FormItem>
           )}
         />
-        
-        <FormField
-          control={form.control}
-          name="category_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Categoria</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma categoria" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {isCategoriesLoading ? (
-                    <SelectItem value="loading" disabled>Carregando categorias...</SelectItem>
-                  ) : incomeCategories.length > 0 ? (
-                    incomeCategories.map((category) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name}
-                      </SelectItem>
-                    ))
-                  ) : (
-                    <SelectItem value="none" disabled>Nenhuma categoria disponível</SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
         <FormField
           control={form.control}
           name="status"
@@ -163,22 +184,38 @@ const ReceivableForm: React.FC<ReceivableFormProps> = ({ onSuccess }) => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="pending">Pendente</SelectItem>
-                  <SelectItem value="paid">Pago</SelectItem>
-                  <SelectItem value="overdue">Atrasado</SelectItem>
-                  <SelectItem value="canceled">Cancelado</SelectItem>
+                  {statusOptions.map((status) => (
+                    <SelectItem key={status.value} value={status.value}>{status.label}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <FormMessage />
             </FormItem>
           )}
         />
-        
-        <div className="flex justify-end gap-2 pt-4">
-          <Button type="submit" disabled={addReceivable.isPending}>
-            {addReceivable.isPending ? "Salvando..." : "Salvar"}
-          </Button>
-        </div>
+        <FormField
+          control={form.control}
+          name="category_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Categoria</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a categoria" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {incomeCategories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit">Adicionar Recebível</Button>
       </form>
     </Form>
   );

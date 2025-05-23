@@ -31,7 +31,7 @@ export const getAIConfig = async (): Promise<AIConfig | null> => {
     
     return {
       provider: record.provider as 'openai' | 'perplexity' | null,
-      model: record.model as string,
+      model: record.model,
       apiKey: record.api_key || '',
       lastUpdated: record.last_updated || undefined,
       updatedBy: record.updated_by || undefined

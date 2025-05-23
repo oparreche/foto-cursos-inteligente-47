@@ -1,10 +1,31 @@
 
 import { Database } from "@/integrations/supabase/types";
 
-// Tipos exportados do banco de dados
-export type PhotographyQuestion = Database['public']['Tables']['photography_questions']['Row'];
-export type PhotographyAnswer = Database['public']['Tables']['photography_answers']['Row'];
-export type QuizScore = Database['public']['Tables']['quiz_scores']['Row'];
+// Custom types for quiz functionality
+export type PhotographyQuestion = {
+  id: string;
+  question: string;
+  category: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+  created_at?: string;
+  created_by?: string;
+};
+
+export type PhotographyAnswer = {
+  id: string;
+  question_id: string;
+  answer_text: string;
+  is_correct: boolean;
+  created_at?: string;
+};
+
+export type QuizScore = {
+  id: string;
+  user_id: string;
+  score: number;
+  total_questions: number;
+  date_played: string;
+};
 
 // Tipos para formulários e componentes
 export type QuestionWithAnswers = PhotographyQuestion & {

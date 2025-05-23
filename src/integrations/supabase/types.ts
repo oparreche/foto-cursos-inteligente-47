@@ -378,6 +378,65 @@ export type Database = {
           },
         ]
       }
+      photography_answers: {
+        Row: {
+          answer_text: string
+          created_at: string | null
+          id: string
+          is_correct: boolean
+          question_id: string | null
+        }
+        Insert: {
+          answer_text: string
+          created_at?: string | null
+          id?: string
+          is_correct?: boolean
+          question_id?: string | null
+        }
+        Update: {
+          answer_text?: string
+          created_at?: string | null
+          id?: string
+          is_correct?: boolean
+          question_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photography_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "photography_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      photography_questions: {
+        Row: {
+          category: string
+          created_at: string | null
+          created_by: string | null
+          difficulty: string
+          id: string
+          question: string
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          created_by?: string | null
+          difficulty: string
+          id?: string
+          question: string
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          created_by?: string | null
+          difficulty?: string
+          id?: string
+          question?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address: string | null
@@ -432,6 +491,30 @@ export type Database = {
           postal_code?: string | null
           state?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      quiz_scores: {
+        Row: {
+          date_played: string | null
+          id: string
+          score: number
+          total_questions: number
+          user_id: string | null
+        }
+        Insert: {
+          date_played?: string | null
+          id?: string
+          score: number
+          total_questions: number
+          user_id?: string | null
+        }
+        Update: {
+          date_played?: string | null
+          id?: string
+          score?: number
+          total_questions?: number
+          user_id?: string | null
         }
         Relationships: []
       }

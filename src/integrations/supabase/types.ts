@@ -12,7 +12,7 @@ export type Database = {
       ai_settings: {
         Row: {
           api_key: string | null
-          id: string
+          id: number
           last_updated: string | null
           model: string | null
           provider: string | null
@@ -20,7 +20,7 @@ export type Database = {
         }
         Insert: {
           api_key?: string | null
-          id?: string
+          id?: number
           last_updated?: string | null
           model?: string | null
           provider?: string | null
@@ -28,7 +28,7 @@ export type Database = {
         }
         Update: {
           api_key?: string | null
-          id?: string
+          id?: number
           last_updated?: string | null
           model?: string | null
           provider?: string | null
@@ -88,6 +88,7 @@ export type Database = {
         Row: {
           course_id: string | null
           course_name: string
+          created_at: string | null
           days: string
           id: string
           is_active: boolean | null
@@ -95,21 +96,25 @@ export type Database = {
           price: number
           spots_available: number
           total_spots: number
+          updated_at: string | null
         }
         Insert: {
           course_id?: string | null
           course_name: string
+          created_at?: string | null
           days: string
           id?: string
           is_active?: boolean | null
           period: string
-          price?: number
+          price: number
           spots_available?: number
           total_spots?: number
+          updated_at?: string | null
         }
         Update: {
           course_id?: string | null
           course_name?: string
+          created_at?: string | null
           days?: string
           id?: string
           is_active?: boolean | null
@@ -117,6 +122,7 @@ export type Database = {
           price?: number
           spots_available?: number
           total_spots?: number
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -130,28 +136,34 @@ export type Database = {
       }
       courses: {
         Row: {
+          created_at: string | null
           description: string | null
           id: string
           is_active: boolean | null
           name: string
           price: number | null
           slug: string
+          updated_at: string | null
         }
         Insert: {
+          created_at?: string | null
           description?: string | null
           id?: string
           is_active?: boolean | null
           name: string
           price?: number | null
           slug: string
+          updated_at?: string | null
         }
         Update: {
+          created_at?: string | null
           description?: string | null
           id?: string
           is_active?: boolean | null
           name?: string
           price?: number | null
           slug?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -215,39 +227,40 @@ export type Database = {
         Row: {
           color: string | null
           created_at: string | null
-          created_by: string | null
           description: string | null
+          icon: string | null
           id: string
-          is_active: boolean | null
           name: string
           type: string
+          updated_at: string | null
         }
         Insert: {
           color?: string | null
           created_at?: string | null
-          created_by?: string | null
           description?: string | null
+          icon?: string | null
           id?: string
-          is_active?: boolean | null
           name: string
           type: string
+          updated_at?: string | null
         }
         Update: {
           color?: string | null
           created_at?: string | null
-          created_by?: string | null
           description?: string | null
+          icon?: string | null
           id?: string
-          is_active?: boolean | null
           name?: string
           type?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
       manual_enrollments: {
         Row: {
-          class_id: string
+          class_id: string | null
           coupon_id: string | null
+          created_at: string | null
           created_by: string | null
           discount_amount: number | null
           enrollment_date: string | null
@@ -256,11 +269,12 @@ export type Database = {
           original_amount: number
           payment_amount: number
           payment_status: string
-          student_id: string
+          student_id: string | null
         }
         Insert: {
-          class_id: string
+          class_id?: string | null
           coupon_id?: string | null
+          created_at?: string | null
           created_by?: string | null
           discount_amount?: number | null
           enrollment_date?: string | null
@@ -268,12 +282,13 @@ export type Database = {
           notes?: string | null
           original_amount: number
           payment_amount: number
-          payment_status?: string
-          student_id: string
+          payment_status: string
+          student_id?: string | null
         }
         Update: {
-          class_id?: string
+          class_id?: string | null
           coupon_id?: string | null
+          created_at?: string | null
           created_by?: string | null
           discount_amount?: number | null
           enrollment_date?: string | null
@@ -282,7 +297,7 @@ export type Database = {
           original_amount?: number
           payment_amount?: number
           payment_status?: string
-          student_id?: string
+          student_id?: string | null
         }
         Relationships: [
           {
@@ -337,10 +352,10 @@ export type Database = {
           description: string
           due_date: string
           id: string
-          notes: string | null
           payment_date: string | null
-          recipient: string | null
           status: string
+          supplier: string
+          updated_at: string | null
         }
         Insert: {
           amount: number
@@ -350,10 +365,10 @@ export type Database = {
           description: string
           due_date: string
           id?: string
-          notes?: string | null
           payment_date?: string | null
-          recipient?: string | null
           status: string
+          supplier: string
+          updated_at?: string | null
         }
         Update: {
           amount?: number
@@ -363,10 +378,10 @@ export type Database = {
           description?: string
           due_date?: string
           id?: string
-          notes?: string | null
           payment_date?: string | null
-          recipient?: string | null
           status?: string
+          supplier?: string
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -384,21 +399,21 @@ export type Database = {
           created_at: string | null
           id: string
           is_correct: boolean
-          question_id: string | null
+          question_id: string
         }
         Insert: {
           answer_text: string
           created_at?: string | null
           id?: string
           is_correct?: boolean
-          question_id?: string | null
+          question_id: string
         }
         Update: {
           answer_text?: string
           created_at?: string | null
           id?: string
           is_correct?: boolean
-          question_id?: string | null
+          question_id?: string
         }
         Relationships: [
           {
@@ -524,39 +539,39 @@ export type Database = {
           category_id: string | null
           created_at: string | null
           created_by: string | null
+          customer: string
           description: string
           due_date: string
           id: string
-          notes: string | null
-          payer: string | null
           payment_date: string | null
           status: string
+          updated_at: string | null
         }
         Insert: {
           amount: number
           category_id?: string | null
           created_at?: string | null
           created_by?: string | null
+          customer: string
           description: string
           due_date: string
           id?: string
-          notes?: string | null
-          payer?: string | null
           payment_date?: string | null
           status: string
+          updated_at?: string | null
         }
         Update: {
           amount?: number
           category_id?: string | null
           created_at?: string | null
           created_by?: string | null
+          customer?: string
           description?: string
           due_date?: string
           id?: string
-          notes?: string | null
-          payer?: string | null
           payment_date?: string | null
           status?: string
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -575,7 +590,7 @@ export type Database = {
           can_edit: boolean
           can_view: boolean
           module: string
-          role: string
+          role: Database["public"]["Enums"]["user_role"]
         }
         Insert: {
           can_create?: boolean
@@ -583,7 +598,7 @@ export type Database = {
           can_edit?: boolean
           can_view?: boolean
           module: string
-          role: string
+          role: Database["public"]["Enums"]["user_role"]
         }
         Update: {
           can_create?: boolean
@@ -591,7 +606,7 @@ export type Database = {
           can_edit?: boolean
           can_view?: boolean
           module?: string
-          role?: string
+          role?: Database["public"]["Enums"]["user_role"]
         }
         Relationships: []
       }
@@ -599,46 +614,55 @@ export type Database = {
         Row: {
           amount: number
           created_at: string | null
+          created_by: string | null
           description: string
           id: string
+          notes: string | null
           reference_id: string | null
           reference_type: string | null
           transaction_date: string
           type: string
+          updated_at: string | null
         }
         Insert: {
           amount: number
           created_at?: string | null
+          created_by?: string | null
           description: string
           id?: string
+          notes?: string | null
           reference_id?: string | null
           reference_type?: string | null
           transaction_date: string
           type: string
+          updated_at?: string | null
         }
         Update: {
           amount?: number
           created_at?: string | null
+          created_by?: string | null
           description?: string
           id?: string
+          notes?: string | null
           reference_id?: string | null
           reference_type?: string | null
           transaction_date?: string
           type?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
       user_roles: {
         Row: {
-          role: string
+          role: Database["public"]["Enums"]["user_role"]
           user_id: string
         }
         Insert: {
-          role?: string
+          role: Database["public"]["Enums"]["user_role"]
           user_id: string
         }
         Update: {
-          role?: string
+          role?: Database["public"]["Enums"]["user_role"]
           user_id?: string
         }
         Relationships: []
@@ -651,7 +675,7 @@ export type Database = {
       get_ai_settings: {
         Args: Record<PropertyKey, never>
         Returns: {
-          id: string
+          id: number
           provider: string
           model: string
           api_key: string
@@ -659,13 +683,73 @@ export type Database = {
           updated_by: string
         }[]
       }
+      get_financial_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      get_user_profile: {
+        Args: { p_user_id: string }
+        Returns: {
+          id: string
+          email: string
+          first_name: string
+          last_name: string
+          cpf: string
+          birth_date: string
+          phone: string
+          address: string
+          address_number: string
+          address_complement: string
+          neighborhood: string
+          city: string
+          state: string
+          postal_code: string
+          created_at: string
+          updated_at: string
+        }[]
+      }
+      get_user_roles: {
+        Args: { p_user_id: string }
+        Returns: {
+          role_name: string
+        }[]
+      }
+      has_role: {
+        Args: {
+          user_id: string
+          role: Database["public"]["Enums"]["user_role"]
+        }
+        Returns: boolean
+      }
+      is_coupon_valid: {
+        Args: { coupon_id: string }
+        Returns: boolean
+      }
       update_ai_settings: {
         Args: { p_provider: string; p_model: string; p_api_key: string }
+        Returns: undefined
+      }
+      update_user_profile: {
+        Args: {
+          p_user_id: string
+          p_first_name: string
+          p_last_name: string
+          p_cpf: string
+          p_birth_date: string
+          p_phone: string
+          p_address: string
+          p_address_number: string
+          p_address_complement: string
+          p_neighborhood: string
+          p_city: string
+          p_state: string
+          p_postal_code: string
+        }
         Returns: boolean
       }
     }
     Enums: {
-      [_ in never]: never
+      user_role: "user" | "admin" | "super_admin" | "instructor" | "student"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -780,6 +864,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_role: ["user", "admin", "super_admin", "instructor", "student"],
+    },
   },
 } as const
